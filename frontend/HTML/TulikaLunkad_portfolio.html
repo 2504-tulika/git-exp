@@ -5,345 +5,219 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tulika Lunkad | Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
-<body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 20px;"> <!--defined body font style-->
+<body>
+    <!-- Navar declaration -->
+    <nav class="navbar">
+        <div class="logo">&lt;Portfolio /&gt;</div>
 
-    <!-- Portfolio Header with Profile Image -->
-    <header style="text-align:center;">
-
-        <h1 style="margin-bottom:5px;">Tulika Lunkad</h1>
-
-        <h2 style="margin-top:0; color:gray;">
-            Final Year Student | ML Research Intern | Data Analyst
-        </h2>
-
-        <figure>
-            <img src="Profile.jpg" alt="Image" width="160" style="border-radius: 10px;">
-            <figcaption><small><b>Computer Science Student | Data Analyst</b></small></figcaption>
-        </figure>
-
-        <address>
-            📍 Bhilai, India <br>
-            📞 +91 96696xxxxx <br>
-            <a href="mailto:tulika2504@gmail.com">tulika2504@gmail.com</a> |
-            <a href="https://github.com/2504-tulika">GitHub</a> |
-            <a href="https://www.linkedin.com/in/tulika-lunkad-9a6536255/">LinkedIn</a>
-        </address>
-
-    </header>
-
-    <hr>
-    <!-- adding Navbar links to easily go to required section-->
-    <nav>
-        <ul>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
             <li><a href="#about">About</a></li>
-
-            <li>Profile
-                <ul>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#education">Education</a></li>
-                    <li><a href="#experience">Experience</a></li>
-                </ul>
-            </li>
-
+            <li><a href="#education">Education</a></li>
+            <li><a href="#experience">Experience</a></li>
             <li><a href="#projects">Projects</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
     </nav>
 
-    <hr>
+    <!-- Hero section -->
+    <section id="home" class="hero">
 
-    <!-- Defining section1 - About -->
-    <section id="about">
-        <h2>About Me</h2>
+        <div class="hero-content">
+            <h1>Hi, I'm <span>Tulika Lunkad</span></h1>
 
-        <p>
-            I am a <strong>high-performing Computer Science student</strong> specializing in <em>Data Science and
-                Machine Learning</em>
-            with a strong academic record of <mark>CGPA 9.2</mark>.
-            During my internship at
-            <strong>IIT Guwahati</strong>, I worked on advanced
-            anomaly detection models and explored real-world applications of
-            <abbr title="Natural Language Processing">NLP</abbr>
-            and deep learning systems.
-            My focus lies in building intelligent dashboards, scalable data systems,
-            and research-driven machine learning solutions that create measurable impact. I have always loved to learn
-            new technologies and apply them to solve complex problems
-        </p>
+            <h2>Final Year Student | ML Research Intern | Data Analyst</h2>
 
-        <hr>
-    </section>
-
-    <!-- Defining Section2 - Skills -->
-    <section id="skills">
-        <h2>Skills</h2>
-
-        <!-- Using details and summary tags to make skills collapsible and take less space -->
-        <details open>
-            <summary><strong>Technical Skills <i>(click to expand)</i></strong></summary>
-
-            <!-- defining list inside Technical skills part-->
-            <ul type="square">
-                <li>Programming Languages
-                    <ul type="circle">
-                        <li>Python</li>
-                        <li>SQL</li>
-                        <li>R (Basics)</li>
-                    </ul>
-                </li>
-
-                <li>Machine Learning & Libraries
-                    <ul type="circle">
-                        <li>PyTorch</li>
-                        <li>TensorFlow</li>
-                        <li>LangChain</li>
-                        <li>NumPy & Pandas</li>
-                    </ul>
-                </li>
-
-                <li>Data Visualization & BI Tools
-                    <ul type="circle">
-                        <li>Power BI</li>
-                        <li>Tableau</li>
-                        <li>Excel (Advanced)</li>
-                        <li>Databricks (Basics)</li>
-                    </ul>
-                </li>
-
-                <li>Database & Cloud Platforms
-                    <ul type="circle">
-                        <li>MySQL</li>
-                        <li>MongoDB</li>
-                        <li>AWS</li>
-                        <li>Azure</li>
-                    </ul>
-                </li>
-            </ul>
-        </details>
-
-        <details>
-            <summary><strong>Soft Skills <i>(click to expand)</i></strong></summary>
-
-            <!-- Defining lists for soft skills part-->
-            <ul type="disc">
-                <li>Analytical Thinking</li>
-                <li>Problem Solving</li>
-                <li>Research-Oriented Mindset</li>
-                <li>Team Collaboration</li>
-                <li>Communication Skills</li>
-            </ul>
-        </details>
-
-        <hr>
-    </section>
-
-    <!-- Adding Section3 - Education -->
-    <section id="education">
-        <h2>Education</h2>
-
-        <!-- Usage of tables for the Education section for more clearer visualisation -->
-        <table border="1" cellpadding="8" cellspacing="0" width="100%">
-            <tr>
-                <th>Degree</th>
-                <th>Institution</th>
-                <th>Year</th>
-                <th>Percentage</th>
-            </tr>
-
-            <tr>
-                <td rowspan="2">B.Tech - CSE (Data Science)</td>
-                <td>Bhilai Institute of Technology Durg</td>
-                <td>2022 – 2026</td>
-                <td>CGPA: 9.2</td>
-            </tr>
-
-            <tr>
-                <td colspan="3">
-                    Relevant Coursework: DSA, ML, AI, Data Analytics, DBMS, Cloud Computing, OS, Networking
-                </td>
-            </tr>
-
-
-            <tr>
-                <td>Higher Secondary (XII)</td>
-                <td>CBSE Board</td>
-                <td>2022</td>
-                <td>91%</td>
-            </tr>
-
-            <tr>
-                <td>Secondary (X)</td>
-                <td>CBSE Board</td>
-                <td>2020</td>
-                <td>95.6%</td>
-            </tr>
-
-        </table>
-
-        <hr>
-    </section>
-
-    <!-- Adding Section4 - Experience -->
-    <section id="experience">
-        <h2>Experience</h2>
-
-        <article>
-            <h3>Machine Learning Research Intern</h3>
             <p>
-                <strong>Indian Institute of Technology (IIT) Guwahati</strong><br>
-                <em>May 2024 – July 2024</em>
+                Passionate about building intelligent systems, data-driven dashboards,
+                and research-oriented machine learning solutions.
             </p>
+        </div>
 
-            <ul>
-                <li>Conducted research on anomaly detection models using advanced machine learning techniques.</li>
-                <li>Worked on Natural Language Processing (NLP) based implementations for real-world datasets.</li>
-                <li>Analyzed data patterns and improved model accuracy through experimentation and validation.</li>
-                <li>Collaborated with research mentors to evaluate model performance and optimize workflows.</li>
-            </ul>
-        </article>
+        <div class="socials">
 
-        <hr>
+        <a href="https://github.com/2504-tulika" target="_blank" class="icon-btn">
+            <i class="fab fa-github"></i>
+        </a>
+
+        <a href="https://www.linkedin.com/in/tulika-lunkad-9a6536255/" target="_blank" class="icon-btn">
+            <i class="fab fa-linkedin-in"></i>
+        </a>
+
+        <a href="mailto:tulika2504@gmail.com" class="icon-btn">
+            <i class="fas fa-envelope"></i>
+        </a>
+
+        <a href="Tulika_Lunkad_Resume.pdf" download class="icon-btn resume-btn">
+            <i class="fas fa-download"></i>
+        </a>
+
+    </div>
+
+
+<div class="buttons">
+    <a href="#projects" class="btn primary-btn">View My Work</a>
+    <a href="#contact" class="btn secondary-btn">Get In Touch</a>
+</div>
+
+
+
+        <div class="pfp">
+            <img src="Profile.jpg" alt="Tulika Lunkad">
+        </div>
+
     </section>
 
-    <!-- Adding Section5 - Projects -->
-    <section id="projects">
-        <h2>Projects</h2>
+    <!-- ================= ABOUT SECTION ================= -->
+    <section id="about" class="about section">
 
-        <ol>
-            <li>
-                <strong style="margin-right: 30px;">Hospital Management Dashboard</strong>
-                <a href="https://github.com/2504-tulika/Hospital-Management-Dashboard-PowerBI" target="_blank">View
-                    GitHub Repository</a>
+        <h2 class="section-title">About Me</h2>
 
-                <br>
+        <div class="about-container">
 
-                <em>Power BI | MySQL | Excel</em>
+            <div class="about-card">
+                <h3>Profile</h3>
                 <p>
-                    Designed a multi-page hospital management dashboard with seamless navigation
-                    across five functional modules including patients, doctors, finance, and staff.
-                    Integrated MySQL as backend to manage patient and financial records
-                    and optimized queries for real-time KPI reporting.
+                    I am a Computer Science student specializing in Data Science
+                  and very passionate about data and data driven approaches,
+                  I have learned several data analytics technologies and have build several projects based on 
+                  Data analytics using Tableau, PowerBI, and other tools.. During my internship at IIT Guwahati,
+                    I worked on anomaly detection models and NLP-based systems
+                    for real-world datasets.
                 </p>
+            </div>
 
-            </li>
-
-            <br>
-
-            <li>
-                <strong style="margin-right: 30px;">Olympic Data Analysis Dashboard</strong>
-                <a href="https://github.com/2504-tulika/Stats_Of_Champions" target="_blank">View GitHub Repository</a>
-
-                <br>
-
-                <em>Python | Streamlit | Pandas | Plotly</em>
+            <div class="about-card">
+                <h3>Core Focus</h3>
                 <p>
-                    Developed an interactive analytics dashboard analyzing Olympics data
-                    with medal tallies, country trends, and athlete insights.
-                    Engineered dynamic filters for year, country, and sport
-                    to generate tailored visualizations.
+                    My focus lies in Data Analytics, and programming on Python. Building 
+                    intelligent dashboards, scalable data systems,
+                    and solving real-world problems using AI-driven solutions.
                 </p>
-
-            </li>
-
-            <br>
-
-            <li>
-                <strong style="margin-right: 30px;">Data Sales Insights Using Tableau</strong>
-                <a href="https://github.com/2504-tulika/Data-Sales-Insights-Tableau" target="_blank">View GitHub
-                    Repository</a>
-
-                <br>
-
-                <em>Tableau | SQL | MySQL | Excel</em>
-                <p>
-                    Analyzed 3+ years of sales data to identify revenue drivers
-                    and profitability trends. Designed a Tableau dashboard powered
-                    by a SQL-driven star schema for in-depth KPI analysis.
-                    Automated ETL workflows and cleaned datasets for consistency.
-                </p>
-
-            </li>
-
-        </ol>
-
-        <hr>
+            </div>
+        </div>
     </section>
 
-    <!-- Adding Section6 - Contact Form-->
-    <!-- A interactive contact form to get in touch with fellow techies-->
-    <section id="contact">
-        <h2>Contact Me</h2>
+    <!-- Defining Cards for Skills section -->
+    <section id="skills" class="skills section">
+        <h2 class="section-title">Skills</h2>
+        <div class="skills-grid">
 
-        <p>
-            I am open to internships, research collaborations, and data-driven projects.
-            Feel free to connect using the form below.
-        </p>
+            <div class="skill-card">
+                <h3>Programming</h3>
+                <ul>
+                    <li>Python</li>
+                    <li>SQL</li>
+                    <li>R (Basics)</li>
+                </ul>
+            </div>
 
-        <form>
+            <div class="skill-card">
+                <h3>Machine Learning</h3>
+                <ul>
+                    <li>PyTorch</li>
+                    <li>TensorFlow</li>
+                    <li>LangChain</li>
+                    <li>NumPy & Pandas</li>
+                </ul>
+            </div>
 
-            <fieldset>
-                <legend><strong>Personal Information</strong></legend>
+            <div class="skill-card">
+                <h3>Data Visualization</h3>
+                <ul>
+                    <li>Power BI</li>
+                    <li>Tableau</li>
+                    <li>Excel (Advanced)</li>
+                </ul>
+            </div>
 
-                <label for="name">Full Name:</label><br>
-                <input type="text" id="name" name="name" required><br><br>
+            <div class="skill-card">
+                <h3>Databases & Cloud</h3>
+                <ul>
+                    <li>MySQL</li>
+                    <li>MongoDB</li>
+                    <li>AWS</li>
+                    <li>Azure</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-                <label for="email">Email Address:</label><br>
-                <input type="email" id="email" name="email" required><br><br>
-            </fieldset>
+     <!-- Education Section Cards -->
+    <section id="education" class="education section">
+        <h2 class="section-title">Education</h2>
+        <div class="education-container">
 
-            <br>
+            <div class="edu-card">
+                <h3>B.Tech - CSE (Data Science)</h3>
+                <p>Bhilai Institute of Technology Durg</p>
+                <span>2022 – 2026 | CGPA: 9.2</span>
+            </div>
 
-            <fieldset>
-                <legend><strong>Purpose of Contact</strong></legend>
+            <div class="edu-card">
+                <h3>Higher Secondary (XII)</h3>
+                <p>CBSE Board</p>
+                <span>2022 | 91%</span>
+            </div>
 
-                <label>
-                    <input type="radio" name="purpose" value="internship">
-                    Internship Opportunity
-                </label><br>
+            <div class="edu-card">
+                <h3>Secondary (X)</h3>
+                <p>CBSE Board</p>
+                <span>2020 | 95.6%</span>
+            </div>
+        </div>
+    </section>
 
-                <label>
-                    <input type="radio" name="purpose" value="collaboration">
-                    Research Collaboration
-                </label><br>
+    <!-- Projects section -->
+    <section id="projects" class="projects section">
+        <h2 class="section-title">Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>Hospital Management Dashboard</h3>
+                <p>Power BI | MySQL | Excel</p>
+                <a href="https://github.com/2504-tulika/Hospital-Management-Dashboard-PowerBI" target="_blank">View Project</a>
+            </div>
 
-                <label>
-                    <input type="radio" name="purpose" value="project">
-                    Project Discussion
-                </label>
-            </fieldset>
+            <div class="project-card">
+                <h3>Olympic Data Analysis Dashboard</h3>
+                <p>Python | Streamlit | Pandas | Plotly</p>
+                <a href="https://github.com/2504-tulika/Stats_Of_Champions" target="_blank">View Project</a>
+            </div>
 
-            <br>
+            <div class="project-card">
+                <h3>Data Sales Insights</h3>
+                <p>Tableau | SQL | MySQL</p>
+                <a href="https://github.com/2504-tulika/Data-Sales-Insights-Tableau" target="_blank">View Project</a>
+            </div>
+        </div>
+    </section>
 
-            <label for="domain">Select Domain of Interest:</label><br>
-            <select id="domain" name="domain">
-                <option value="">--Choose an option--</option>
-                <option value="ml">Machine Learning</option>
-                <option value="data-analytics">Data Analytics</option>
-                <option value="dashboard">Dashboard Development</option>
-                <option value="ai-research">AI Research</option>
-            </select>
+    <!-- Contact Form -->
+    <section id="contact" class="contact section">
 
-            <br><br>
+        <h2 class="section-title">Contact Me</h2>
 
-            <label for="message">Your Message:</label><br>
-            <textarea id="message" name="message" rows="5" cols="40"></textarea>
+        <form class="contact-form">
 
-            <br><br>
-            <input type="submit" value="Send Message">
+            <input type="text" placeholder="Full Name" required>
+            <input type="email" placeholder="Email Address" required>
+            <textarea rows="5" placeholder="Your Message"></textarea>
+
+            <button type="submit" class="btn primary-btn">Send Message</button>
 
         </form>
 
-        <hr>
     </section>
 
-    <footer style="text-align:center; margin-top: 20px; color: gray;">
-        <p>
-            © 2026 Tulika Lunkad |
-            <a href="https://github.com/2504-tulika" target="_blank">GitHub</a> |
-            <a href="https://www.linkedin.com/in/tulika-lunkad-9a6536255/" target="_blank">LinkedIn</a>
-        </p>
+    <!-- Footer Section -->
+    <footer>
+        <p>© 2026 Tulika Lunkad | Data Science Portfolio</p>
     </footer>
 
 </body>
 </html>
+    
