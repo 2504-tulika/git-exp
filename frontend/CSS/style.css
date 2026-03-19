@@ -194,15 +194,6 @@ body {
     transition: 0.3s ease;
 }
 
-/*Styling body*/
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e1b4b);
-    color: var(--text-light);
-    line-height: 1.6;
-    scroll-behavior: smooth;
-}
-
 /* Hero Section */
 
 .hero {
@@ -226,8 +217,8 @@ body {
 /* Profile image styling */
 
 .pfp img {
-    width: 280px;
-    border-radius: 20px;
+    width: 250px;
+    border-radius: 50%;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     transition: 0.4s ease;
 }
