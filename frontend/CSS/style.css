@@ -9,13 +9,24 @@ html {
     scroll-behavior: smooth;
 }
 
+.section-title,
+h2{
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
 body {
-    font-family: 'Inter', 'Poppins', sans-serif;
+    font-family: 'Playfair Display';
     background-color: #050505;
     color: white;
     overflow-x: hidden;
     position: relative;
 }
+
+h1{
+    font-family: 'Orbitron', sans-serif;
+}
+
 
 /* Bg layers*/
 .gradient-background {
@@ -332,12 +343,19 @@ body {
 
 /*Cards*/
 .about-container,
-.skills-grid,
 .projects-grid,
 .education-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* glassy looks */
