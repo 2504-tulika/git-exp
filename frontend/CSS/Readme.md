@@ -50,18 +50,18 @@ The design follows a **dark AI-tech theme** with gradient backgrounds, glowing e
 ---
 
 ## Project Structure
-
+```
 TulikaLunkad_frontend/
 │
-├── frontend/
-   ├── index.html
-   ├── CSS/
-   │   └── style.css
-   │   └──  README.md
-   ├── images/
-   │   └── (project preview images)
-   ├── Profile.jpg
-   └── Tulika_Lunkad_Resume.pdf
+├── index.html
+├── CSS/
+│   └── style.css
+│   └── README.md
+├── images/
+│   └── (project preview images)
+├── Profile.jpg
+└── Tulika_Lunkad_Resume.pdf
+```
 
 ---
 
