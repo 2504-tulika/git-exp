@@ -62,7 +62,14 @@ TulikaLunkad_frontend/
 ├── Profile.jpg
 └── Tulika_Lunkad_Resume.pdf
 ```
+---
+## Screenshots
 
+ ## 📸 Screenshots
+
+| Hero | Projects | Skills | Contact |
+|------|----------|--------|---------|
+| ![](frontend/images/screenshots/Hero-section.png) | ![](frontend/images/screenshots/Projects.png) | ![](frontend/images/screenshots/Skills.png) | ![](frontend/images/screenshots/Contact.png) |
 ---
 
 ## Git Workflow
