@@ -39,22 +39,22 @@ const students = [
 // console.log("Student Data Loaded Successfully");
 
 //Function to calculate total marks of a student
-// function calTotal(student) {
-//   let total = 0;
+function calTotal(student) {
+  let total = 0;
 
-//   // Loop through each subject
-//   for (let i = 0; i < student.marks.length; i++) {
-//     total += student.marks[i].score;
-//   }
+  // Loop through each subject
+  for (let i = 0; i < student.marks.length; i++) {
+    total += student.marks[i].score;
+  }
 
-//   return total;
-// }
-// console.log("\nTotal Marks of Each Student:");
+  return total;
+}
+console.log("\nTotal Marks of Each Student:");
 
-// for (let i = 0; i < students.length; i++) {
-//   let totalMarks = calTotal(students[i]);
-//   console.log(students[i].name + " Total Marks: " + totalMarks);
-// }
+for (let i = 0; i < students.length; i++) {
+  let totalMarks = calTotal(students[i]);
+  console.log(students[i].name + " Total Marks: " + totalMarks);
+}
 
 // Function to calculate average marks of one student
 
@@ -103,23 +103,43 @@ const students = [
 // calculateSubjectHighest();
 
 // Function to calculate subject-wise average score
-function calculateSubjectAverage() {
-  console.log("\nSubject-wise Average Scores:");
+// function calculateSubjectAverage() {
+//   console.log("\nSubject-wise Average Scores:");
 
-  let subjects = students[0].marks;
+//   let subjects = students[0].marks;
 
-  for (let i = 0; i < subjects.length; i++) {
-    let totalScore = 0;
-    let currentSubject = subjects[i].subject;
+//   for (let i = 0; i < subjects.length; i++) {
+//     let totalScore = 0;
+//     let currentSubject = subjects[i].subject;
 
-    // Loop through students
-    for (let j = 0; j < students.length; j++) {
-      totalScore += students[j].marks[i].score;
+//     // Loop through students
+//     for (let j = 0; j < students.length; j++) {
+//       totalScore += students[j].marks[i].score;
+//     }
+
+//     let average = totalScore / students.length;
+
+//     console.log("Average " + currentSubject + " Score: " + average.toFixed(2));
+//   }
+// }
+// calculateSubjectAverage();
+
+// Function to determine class topper
+function findClassTopper() {
+  console.log("\n--- Class Topper ---");
+
+  let highestTotal = 0;
+  let topperName = "";
+
+  for (let i = 0; i < students.length; i++) {
+    let totalMarks = calTotal(students[i]);
+
+    if (totalMarks > highestTotal) {
+      highestTotal = totalMarks;
+      topperName = students[i].name;
     }
-
-    let average = totalScore / students.length;
-
-    console.log("Average " + currentSubject + " Score: " + average.toFixed(2));
   }
+
+  console.log("Class Topper: " + topperName + " with " + highestTotal + " marks");
 }
-calculateSubjectAverage();
+findClassTopper();
