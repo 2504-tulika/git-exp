@@ -69,7 +69,7 @@ TulikaLunkad_frontend/
 
 | Hero | Projects | Skills | Contact |
 |------|----------|--------|---------|
-| ![](frontend/images/screenshots/Hero-section.png) | ![](frontend/images/screenshots/Projects.png) | ![](frontend/images/screenshots/Skills.png) | ![](frontend/images/screenshots/Contact.png) |
+| ![](Screenshots/Hero-section.png) | ![](Screenshots/Projects.png) | ![](Screenshots/Skills.png) | ![](Screenshots/Contact.png) |
 ---
 
 ## Git Workflow
