@@ -32,7 +32,7 @@ const students = [
       { subject: "History", score: 79 },
       { subject: "Computer", score: 84 }
     ],
-    attendance: 91
+    attendance: 65
   }
 ];
 
@@ -58,21 +58,21 @@ for (let i = 0; i < students.length; i++) {
 
 // Function to calculate average marks of one student
 
-// function calAverage(student) {
-//   let totalMarks = calTotal(student);
-//   let numberOfSubjects = student.marks.length;
+function calAverage(student) {
+  let totalMarks = calTotal(student);
+  let numberOfSubjects = student.marks.length;
 
-//   let average = totalMarks / numberOfSubjects;
+  let average = totalMarks / numberOfSubjects;
 
-//   return average;
-// }
-// // Iterating through each student data and calculating average marks
-// console.log("\nAverage Marks of Each Student:");
+  return average;
+}
+// Iterating through each student data and calculating average marks
+console.log("\nAverage Marks of Each Student:");
 
-// for (let i = 0; i < students.length; i++) {
-//   let averageMarks = calAverage(students[i]);
-//   console.log(students[i].name + " Average: " + averageMarks.toFixed(2));
-// }
+for (let i = 0; i < students.length; i++) {
+  let averageMarks = calAverage(students[i]);
+  console.log(students[i].name + " Average: " + averageMarks.toFixed(2));
+}
 
 // Function to calculate subject-wise highest score
 // function calculateSubjectHighest() {
@@ -125,21 +125,58 @@ for (let i = 0; i < students.length; i++) {
 // calculateSubjectAverage();
 
 // Function to determine class topper
-function findClassTopper() {
-  console.log("\n--- Class Topper ---");
+// function findClassTopper() {
+//   console.log("\n--- Class Topper ---");
 
-  let highestTotal = 0;
-  let topperName = "";
+//   let highestTotal = 0;
+//   let topperName = "";
 
-  for (let i = 0; i < students.length; i++) {
-    let totalMarks = calTotal(students[i]);
+//   for (let i = 0; i < students.length; i++) {
+//     let totalMarks = calTotal(students[i]);
 
-    if (totalMarks > highestTotal) {
-      highestTotal = totalMarks;
-      topperName = students[i].name;
+//     if (totalMarks > highestTotal) {
+//       highestTotal = totalMarks;
+//       topperName = students[i].name;
+//     }
+//   }
+
+//   console.log("Class Topper: " + topperName + " with " + highestTotal + " marks");
+// }
+// findClassTopper();
+
+// Assigning Grade to each student based on average marks and attendance
+function assignGrade(student) {
+  
+  // Check attendance condition
+  if (student.attendance < 75) {
+    return "Fail (Low Attendance)";
+  }
+
+  // Check subject failure (if score <= 40 student fails in that subject)
+  for (let i = 0; i < student.marks.length; i++) {
+    if (student.marks[i].score <= 40) {
+      return "Fail (Failed in " + student.marks[i].subject + ")";
     }
   }
 
-  console.log("Class Topper: " + topperName + " with " + highestTotal + " marks");
+  // If passed above conditions, calculate average
+  let average = calAverage(student);
+
+  // 4. Assign grade based on average
+  if (average >= 85) {
+    return "A";
+  } else if (average >= 70) {
+    return "B";
+  } else if (average >= 50) {
+    return "C";
+  } else {
+    return "Fail";
+  }
 }
-findClassTopper();
+
+console.log("\nStudent Grades:");
+
+for (let i = 0; i < students.length; i++) {
+  let grade = assignGrade(students[i]);
+  console.log(students[i].name + " Grade: " + grade);
+}
