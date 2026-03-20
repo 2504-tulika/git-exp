@@ -75,29 +75,51 @@ const students = [
 // }
 
 // Function to calculate subject-wise highest score
-function calculateSubjectHighest() {
-  console.log("\nSubject-wise Highest Scores:");
+// function calculateSubjectHighest() {
+//   console.log("\nSubject-wise Highest Scores:");
 
-  // Subject marks of first student
+//   // Subject marks of first student
+//   let subjects = students[0].marks;
+
+//   for (let i = 0; i < subjects.length; i++) {
+//     let highestScore = 0;
+//     let topperName = "";
+
+//     let currentSubject = subjects[i].subject;
+
+//     // Loop through all students
+//     for (let j = 0; j < students.length; j++) {
+//       let score = students[j].marks[i].score;
+
+//       if (score > highestScore) {
+//         highestScore = score;
+//         topperName = students[j].name;
+//       }
+//     }
+
+//     console.log("Highest in " + currentSubject + ": " + topperName + " (" + highestScore + ")");
+//   }
+// }
+// calculateSubjectHighest();
+
+// Function to calculate subject-wise average score
+function calculateSubjectAverage() {
+  console.log("\nSubject-wise Average Scores:");
+
   let subjects = students[0].marks;
 
   for (let i = 0; i < subjects.length; i++) {
-    let highestScore = 0;
-    let topperName = "";
-
+    let totalScore = 0;
     let currentSubject = subjects[i].subject;
 
-    // Loop through all students
+    // Loop through students
     for (let j = 0; j < students.length; j++) {
-      let score = students[j].marks[i].score;
-
-      if (score > highestScore) {
-        highestScore = score;
-        topperName = students[j].name;
-      }
+      totalScore += students[j].marks[i].score;
     }
 
-    console.log("Highest in " + currentSubject + ": " + topperName + " (" + highestScore + ")");
+    let average = totalScore / students.length;
+
+    console.log("Average " + currentSubject + " Score: " + average.toFixed(2));
   }
 }
-calculateSubjectHighest();
+calculateSubjectAverage();
