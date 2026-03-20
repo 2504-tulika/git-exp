@@ -10,7 +10,7 @@ Addition of Raw data to the file student_analyzer.js
 ![](Consolerun/Data.png)
 
 ### Output:
-![](Consolerun\DataO.png)
+![](Consolerun/DataO.png)
 
 ---
 ## 2. Total Marks Calculation
@@ -18,10 +18,10 @@ Addition of Raw data to the file student_analyzer.js
 Each student's total marks are calculated by iterating through their subject scores using a loop and summing all values.
 
 ### Code:
-![](Consolerun\fun1.png)
+![](Consolerun/fun1.png)
 
 ### Output:
-![](Consolerun\fun1O.png)
+![](Consolerun/fun1O.png)
 
 ---
 
@@ -31,10 +31,10 @@ The average is calculated by dividing total marks by the number of subjects.
 The `calTotal()` function is reused to maintain modularity and avoid repetition.
 
 ### Code:
-![](Consolerun\fun2.png)
+![](Consolerun/fun2.png)
 
 ### Output:
-![](Consolerun\fun2O.png)
+![](Consolerun/fun2O.png)
 
 ---
 
@@ -46,10 +46,10 @@ Nested loops are used:
 This allows comparison of each subject score across all students to determine the highest scorer.
 
 ### Code:
-![](Consolerun\fun3.png)
+![](Consolerun/fun3.png)
 
 ### Output:
-![](Consolerun\fun3O.png)
+![](Consolerun/fun3O.png)
 
 ---
 
@@ -60,10 +60,10 @@ For each subject:
 - Divided by total number of students
 
 ### Code:
-![](Consolerun\fun4.png)
+![](Consolerun/fun4.png)
 
 ### Output:
-![](Consolerun\fun4O.png)
+![](Consolerun/fun4O.png)
 
 ---
 
@@ -73,10 +73,10 @@ The student with the highest total marks is determined using a single loop compa
 This section displays the overall class topper along with total marks.
 
 ### Code:
-![](Consolerun\fun5.png)
+![](Consolerun/fun5.png)
 
 ### Output:
-![](Consolerun\fun5O.png)
+![](Consolerun/fun5O.png)
 
 ---
 
@@ -98,9 +98,9 @@ This section displays the overall class topper along with total marks.
 The fail conditions are checked before grade assignment to maintain correct logical order.
 
 ### Code:
-![](Consolerun\fun6.png)
+![](Consolerun/fun6.png)
 
 ### Output:
-![](Consolerun\fun6O.png)
+![](Consolerun/fun6O.png)
 
 ---
