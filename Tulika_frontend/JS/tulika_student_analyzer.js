@@ -36,4 +36,22 @@ const students = [
   }
 ];
 
-console.log("Student Data Loaded Successfully");
+// console.log("Student Data Loaded Successfully");
+
+// Function to calculate total marks of a student
+function calTotal(student) {
+  let total = 0;
+
+  // Loop through each subject
+  for (let i = 0; i < student.marks.length; i++) {
+    total += student.marks[i].score;
+  }
+
+  return total;
+}
+console.log("\nTotal Marks of Each Student:");
+
+for (let i = 0; i < students.length; i++) {
+  let totalMarks = calTotal(students[i]);
+  console.log(students[i].name + " Total Marks: " + totalMarks);
+}
