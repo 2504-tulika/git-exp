@@ -39,37 +39,65 @@ const students = [
 // console.log("Student Data Loaded Successfully");
 
 //Function to calculate total marks of a student
-function calTotal(student) {
-  let total = 0;
+// function calTotal(student) {
+//   let total = 0;
 
-  // Loop through each subject
-  for (let i = 0; i < student.marks.length; i++) {
-    total += student.marks[i].score;
-  }
+//   // Loop through each subject
+//   for (let i = 0; i < student.marks.length; i++) {
+//     total += student.marks[i].score;
+//   }
 
-  return total;
-}
-console.log("\nTotal Marks of Each Student:");
+//   return total;
+// }
+// console.log("\nTotal Marks of Each Student:");
 
-for (let i = 0; i < students.length; i++) {
-  let totalMarks = calTotal(students[i]);
-  console.log(students[i].name + " Total Marks: " + totalMarks);
-}
+// for (let i = 0; i < students.length; i++) {
+//   let totalMarks = calTotal(students[i]);
+//   console.log(students[i].name + " Total Marks: " + totalMarks);
+// }
 
 // Function to calculate average marks of one student
 
-function calAverage(student) {
-  let totalMarks = calTotal(student);
-  let numberOfSubjects = student.marks.length;
+// function calAverage(student) {
+//   let totalMarks = calTotal(student);
+//   let numberOfSubjects = student.marks.length;
 
-  let average = totalMarks / numberOfSubjects;
+//   let average = totalMarks / numberOfSubjects;
 
-  return average;
+//   return average;
+// }
+// // Iterating through each student data and calculating average marks
+// console.log("\nAverage Marks of Each Student:");
+
+// for (let i = 0; i < students.length; i++) {
+//   let averageMarks = calAverage(students[i]);
+//   console.log(students[i].name + " Average: " + averageMarks.toFixed(2));
+// }
+
+// Function to calculate subject-wise highest score
+function calculateSubjectHighest() {
+  console.log("\nSubject-wise Highest Scores:");
+
+  // Subject marks of first student
+  let subjects = students[0].marks;
+
+  for (let i = 0; i < subjects.length; i++) {
+    let highestScore = 0;
+    let topperName = "";
+
+    let currentSubject = subjects[i].subject;
+
+    // Loop through all students
+    for (let j = 0; j < students.length; j++) {
+      let score = students[j].marks[i].score;
+
+      if (score > highestScore) {
+        highestScore = score;
+        topperName = students[j].name;
+      }
+    }
+
+    console.log("Highest in " + currentSubject + ": " + topperName + " (" + highestScore + ")");
+  }
 }
-// Iterating through each student data and calculating average marks
-console.log("\nAverage Marks of Each Student:");
-
-for (let i = 0; i < students.length; i++) {
-  let averageMarks = calAverage(students[i]);
-  console.log(students[i].name + " Average: " + averageMarks.toFixed(2));
-}
+calculateSubjectHighest();
