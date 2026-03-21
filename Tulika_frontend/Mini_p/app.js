@@ -1,5 +1,4 @@
 'use strict';
-/* NovaNest Beauty Inventory — app.js */
 
 const PRODUCTS_DEFAULT = [
   {id:1, name:'Rose Glow Vitamin C Serum',  category:'Skincare',  brand:'Lumière',   price:2499, stock:18, desc:'Brightening serum with 15% ascorbic acid.', sku:'LMR-001', restock:5, image:''},
