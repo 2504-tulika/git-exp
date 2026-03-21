@@ -2,45 +2,54 @@
 
 ---
 
-## 1. Total Marks Calculation
+## 1. Adding Student Data
+
+Addition of Raw data to the file student_analyzer.js
+
+### Code:
+![](Consolerun/Data.png)
+
+### Output:
+![](Consolerun/DataO.png)
+
+---
+## 2. Total Marks Calculation
 
 Each student's total marks are calculated by iterating through their subject scores using a loop and summing all values.
 
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
+### Code:
+![](Consolerun/fun1.png)
 
-**Explanation:**  
-This output demonstrates the calculation of total marks for each student using a loop that accesses nested object values.
+### Output:
+![](Consolerun/fun1O.png)
 
 ---
 
-## 2️. Average Marks Calculation
+## 3. Average Marks Calculation
 
 The average is calculated by dividing total marks by the number of subjects.
+The `calTotal()` function is reused to maintain modularity and avoid repetition.
 
-The `calculateTotal()` function is reused to maintain modularity and avoid repetition.
+### Code:
+![](Consolerun/fun2.png)
 
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
-
-**Explanation:**  
-This section shows the calculated average marks for each student rounded to two decimal places.
+### Output:
+![](Consolerun/fun2O.png)
 
 ---
 
-## 3️. Subject-wise Highest Score
+## 4. Subject-wise Highest Score
 
 Nested loops are used:
 - Outer loop → Subjects
 - Inner loop → Students
-
 This allows comparison of each subject score across all students to determine the highest scorer.
 
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
+### Code:
+![](Consolerun/fun3.png)
 
-**Explanation:**  
-The program identifies the student who scored the highest in each subject.
+### Output:
+![](Consolerun/fun3O.png)
 
 ---
 
@@ -50,24 +59,24 @@ For each subject:
 - Scores from all students are summed
 - Divided by total number of students
 
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
+### Code:
+![](Consolerun/fun4.png)
 
-**Explanation:**  
-This output shows the class average for each subject.
+### Output:
+![](Consolerun/fun4O.png)
 
 ---
 
 ## 5️. Class Topper
 
 The student with the highest total marks is determined using a single loop comparison.
-
-Sorting was avoided intentionally for efficiency since only the maximum value is required.
-
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
-**Explanation:**  
 This section displays the overall class topper along with total marks.
+
+### Code:
+![](Consolerun/fun5.png)
+
+### Output:
+![](Consolerun/fun5O.png)
 
 ---
 
@@ -88,10 +97,10 @@ This section displays the overall class topper along with total marks.
 
 The fail conditions are checked before grade assignment to maintain correct logical order.
 
-### Console Output Screenshot:
-![](frontend/images/screenshots/Hero-section.png)
+### Code:
+![](Consolerun/fun6.png)
 
-**Explanation:**  
-This section demonstrates final grade allocation based on average performance and mandatory eligibility rules.
+### Output:
+![](Consolerun/fun6O.png)
 
 ---
