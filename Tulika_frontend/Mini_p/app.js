@@ -21,3 +21,30 @@ const PRODUCTS_DEFAULT = [
 const ICONS  = {Skincare:'fa-droplet',Makeup:'fa-wand-magic-sparkles',Fragrance:'fa-wind',Haircare:'fa-scissors',Wellness:'fa-spa'};
 const COLORS = {Skincare:'#3a9c8f',Makeup:'#c9697a',Fragrance:'#8a6bc9',Haircare:'#c9923a',Wellness:'#4a9c6d'};
 const CATS   = ['Skincare','Makeup','Fragrance','Haircare','Wellness'];
+
+/* NOTIFICATIONS */
+function buildNotifs(){
+  const low=products.filter(p=>p.stock>0&&p.stock<5), out=products.filter(p=>p.stock===0);
+  notifications=[];
+  out.forEach(p=>notifications.push({type:'danger',icon:'fa-ban',title:'Out of Stock',desc:`${p.name} needs restock.`,time:'Now',unread:true}));
+  low.forEach(p=>notifications.push({type:'warn',icon:'fa-triangle-exclamation',title:'Low Stock',desc:`${p.name} — ${p.stock} left.`,time:'Today',unread:true}));
+  if(!notifications.length) notifications.push({type:'success',icon:'fa-circle-check',title:'All Stocked!',desc:'All products are well stocked.',time:'Now',unread:false});
+  renderNotifs();
+}
+function renderNotifs(){
+  const cnt=notifications.filter(n=>n.unread).length;
+  const b=el('notifBadge'); if(b) b.textContent=cnt||'';
+  const list=el('notifList'); if(!list) return;
+  list.innerHTML=notifications.map((n,i)=>`<li class="notif-item ${n.unread?'unread':''}" onclick="markRead(${i})"><div class="notif-icon ${n.type}"><i class="fa-solid ${n.icon}"></i></div><div><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div></div></li>`).join('');
+}
+function markRead(i){ notifications[i].unread=false; renderNotifs(); }
+
+/* PANELS */
+function closeAllPanels(){ ['notifPanel','settingsPanel','adminDropdown'].forEach(id=>el(id)?.classList.remove('open')); el('overlay')?.classList.remove('show'); el('searchResults')?.classList.remove('open'); }
+function togglePanel(id){ const p=el(id), open=p.classList.contains('open'); closeAllPanels(); if(!open){ p.classList.add('open'); el('overlay').classList.add('show'); } }
+
+function clearFilters(){
+     searchQuery=''; activeCat='all'; activeStock='all'; 
+     el('searchInput').value=''; 
+     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); 
+     document.querySelector('.chip[data-stock="all"]')?.classList.add('active'); renderProducts(); }
