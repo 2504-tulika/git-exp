@@ -129,6 +129,85 @@
 
         <main id="mainContent">
 
+    <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="pg-head">
+          <div>
+            <p class="eyebrow"><i class="fa-solid fa-chart-pie"></i> Overview</p>
+            <h1>Dashboard</h1>
+            <p class="pg-sub">Good <span id="timeGreeting">day</span> <span id="greetEmoji">👋</span>, Admin.</p>
+          </div>
+          <div class="pg-acts"><span class="date-pill"><i class="fa-regular fa-calendar"></i> <span
+                id="currentDate"></span></span><button class="btn-p" data-page="add-product"><i
+                class="fa-solid fa-plus"></i> New Product</button></div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi teal">
+            <div class="kpi-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <div class="kpi-v" id="statTotal">—</div>
+            <div class="kpi-l">Total Products</div>
+            <div class="kpi-bar">
+              <div class="kpi-fill" id="kpiTotalFill" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="kpi rose">
+            <div class="kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="kpi-v" id="statValue">—</div>
+            <div class="kpi-l">Inventory Value</div>
+            <div class="kpi-bar">
+              <div class="kpi-fill" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="kpi amber">
+            <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="kpi-v" id="statLowStock">—</div>
+            <div class="kpi-l">Low Stock</div>
+            <div class="kpi-bar">
+              <div id="kpiLowBar">
+                <div class="kpi-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi danger">
+            <div class="kpi-icon"><i class="fa-solid fa-ban"></i></div>
+            <div class="kpi-v" id="statOutOfStock">—</div>
+            <div class="kpi-l">Out of Stock</div>
+            <div class="kpi-bar">
+              <div id="kpiOutBar">
+                <div class="kpi-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head">
+              <h2><i class="fa-solid fa-chart-bar"></i> Categories</h2><span class="live-tag">● Live</span>
+            </div>
+            <div id="catBars" class="cat-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h2><i class="fa-solid fa-fire-flame-curved"></i> Top Value</h2>
+            </div>
+            <ul id="dashTopValue" class="mini-list"></ul>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Products</h2><a class="card-lnk"
+                data-page="products">All ~</a>
+            </div>
+            <ul id="recentList" class="mini-list"></ul>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h2><i class="fa-solid fa-siren-on"></i> Alerts</h2><a class="card-lnk" data-page="analytics">All ~</a>
+            </div>
+            <ul id="dashAlerts" class="alert-list"></ul>
+          </div>
+        </div>
+      </section>
+
 </body>
 
 </html>
