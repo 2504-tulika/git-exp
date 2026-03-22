@@ -59,3 +59,111 @@
   </div>
 
 </aside>
+
+<!-- ===== MAIN WRAPPER ===== -->
+<div id="mainWrap">
+
+  <!-- TOPBAR -->
+  <header id="topbar">
+
+    <div class="tb-left">
+      <button id="bars"><i class="fa-solid fa-bars-staggered"></i></button>
+      <nav class="NN">
+        <i class="fa-solid fa-gem"></i> NovaNest
+        <i class="fa-solid fa-chevron-right" style="font-size:.5rem"></i>
+        <span id="NNPage">Dashboard</span>
+      </nav>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="searchInput" placeholder="Search products…" autocomplete="off">
+      <kbd>⌘K</kbd>
+      <div id="searchResults"></div>
+    </div>
+
+    <div class="tb-right">
+
+      <!-- Notifications -->
+      <div class="dd-wrap">
+        <button class="tb-btn" id="notifBtn">
+          <i class="fa-solid fa-bell"></i>
+          <span class="n-badge" id="notifBadge"></span>
+        </button>
+        <div class="dd-panel" id="notifPanel">
+          <div class="dd-head">
+            <span>Notifications</span>
+            <button class="dp-act" id="clearNotifsBtn">Clear all</button>
+          </div>
+          <ul id="notifList"></ul>
+          <div class="dd-foot">
+            <button onclick="navigateTo('analytics'); closeAllPanels()">View Analytics →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="dd-wrap">
+        <button class="tb-btn" id="settingsBtn"><i class="fa-solid fa-sliders"></i></button>
+        <div class="dd-panel" id="settingsPanel">
+          <div class="dd-head"><span>Preferences</span></div>
+          <div class="settings-body">
+            <div class="s-row">
+              <div><span class="s-label">Dark Mode</span><span class="s-sub">Switch theme</span></div>
+              <label class="tog"><input type="checkbox" id="darkToggle"><span class="tog-s"></span></label>
+            </div>
+            <div class="s-row">
+              <div><span class="s-label">Compact Cards</span><span class="s-sub">Smaller grid</span></div>
+              <label class="tog"><input type="checkbox" id="compactToggle"><span class="tog-s"></span></label>
+            </div>
+            <div class="s-row">
+              <div><span class="s-label">Low Stock Alert</span><span class="s-sub">Below quantity</span></div>
+              <input type="number" class="s-input" id="threshInput" value="5" min="1" max="50">
+            </div>
+            <div class="s-row">
+              <div><span class="s-label">Currency</span><span class="s-sub">Price display</span></div>
+              <select class="s-sel" id="currencySelect">
+                <option value="₹">₹ INR</option>
+                <option value="$">$ USD</option>
+                <option value="€">€ EUR</option>
+              </select>
+            </div>
+            <hr class="s-hr">
+            <button class="s-danger" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> Reset to Demo Data</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tb-div"></div>
+
+      <!-- Admin Profile -->
+      <div class="dd-wrap">
+        <button class="profile-btn" id="adminPill">
+          <div class="av sm">A</div>
+          <div class="profile-info">
+            <span id="topbarName">Admin</span>
+            <span id="topbarRole">Manager</span>
+          </div>
+          <i class="fa-solid fa-chevron-down" style="font-size:.6rem; color:var(--text-muted); margin-left:.2rem"></i>
+        </button>
+        <div class="dd-panel" id="adminDropdown">
+          <div class="dd-top">
+            <div class="av md" id="ddAvatar">A</div>
+            <div>
+              <div class="user-name" id="ddName"></div>
+              <div style="font-size:.72rem; color:var(--text-muted)" id="ddEmail"></div>
+            </div>
+          </div>
+          <div class="pm">
+            <button class="pm-item" id="editProfileBtn"><i class="fa-solid fa-user-pen"></i> Edit Profile</button>
+            <button class="pm-item" onclick="navigateTo('analytics'); closeAllPanels()"><i class="fa-solid fa-chart-line"></i> Analytics</button>
+            <button class="pm-item" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> Export CSV</button>
+            <hr class="s-hr" style="margin:.4rem 0">
+            <button class="pm-item danger" id="ddSignOut"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
