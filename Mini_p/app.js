@@ -665,7 +665,7 @@ function saveEdit() {
 }
 
 
-// ---- Delete Product ----
+// Delete Product 
 
 function confirmDelete(id) {
   const product = products.find(p => p.id === id);
@@ -682,4 +682,153 @@ function confirmDelete(id) {
   };
 
   openModal('confirmModal');
+}
+
+//Search Bar
+function renderSearchDropdown(query) {
+  const resultsBox = el('searchResults');
+  if (!resultsBox) return;
+
+  if (!query) {
+    resultsBox.classList.remove('open');
+    return;
+  }
+
+  const matches = products.filter(p =>
+    p.name.toLowerCase().includes(query) ||
+    (p.brand || '').toLowerCase().includes(query) ||
+    p.category.toLowerCase().includes(query)
+  ).slice(0, 6);
+
+  if (!matches.length) {
+    resultsBox.innerHTML = `<div class="sr-empty"><i class="fa-solid fa-magnifying-glass"></i> No results for "${esc(query)}"</div>`;
+  } else {
+    resultsBox.innerHTML = matches.map(p => `
+      <div class="sr-item" onclick="searchGoTo(${p.id})">
+        <div class="sr-icon" style="background:${COLORS[p.category]}22; color:${COLORS[p.category]}">
+          <i class="fa-solid ${ICONS[p.category]}"></i>
+        </div>
+        <div>
+          <div class="sr-name">${esc(p.name)}</div>
+          <div class="sr-meta">${p.category} · ${p.brand || '—'} · Stock: ${p.stock}</div>
+        </div>
+        <span class="sr-price">₹${fmt(p.price)}</span>
+      </div>
+    `).join('');
+  }
+
+  resultsBox.classList.add('open');
+}
+
+// Jump to a product card from search
+function searchGoTo(id) {
+  el('searchResults').classList.remove('open');
+  searchQuery = '';
+  el('searchInput').value = '';
+  activeCat   = 'all';
+  activeStock = 'all';
+  navigateTo('products');
+
+  setTimeout(() => {
+    const card = document.querySelector(`.product-card[data-id="${id}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.outline = '2px solid var(--primary)';
+      setTimeout(() => card.style.outline = '', 1800);
+    }
+  }, 300);
+}
+
+
+// Export CSV 
+
+function exportCSV() {
+  const header = ['ID', 'Name', 'Category', 'Brand', 'Price', 'Stock', 'SKU', 'Total Value'];
+  const rows   = products.map(p => [
+    p.id, `"${p.name}"`, p.category, `"${p.brand || ''}"`,
+    p.price, p.stock, `"${p.sku || ''}"`, p.price * p.stock
+  ]);
+
+  const csv  = [header, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href     = URL.createObjectURL(blob);
+  link.download = 'novanest-inventory.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
+
+  toast('Exported as CSV!', 'success');
+}
+
+
+// Sidebar Badges
+
+function updateBadges() {
+  setText('badge-all', products.length);
+  CATS.forEach(cat => {
+    setText('badge-' + cat, products.filter(p => p.category === cat).length);
+  });
+}
+
+
+// Modals 
+
+function openModal(id) {
+  el(id)?.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  el(id)?.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+
+// Dropdown Panels
+
+function closeAllPanels() {
+  ['notifPanel', 'settingsPanel', 'adminDropdown'].forEach(id => {
+    el(id)?.classList.remove('open');
+  });
+  el('overlay')?.classList.remove('show');
+  el('searchResults')?.classList.remove('open');
+}
+
+function togglePanel(id) {
+  const panel    = el(id);
+  const isOpen   = panel.classList.contains('open');
+  closeAllPanels();
+  if (!isOpen) {
+    panel.classList.add('open');
+    el('overlay').classList.add('show');
+  }
+}
+
+
+// Notifications
+
+function toast(message, type = '') {
+  const icons = {
+    success: 'fa-circle-check',
+    error:   'fa-circle-xmark',
+    warn:    'fa-triangle-exclamation',
+    '':      'fa-circle-info'
+  };
+
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.innerHTML = `<i class="fa-solid ${icons[type] || icons['']}"></i> ${message}`;
+
+  el('toastStack').appendChild(div);
+
+  // Animate in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => div.classList.add('show'));
+  });
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    div.classList.add('out');
+    setTimeout(() => div.remove(), 300);
+  }, 3000);
 }
