@@ -79,7 +79,6 @@
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input id="searchInput" placeholder="Search products…" autocomplete="off">
-      <kbd>⌘K</kbd>
       <div id="searchResults"></div>
     </div>
 
@@ -387,4 +386,62 @@
     </section>
 
   </main>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-wrap hidden" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2><i class="fa-solid fa-pen-to-square"></i> Edit Product</h2>
+      <button class="modal-x" id="closeEditBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="fg"><label>Name</label><input id="editName"></div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Category</label>
+          <select id="editCategory">
+            <option>Skincare</option><option>Makeup</option><option>Fragrance</option><option>Haircare</option><option>Wellness</option>
+          </select>
+        </div>
+        <div class="fg"><label>Brand</label><input id="editBrand"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Price</label><input type="number" id="editPrice" min="0"></div>
+        <div class="fg"><label>Stock</label><input type="number" id="editStock" min="0"></div>
+      </div>
+      <div class="fg"><label>Description</label><textarea id="editDesc" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-g" id="cancelEditBtn">Cancel</button>
+      <button class="btn-p" id="saveEditBtn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-wrap hidden" id="profileModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2><i class="fa-solid fa-user"></i> Edit Profile</h2>
+      <button class="modal-x" id="closeProfileBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem">
+        <div class="av lg" id="modalAvatar">A</div>
+        <div>
+          <div style="font-weight:700" id="ddName2">Admin User</div>
+          <div style="font-size:.75rem; color:var(--text-muted)">Store Administrator</div>
+        </div>
+      </div>
+      <div class="fg"><label>Name</label><input id="pName"></div>
+      <div class="fg"><label>Role</label><input id="pRole"></div>
+      <div class="fg"><label>Email</label><input type="email" id="pEmail"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-g" id="cancelProfileBtn">Cancel</button>
+      <button class="btn-p" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+    </div>
+  </div>
 </div>
