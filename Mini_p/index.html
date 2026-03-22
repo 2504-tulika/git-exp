@@ -233,3 +233,158 @@
         </div>
       </div>
     </section>
+
+    <!-- ANALYTICS PAGE -->
+    <section class="page" id="page-analytics">
+      <div class="pg-head">
+        <div>
+          <p class="pie"><i class="fa-solid fa-chart-line"></i> Insights</p>
+          <h1>Analytics</h1>
+          <p class="pg-sub">Inventory intelligence at a glance.</p>
+        </div>
+        <button class="btn-g" id="analyticsExportBtn"><i class="fa-solid fa-file-export"></i> Export</button>
+      </div>
+
+      <div id="analyticsKpi" class="akpi-row"></div>
+
+      <div class="analytics-grid">
+        <div class="card full">
+          <div class="card-head"><h2><i class="fa-solid fa-chart-pie"></i> Category Performance</h2></div>
+          <div id="catIntel" class="cat-intel"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2><i class="fa-solid fa-trophy"></i> Top by Value</h2></div>
+          <ul id="rankList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2><i class="fa-solid fa-triangle-exclamation"></i> Stock Alerts <span id="alertCount" class="badge"></span></h2></div>
+          <ul id="alertList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
+        </div>
+        <div class="card full">
+          <div class="card-head"><h2><i class="fa-solid fa-tags"></i> Price Distribution</h2></div>
+          <div id="priceDist" class="price-dist"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ADD PRODUCT PAGE -->
+    <section class="page" id="page-add-product">
+      <div class="pg-head">
+        <div>
+          <p class="pie"><i class="fa-solid fa-circle-plus"></i> Inventory</p>
+          <h1>Add Product</h1>
+          <p class="pg-sub">List a new product in your store.</p>
+        </div>
+      </div>
+
+      <div class="form-layout">
+
+        <!-- Main Form -->
+        <div class="card form-card">
+          <p class="form-sec"><i class="fa-solid fa-cube"></i> Product Details</p>
+
+          <div class="fg">
+            <label>Name <span class="req">*</span></label>
+            <input id="fName" placeholder="e.g. Rose Glow Serum">
+          </div>
+
+          <div class="form-row">
+            <div class="fg">
+              <label>Category <span class="req">*</span></label>
+              <div class="sel-wrap full">
+                <i class="fa-solid fa-tag"></i>
+                <select id="fCategory">
+                  <option value="">Choose…</option>
+                  <option>Skincare</option>
+                  <option>Makeup</option>
+                  <option>Fragrance</option>
+                  <option>Haircare</option>
+                  <option>Wellness</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg">
+              <label>Brand</label>
+              <input id="fBrand" placeholder="e.g. Lumière">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="fg">
+              <label>Price <span class="req">*</span></label>
+              <div class="inp-pfx">
+                <span class="pfx" id="currencySymbol">₹</span>
+                <input type="number" id="fPrice" placeholder="0" min="0">
+              </div>
+            </div>
+            <div class="fg">
+              <label>Stock Qty <span class="req">*</span></label>
+              <input type="number" id="fStock" placeholder="0" min="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="fg">
+              <label>SKU</label>
+              <input id="fSku" placeholder="e.g. NN-SK-001">
+            </div>
+            <div class="fg">
+              <label>Restock At</label>
+              <input type="number" id="fRestock" placeholder="5" min="1">
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Description</label>
+            <textarea id="fDesc" rows="3" placeholder="Brief product description…"></textarea>
+          </div>
+
+          <div class="fg">
+            <label>Image URL</label>
+            <input id="fImage" placeholder="https://example.com/image.jpg">
+          </div>
+
+          <div class="form-acts">
+            <button class="btn-g" id="clearFormBtn"><i class="fa-solid fa-eraser"></i> Clear</button>
+            <button class="btn-p" id="submitProduct"><i class="fa-solid fa-circle-check"></i> Add to Inventory</button>
+          </div>
+        </div>
+
+        <!-- Sidebar: Preview + Tips -->
+        <div class="form-side">
+
+          <div class="card" style="padding:1.2rem">
+            <p class="form-sec"><i class="fa-solid fa-eye"></i> Live Preview</p>
+            <div class="product-card preview-only">
+              <div class="pcard-img">
+                <div id="previewPh" class="pcard-ph"><i class="fa-solid fa-image"></i></div>
+              </div>
+              <div class="pcard-body">
+                <div class="pcard-cat" id="prevCat">Category</div>
+                <div class="pcard-name" id="prevName">Product Name</div>
+                <div class="pcard-brand" id="prevBrand">Brand</div>
+                <div class="pcard-foot">
+                  <span class="pcard-price" id="prevPrice">₹0</span>
+                  <span class="stock-pill in" id="prevStock">Stock: 0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:1.2rem">
+            <p class="form-sec"><i class="fa-solid fa-lightbulb"></i> Tips</p>
+            <ul class="tips-list">
+              <li><i class="fa-solid fa-check"></i> Use a clear, specific product name</li>
+              <li><i class="fa-solid fa-check"></i> SKU helps with unique tracking</li>
+              <li><i class="fa-solid fa-check"></i> Stock below threshold triggers alerts</li>
+              <li><i class="fa-solid fa-check"></i> High-res image URLs look best</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
