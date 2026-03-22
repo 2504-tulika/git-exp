@@ -98,3 +98,177 @@ function simulateLoad() {
   });
 }
 
+// Update topbar and sidebar with profile info
+function loadProfile() {
+  const initials = (profile.name || 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  ['ddAvatar', 'modalAvatar'].forEach(id => {
+    const elem = el(id);
+    if (elem) elem.textContent = initials;
+  });
+
+  // Update topbar admin button
+  const topbarAv = el('adminPill')?.querySelector('.av');
+  if (topbarAv) topbarAv.textContent = initials;
+
+  setText('topbarName', profile.name);
+  setText('topbarRole', profile.role);
+  setText('ddName',     profile.name);
+  setText('ddEmail',    profile.email);
+  setText('ddName2',    profile.name);
+}
+
+// Render all sections
+function renderAll() {
+  renderDashboard();
+  renderProducts();
+  renderAnalytics();
+  updateBadges();
+}
+
+
+// ---- Notifications ----
+
+function buildNotifications() {
+  notifications = [];
+
+  const outOfStock = products.filter(p => p.stock === 0);
+  const lowStock   = products.filter(p => p.stock > 0 && p.stock < 5);
+
+  outOfStock.forEach(p => {
+    notifications.push({
+      type: 'danger', icon: 'fa-ban',
+      title: 'Out of Stock',
+      desc:  `${p.name} needs restocking immediately.`,
+      time:  'Now', unread: true
+    });
+  });
+
+  lowStock.forEach(p => {
+    notifications.push({
+      type: 'warn', icon: 'fa-triangle-exclamation',
+      title: 'Low Stock Alert',
+      desc:  `${p.name} — only ${p.stock} unit${p.stock > 1 ? 's' : ''} left.`,
+      time:  'Today', unread: true
+    });
+  });
+
+  if (!notifications.length) {
+    notifications.push({
+      type: 'success', icon: 'fa-circle-check',
+      title: 'All Stocked!',
+      desc:  'All products are well stocked.',
+      time:  'Now', unread: false
+    });
+  }
+
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const unreadCount = notifications.filter(n => n.unread).length;
+  const badge       = el('notifBadge');
+  if (badge) badge.textContent = unreadCount || '';
+
+  const list = el('notifList');
+  if (!list) return;
+
+  list.innerHTML = notifications.map((notif, i) => `
+    <li class="notif-item ${notif.unread ? 'unread' : ''}" onclick="markNotifRead(${i})">
+      <div class="notif-icon ${notif.type}"><i class="fa-solid ${notif.icon}"></i></div>
+      <div>
+        <div class="notif-title">${notif.title}</div>
+        <div class="notif-desc">${notif.desc}</div>
+        <div class="notif-time">${notif.time}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+function markNotifRead(index) {
+  notifications[index].unread = false;
+  renderNotifications();
+}
+
+
+// Navigations (Page) 
+
+function navigateTo(page) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  // Remove active from all nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  // Show selected page
+  el('page-' + page)?.classList.add('active');
+
+  // Mark correct nav item as active
+  document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+
+  setText('NNPage', page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' '));
+
+  if (page === 'products')  renderProducts(); //if needed refresh
+  if (page === 'analytics') renderAnalytics();
+
+  // Close sidebar on mobile
+  if (window.innerWidth < 768) {
+    document.body.classList.remove('sidebar-open');
+  }
+}
+
+function renderDashboard() {
+  const total = products.length;
+  const value = products.reduce((sum, p) => sum + p.price * p.stock, 0);
+  const low   = products.filter(p => p.stock > 0 && p.stock < 5).length;
+  const out   = products.filter(p => p.stock === 0).length;
+
+  // Update KPI cards
+  setText('statTotal',      total);
+  setText('statValue',      '₹' + fmt(value));
+  setText('statLowStock',   low);
+  setText('statOutOfStock', out);
+
+  // Update sidebar stats
+  setText('sideTotal', total);
+  setText('sideLow',   low);
+  setText('sideOut',   out);
+
+  // Animate the low/out of stock KPI bars
+  const lowFill = el('kpiLowBar')?.querySelector('.kpi-fill');
+  const outFill = el('kpiOutBar')?.querySelector('.kpi-fill');
+  if (lowFill) lowFill.style.width = total ? (low / total * 100) + '%' : '0%';
+  if (outFill) outFill.style.width = total ? (out / total * 100) + '%' : '0%';
+
+  renderCategoryBars();
+  renderTopValue('dashTopValue', 5);
+  renderRecentProducts();
+  renderDashAlerts();
+}
+
+// Category horizontal bar chart
+function renderCategoryBars() {
+  const counts = {};
+  CATS.forEach(c => counts[c] = 0);
+  products.forEach(p => {
+    if (counts[p.category] !== undefined) counts[p.category]++;
+  });
+
+  const max = Math.max(...Object.values(counts), 1);
+  const container = el('catBars');
+  if (!container) return;
+
+  container.innerHTML = CATS.map(cat => `
+    <div>
+      <div class="cbar-top">
+        <span class="cbar-name" style="color:${COLORS[cat]}">
+          <i class="fa-solid ${ICONS[cat]}"></i> ${cat}
+        </span>
+        <span class="cbar-count">${counts[cat]} items</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(counts[cat] / max) * 100}%; background:${COLORS[cat]}"></div>
+      </div>
+    </div>
+  `).join('');
+}
