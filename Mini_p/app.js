@@ -1,6 +1,6 @@
 'use strict';
 
-// ---- Default Product Data ----
+// Product Data 
 const PRODUCTS_DEFAULT = [
   { id:1,  name:'Rose Glow Vitamin C Serum',     category:'Skincare',  brand:'Lumière',   price:2499, stock:18, desc:'Brightening serum with 15% ascorbic acid.',      sku:'LMR-001', restock:5,  image:'' },
   { id:2,  name:'Velvet Matte Lipstick',          category:'Makeup',    brand:'NoirLab',   price:799,  stock:43, desc:'Long-lasting matte in 24 rich shades.',          sku:'NRL-002', restock:10, image:'' },
@@ -37,3 +37,64 @@ const COLORS = {
 };
 
 const CATS = ['Skincare', 'Makeup', 'Fragrance', 'Haircare', 'Wellness'];
+
+// Helper Functions
+
+// Get element by ID
+function el(id) {
+  return document.getElementById(id);
+}
+
+// Set text content of an element
+function setText(id, value) {
+  const elem = el(id);
+  if (elem) elem.textContent = value;
+}
+
+// Save data to localStorage
+function save() {
+  localStorage.setItem('nn_products', JSON.stringify(products));
+  localStorage.setItem('nn_nextId', nextId);
+  localStorage.setItem('nn_profile', JSON.stringify(profile));
+}
+
+
+async function init() {
+  // Load saved data from localStorage
+  const savedProducts = localStorage.getItem('nn_products');
+  const savedId       = localStorage.getItem('nn_nextId');
+  const savedProfile  = localStorage.getItem('nn_profile');
+
+  if (savedProducts) products = JSON.parse(savedProducts);
+  else products = JSON.parse(JSON.stringify(PRODUCTS_DEFAULT));
+
+  if (savedId)      nextId  = parseInt(savedId);
+  if (savedProfile) profile = JSON.parse(savedProfile);
+
+  // Apply dark mode if saved
+  if (localStorage.getItem('nn_dark') === '1') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const toggle = el('darkToggle');
+    if (toggle) toggle.checked = true;
+  }
+
+  loadProfile();
+  setGreeting();
+  buildNotifications();
+
+  // Show loading spinner for a moment (simulates API fetch)
+  await simulateLoad();
+
+  renderAll();
+  bindEvents();
+}
+
+// Show/hide loading spinner
+function simulateLoad() {
+  return new Promise(resolve => {
+    el('loadingState').classList.remove('hidden');
+    setTimeout(() => {
+      el('loadingState').classList.add('hidden'); resolve();}, 900);
+  });
+}
+
