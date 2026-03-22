@@ -447,3 +447,239 @@ function clearFilters() {
   document.querySelector('.chip[data-stock="all"]')?.classList.add('active');
   renderProducts();
 }
+
+// ---- Analytics Page ----
+
+function renderAnalytics() {
+  const total = products.length;
+  const value = products.reduce((sum, p) => sum + p.price * p.stock, 0);
+  const avg   = total ? products.reduce((sum, p) => sum + p.price, 0) / total : 0;
+
+  // KPI summary row
+  const kpiContainer = el('analyticsKpi');
+  if (kpiContainer) {
+    const kpis = [
+      { icon: 'fa-boxes-stacked',      bg: 'var(--teal-light)',    color: 'var(--teal)',    label: 'Total Products',  value: total,             sub: CATS.filter(c => products.find(p => p.category === c)).length + ' categories' },
+      { icon: 'fa-indian-rupee-sign',  bg: 'var(--primary-light)', color: 'var(--primary)', label: 'Inventory Value', value: '₹' + fmt(value),  sub: 'Price × Stock' },
+      { icon: 'fa-chart-simple',       bg: 'var(--gold-light)',     color: 'var(--gold)',    label: 'Avg. Price',      value: '₹' + fmt(Math.round(avg)), sub: 'All products' },
+    ];
+    kpiContainer.innerHTML = kpis.map(k => `
+      <div class="akpi">
+        <div class="akpi-icon" style="background:${k.bg}; color:${k.color}">
+          <i class="fa-solid ${k.icon}"></i>
+        </div>
+        <div>
+          <div class="akpi-label">${k.label}</div>
+          <div class="akpi-val">${k.value}</div>
+          <div class="akpi-sub">${k.sub}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Category performance cards
+  const catContainer = el('catIntel');
+  if (catContainer) {
+    const maxCount = Math.max(...CATS.map(c => products.filter(p => p.category === c).length), 1);
+
+    catContainer.innerHTML = CATS.map(cat => {
+      const items     = products.filter(p => p.category === cat);
+      const catValue  = items.reduce((sum, p) => sum + p.price * p.stock, 0);
+      const count     = items.length;
+
+      return `
+        <div class="cat-intel-card">
+          <div class="cic-icon" style="background:${COLORS[cat]}22; color:${COLORS[cat]}">
+            <i class="fa-solid ${ICONS[cat]}"></i>
+          </div>
+          <div class="cic-name">${cat}</div>
+          <div class="cic-count">${count}</div>
+          <div class="cic-value">₹${fmt(catValue)} value</div>
+          <div class="cic-bar bar-track">
+            <div class="bar-fill" style="width:${(count / maxCount) * 100}%; background:${COLORS[cat]}"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Top by value list
+  renderTopValue('rankList', 8);
+
+  // Stock alerts list
+  const alerts       = products.filter(p => p.stock < 5).sort((a, b) => a.stock - b.stock).slice(0, 8);
+  const alertContainer = el('alertList');
+  setText('alertCount', alerts.length || '');
+
+  if (alertContainer) {
+    if (!alerts.length) {
+      alertContainer.innerHTML = '<li style="padding:1.2rem; text-align:center; font-size:.81rem; color:var(--text-muted)"><i class="fa-solid fa-circle-check" style="color:var(--success)"></i> All products stocked!</li>';
+    } else {
+      alertContainer.innerHTML = alerts.map(p => `
+        <li class="rank-item">
+          <div class="rank-dot" style="background:${p.stock === 0 ? 'var(--danger)' : 'var(--amber)'}"></div>
+          <span class="rank-name">${esc(p.name)}</span>
+          <span class="rank-val" style="color:${p.stock === 0 ? 'var(--danger)' : 'var(--amber)'}">
+            ${p.stock === 0 ? 'Out' : p.stock + ' left'}
+          </span>
+        </li>
+      `).join('');
+    }
+  }
+
+  // Price distribution bar chart
+  const buckets = [
+    { label: '₹0 – ₹500',       min: 0,    max: 500 },
+    { label: '₹501 – ₹1,500',   min: 501,  max: 1500 },
+    { label: '₹1,501 – ₹3,000', min: 1501, max: 3000 },
+    { label: '₹3,001 – ₹7,000', min: 3001, max: 7000 },
+    { label: '₹7,000+',         min: 7001, max: Infinity },
+  ];
+
+  const priceContainer = el('priceDist');
+  if (priceContainer) {
+    const maxCount = Math.max(...buckets.map(b => products.filter(p => p.price >= b.min && p.price <= b.max).length), 1);
+
+    priceContainer.innerHTML = buckets.map(b => {
+      const count = products.filter(p => p.price >= b.min && p.price <= b.max).length;
+      return `
+        <div class="pd-bucket">
+          <div class="pd-label">${b.label}</div>
+          <div class="pd-track">
+            <div class="pd-fill" style="width:${(count / maxCount) * 100}%">${count}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+
+// ---- Add Product Form ----
+
+function submitProduct() {
+  const name     = el('fName').value.trim();
+  const category = el('fCategory').value;
+  const brand    = el('fBrand').value.trim();
+  const price    = parseFloat(el('fPrice').value);
+  const stock    = parseInt(el('fStock').value);
+  const desc     = el('fDesc').value.trim();
+  const image    = el('fImage').value.trim();
+  const sku      = el('fSku').value.trim();
+  const restock  = parseInt(el('fRestock').value) || 5;
+
+  // Validation
+  if (!name)                      { toast('Product name is required.', 'error'); return; }
+  if (!category)                  { toast('Please select a category.', 'error'); return; }
+  if (isNaN(price) || price < 0)  { toast('Enter a valid price.', 'error');     return; }
+  if (isNaN(stock) || stock < 0)  { toast('Enter a valid stock quantity.', 'error'); return; }
+
+  products.push({ id: nextId++, name, category, brand, price, stock, desc, image, sku, restock });
+
+  save();
+  buildNotifications();
+  renderAll();
+  clearForm();
+  navigateTo('products');
+  toast(`"${name}" added to inventory!`, 'success');
+}
+
+function clearForm() {
+  ['fName', 'fBrand', 'fPrice', 'fStock', 'fDesc', 'fImage', 'fSku', 'fRestock'].forEach(id => {
+    const elem = el(id);
+    if (elem) elem.value = '';
+  });
+  el('fCategory').value = '';
+  updatePreview();
+}
+
+// Update live preview card while typing
+function updatePreview() {
+  const name     = el('fName')?.value     || 'Product Name';
+  const category = el('fCategory')?.value || 'Category';
+  const brand    = el('fBrand')?.value    || 'Brand';
+  const price    = parseFloat(el('fPrice')?.value) || 0;
+  const stock    = parseInt(el('fStock')?.value)   || 0;
+  const image    = el('fImage')?.value    || '';
+
+  setText('prevName',  name);
+  setText('prevCat',   category);
+  setText('prevBrand', brand);
+  setText('prevPrice', '₹' + fmt(price));
+
+  const stockPill = el('prevStock');
+  if (stockPill) {
+    stockPill.className  = 'stock-pill ' + (stock === 0 ? 'out' : stock < 5 ? 'low' : 'in');
+    stockPill.textContent = stock === 0 ? 'Out of Stock' : stock < 5 ? `Low: ${stock}` : `Stock: ${stock}`;
+  }
+
+  const previewImg = el('previewPh');
+  if (previewImg) {
+    previewImg.innerHTML = image
+      ? `<img src="${esc(image)}" style="width:100%; height:100%; object-fit:cover">`
+      : `<i class="fa-solid ${ICONS[category] || 'fa-image'}" style="color:${COLORS[category] || 'var(--border-dark)'}; font-size:2rem"></i>`;
+  }
+}
+
+
+// ---- Edit Product ----
+
+function openEdit(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  el('editId').value       = id;
+  el('editName').value     = product.name;
+  el('editCategory').value = product.category;
+  el('editBrand').value    = product.brand   || '';
+  el('editPrice').value    = product.price;
+  el('editStock').value    = product.stock;
+  el('editDesc').value     = product.desc    || '';
+
+  openModal('editModal');
+}
+
+function saveEdit() {
+  const id       = parseInt(el('editId').value);
+  const name     = el('editName').value.trim();
+  const category = el('editCategory').value;
+  const brand    = el('editBrand').value.trim();
+  const price    = parseFloat(el('editPrice').value);
+  const stock    = parseInt(el('editStock').value);
+  const desc     = el('editDesc').value.trim();
+
+  if (!name || isNaN(price) || isNaN(stock)) {
+    toast('Please fill in all fields.', 'error');
+    return;
+  }
+
+  const index = products.findIndex(p => p.id === id);
+  if (index > -1) {
+    products[index] = { ...products[index], name, category, brand, price, stock, desc };
+    save();
+    buildNotifications();
+    renderAll();
+    closeModal('editModal');
+    toast('Product updated successfully!', 'success');
+  }
+}
+
+
+// ---- Delete Product ----
+
+function confirmDelete(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  setText('confirmMsg', `Delete "${product.name}"? This cannot be undone.`);
+
+  confirmCb = () => {
+    products = products.filter(p => p.id !== id);
+    save();
+    buildNotifications();
+    renderAll();
+    toast('Product deleted.', 'warn');
+  };
+
+  openModal('confirmModal');
+}
