@@ -272,3 +272,178 @@ function renderCategoryBars() {
     </div>
   `).join('');
 }
+
+// Top products by total value (price × stock)
+function renderTopValue(containerId, limit) {
+  const sorted = [...products]
+    .map(p => ({ ...p, totalValue: p.price * p.stock }))
+    .sort((a, b) => b.totalValue - a.totalValue)
+    .slice(0, limit);
+
+  const container = el(containerId);
+  if (!container) return;
+
+  container.innerHTML = sorted.map((p, i) => `
+    <li class="mini-item">
+      <div class="mini-rank ${['g1', 'g2', 'g3'][i] || ''}">${i + 1}</div>
+      <div class="mini-icon" style="background:${COLORS[p.category]}22; color:${COLORS[p.category]}">
+        <i class="fa-solid ${ICONS[p.category]}"></i>
+      </div>
+      <div>
+        <div class="mini-name">${esc(p.name)}</div>
+        <div class="mini-sub">${p.category} · Stock: ${p.stock}</div>
+      </div>
+      <span class="mini-val">₹${fmt(p.totalValue)}</span>
+    </li>
+  `).join('');
+}
+
+// Recently added products
+function renderRecentProducts() {
+  const container = el('recentList');
+  if (!container) return;
+
+  container.innerHTML = [...products].slice(-6).reverse().map(p => `
+    <li class="mini-item">
+      <div class="mini-icon" style="background:${COLORS[p.category]}22; color:${COLORS[p.category]}">
+        <i class="fa-solid ${ICONS[p.category]}"></i>
+      </div>
+      <div>
+        <div class="mini-name">${esc(p.name)}</div>
+        <div class="mini-sub">${esc(p.brand || '')} · ${p.category}</div>
+      </div>
+      <span class="mini-val">₹${fmt(p.price)}</span>
+    </li>
+  `).join('');
+}
+
+// Dashboard stock alerts
+function renderDashAlerts() {
+  const alerts    = products.filter(p => p.stock < 5).sort((a, b) => a.stock - b.stock).slice(0, 5);
+  const container = el('dashAlerts');
+  if (!container) return;
+
+  if (!alerts.length) {
+    container.innerHTML = '<li style="padding:1rem; text-align:center; font-size:.8rem; color:var(--text-muted)"><i class="fa-solid fa-circle-check" style="color:var(--success)"></i> All stocked!</li>';
+    return;
+  }
+
+  container.innerHTML = alerts.map(p => `
+    <li class="alert-item">
+      <span class="alert-dot ${p.stock === 0 ? 'danger' : 'warn'}"></span>
+      <span class="alert-name">${esc(p.name)}</span>
+      <span class="alert-pill ${p.stock === 0 ? 'danger' : 'warn'}">${p.stock === 0 ? 'Out' : p.stock + ' left'}</span>
+    </li>
+  `).join('');
+}
+
+// Products Page
+function getFilteredProducts() {
+  let list = [...products];
+
+  // Text search
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(query) ||
+      p.category.toLowerCase().includes(query) ||
+      (p.brand || '').toLowerCase().includes(query) ||
+      (p.sku || '').toLowerCase().includes(query)
+    );
+  }
+
+  // Category filter
+  if (activeCat !== 'all') {
+    list = list.filter(p => p.category === activeCat);
+  }
+
+  // Stock filter
+  if      (activeStock === 'instock') list = list.filter(p => p.stock > 4);
+  else if (activeStock === 'low')     list = list.filter(p => p.stock > 0 && p.stock < 5);
+  else if (activeStock === 'out')     list = list.filter(p => p.stock === 0);
+
+  // Sorting
+  if      (activeSort === 'price-asc')  list.sort((a, b) => a.price - b.price);
+  else if (activeSort === 'price-desc') list.sort((a, b) => b.price - a.price);
+  else if (activeSort === 'name-asc')   list.sort((a, b) => a.name.localeCompare(b.name));
+  else if (activeSort === 'stock-asc')  list.sort((a, b) => a.stock - b.stock);
+  else if (activeSort === 'value-desc') list.sort((a, b) => (b.price * b.stock) - (a.price * a.stock));
+
+  return list;
+}
+
+function renderProducts() {
+  const grid      = el('productGrid');
+  const emptyMsg  = el('emptyState');
+  if (!grid) return;
+
+  const list = getFilteredProducts();
+
+  // Update results count label
+  setText('resultsLabel', `${list.length} item${list.length !== 1 ? 's' : ''} found`);
+
+  if (!list.length) {
+    grid.innerHTML = '';
+    emptyMsg?.classList.remove('hidden');
+    return;
+  }
+
+  emptyMsg?.classList.add('hidden');
+
+  // Apply view mode classes
+  grid.className = 'product-grid' + (isListMode ? ' list-mode' : '') + (isCompact ? ' compact' : '');
+
+  grid.innerHTML = list.map((product, index) => buildProductCard(product, index)).join('');
+}
+
+// Build HTML for a single product card
+function buildProductCard(p, index) {
+  const stockClass = p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in';
+  const stockLabel = p.stock === 0 ? 'Out of Stock' : p.stock < 5 ? `Low: ${p.stock}` : `Stock: ${p.stock}`;
+
+  const ribbon = p.stock === 0
+    ? '<span class="pcard-ribbon ribbon-out">Out</span>'
+    : p.stock < 5
+    ? '<span class="pcard-ribbon ribbon-low">Low</span>'
+    : '';
+
+  const imageHTML = p.image
+    ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`
+    : `<div class="pcard-ph" style="background:${COLORS[p.category]}18">
+         <i class="fa-solid ${ICONS[p.category]}" style="color:${COLORS[p.category]}; font-size:2rem; opacity:.7"></i>
+       </div>`;
+
+  return `
+    <div class="product-card" data-id="${p.id}" style="--delay:${index * 0.04}s">
+      <div class="pcard-img">
+        ${imageHTML}
+        ${ribbon}
+        <div class="pcard-actions">
+          <button class="pac-btn edit" onclick="openEdit(${p.id})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+          <button class="pac-btn del"  onclick="confirmDelete(${p.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-cat">${esc(p.category)}</div>
+        <div class="pcard-name">${esc(p.name)}</div>
+        <div class="pcard-brand">${esc(p.brand || '')}${p.sku ? ' · ' + esc(p.sku) : ''}</div>
+        ${p.desc ? `<p class="pcard-desc">${esc(p.desc)}</p>` : ''}
+        <div class="pcard-foot">
+          <span class="pcard-price">₹${fmt(p.price)}</span>
+          <span class="stock-pill ${stockClass}">${stockLabel}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Clear all active filters and reset products view
+function clearFilters() {
+  searchQuery = '';
+  activeCat   = 'all';
+  activeStock = 'all';
+  el('searchInput').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.chip[data-stock="all"]')?.classList.add('active');
+  renderProducts();
+}
