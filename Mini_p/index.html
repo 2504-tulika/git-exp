@@ -247,7 +247,39 @@
                         </div>
                     </div>
                 </div>
+                <!-- Dashboard Cards Grid -->
+                <div class="dash-grid">
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-chart-bar"></i> Categories</h2><span class="live-tag">●
+                                Live</span>
+                        </div>
+                        <div id="catBars" class="cat-bars"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-fire-flame-curved"></i> Top Value</h2>
+                        </div>
+                        <ul id="dashTopValue" class="mini-list"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Products</h2><a class="card-lnk"
+                                data-page="products">All →</a>
+                        </div>
+                        <ul id="recentList" class="mini-list"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-siren-on"></i> Alerts</h2><a class="card-lnk"
+                                data-page="analytics">All →</a>
+                        </div>
+                        <ul id="dashAlerts" class="alert-list"></ul>
+                    </div>
+                </div>
+            
             </section>
+
                 <!-- PRODUCTS PAGE -->
                 <section class="page" id="page-products">
                     <div class="pg-head">
@@ -291,7 +323,7 @@
                         </div>
                     </div>
                     <p id="resultsLabel" class="results-label"></p>
-                    <div class="loading-state hidden" id="loadingState">
+                    <div class="loading-state" id="loadingState">
                         <div class="spinner"></div>
                         <p>Loading inventory…</p>
                     </div>
@@ -308,37 +340,7 @@
                         </div>
                     </div>
                 </section>
-                <!-- Dashboard Cards Grid -->
-                <div class="dash-grid">
-                    <div class="card">
-                        <div class="card-head">
-                            <h2><i class="fa-solid fa-chart-bar"></i> Categories</h2><span class="live-tag">●
-                                Live</span>
-                        </div>
-                        <div id="catBars" class="cat-bars"></div>
-                    </div>
-                    <div class="card">
-                        <div class="card-head">
-                            <h2><i class="fa-solid fa-fire-flame-curved"></i> Top Value</h2>
-                        </div>
-                        <ul id="dashTopValue" class="mini-list"></ul>
-                    </div>
-                    <div class="card">
-                        <div class="card-head">
-                            <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Products</h2><a class="card-lnk"
-                                data-page="products">All →</a>
-                        </div>
-                        <ul id="recentList" class="mini-list"></ul>
-                    </div>
-                    <div class="card">
-                        <div class="card-head">
-                            <h2><i class="fa-solid fa-siren-on"></i> Alerts</h2><a class="card-lnk"
-                                data-page="analytics">All →</a>
-                        </div>
-                        <ul id="dashAlerts" class="alert-list"></ul>
-                    </div>
-                </div>
-            </section>
+                
 
             <!-- ANALYTICS PAGE -->
             <section class="page" id="page-analytics">

@@ -414,8 +414,6 @@ function getFilteredProducts() {
 function renderProducts() {
   const grid      = el('productGrid');
   const emptyMsg  = el('emptyState');
-  const loader    = el('loadingState');
-  if (loader) loader.classList.add('hidden');
   if (!grid) return;
 
   const list = getFilteredProducts();
