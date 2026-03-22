@@ -1,470 +1,593 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaNest — Beauty Inventory</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaNest — Beauty Inventory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
 
-<!-- Sidebar structure -->
-<aside id="sidebar">
+    <!-- Sidebar structure -->
+    <aside id="sidebar">
 
-  <div class="brand">
-    <div class="brand-logo"><i class="fa-solid fa-gem"></i></div>
-    <div>
-      <span class="brand-name">NovaNest</span>
-      <span class="brand-tag">Beauty Atelier</span>
-    </div>
-  </div>
-
-  <nav id="sideNav">
-    <p class="nav-label">Menu</p>
-    <a class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-    <a class="nav-item" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
-    <a class="nav-item" data-page="analytics"><i class="fa-solid fa-chart-line"></i> Analytics</a>
-    <a class="nav-item" data-page="add-product"><i class="fa-solid fa-circle-plus"></i> Add Product</a>
-
-    <p class="nav-label mt">Categories</p>
-    <a class="nav-item cat-filter" data-cat="all"><i class="fa-solid fa-layer-group"></i> All Items <span class="badge" id="badge-all"></span></a>
-    <a class="nav-item cat-filter" data-cat="Skincare"><i class="fa-solid fa-droplet sk"></i> Skincare <span class="badge" id="badge-Skincare"></span></a>
-    <a class="nav-item cat-filter" data-cat="Makeup"><i class="fa-solid fa-wand-magic-sparkles mk"></i> Makeup <span class="badge" id="badge-Makeup"></span></a>
-    <a class="nav-item cat-filter" data-cat="Fragrance"><i class="fa-solid fa-wind fr"></i> Fragrance <span class="badge" id="badge-Fragrance"></span></a>
-    <a class="nav-item cat-filter" data-cat="Haircare"><i class="fa-solid fa-scissors hc"></i> Haircare <span class="badge" id="badge-Haircare"></span></a>
-    <a class="nav-item cat-filter" data-cat="Wellness"><i class="fa-solid fa-spa wl"></i> Wellness <span class="badge" id="badge-Wellness"></span></a>
-  </nav>
-
-  <div class="side-stats">
-    <div class="ss"><span class="ss-v" id="sideTotal">—</span><span>Products</span></div>
-    <div class="ss-div"></div>
-    <div class="ss"><span class="ss-v danger" id="sideOut">—</span><span>Out</span></div>
-    <div class="ss-div"></div>
-    <div class="ss"><span class="ss-v warn" id="sideLow">—</span><span>Low</span></div>
-  </div>
-
-  <div class="side-foot" id="sideUserBtn">
-    <div class="av-wrap">
-      <div class="av">A</div>
-      <span class="dot-online"></span>
-    </div>
-    <div>
-      <span class="u-name">Admin User</span>
-      <span class="u-role">Store Manager</span>
-    </div>
-    <i class="fa-solid fa-ellipsis-vertical" style="color:rgba(255,255,255,.2); margin-left:auto; font-size:.75rem"></i>
-  </div>
-
-</aside>
-
-<!-- ===== MAIN WRAPPER ===== -->
-<div id="mainWrap">
-
-  <!-- TOPBAR -->
-  <header id="topbar">
-
-    <div class="tb-left">
-      <button id="bars"><i class="fa-solid fa-bars-staggered"></i></button>
-      <nav class="NN">
-        <i class="fa-solid fa-gem"></i> NovaNest
-        <i class="fa-solid fa-chevron-right" style="font-size:.5rem"></i>
-        <span id="NNPage">Dashboard</span>
-      </nav>
-    </div>
-
-    <!-- Search Bar -->
-    <div class="search-box">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input id="searchInput" placeholder="Search products…" autocomplete="off">
-      <div id="searchResults"></div>
-    </div>
-
-    <div class="tb-right">
-
-      <!-- Notifications -->
-      <div class="dd-wrap">
-        <button class="tb-btn" id="notifBtn">
-          <i class="fa-solid fa-bell"></i>
-          <span class="n-badge" id="notifBadge"></span>
-        </button>
-        <div class="dd-panel" id="notifPanel">
-          <div class="dd-head">
-            <span>Notifications</span>
-            <button class="dp-act" id="clearNotifsBtn">Clear all</button>
-          </div>
-          <ul id="notifList"></ul>
-          <div class="dd-foot">
-            <button onclick="navigateTo('analytics'); closeAllPanels()">View Analytics →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Settings -->
-      <div class="dd-wrap">
-        <button class="tb-btn" id="settingsBtn"><i class="fa-solid fa-sliders"></i></button>
-        <div class="dd-panel" id="settingsPanel">
-          <div class="dd-head"><span>Preferences</span></div>
-          <div class="settings-body">
-            <div class="s-row">
-              <div><span class="s-label">Dark Mode</span><span class="s-sub">Switch theme</span></div>
-              <label class="tog"><input type="checkbox" id="darkToggle"><span class="tog-s"></span></label>
-            </div>
-            <div class="s-row">
-              <div><span class="s-label">Compact Cards</span><span class="s-sub">Smaller grid</span></div>
-              <label class="tog"><input type="checkbox" id="compactToggle"><span class="tog-s"></span></label>
-            </div>
-            <div class="s-row">
-              <div><span class="s-label">Low Stock Alert</span><span class="s-sub">Below quantity</span></div>
-              <input type="number" class="s-input" id="threshInput" value="5" min="1" max="50">
-            </div>
-            <div class="s-row">
-              <div><span class="s-label">Currency</span><span class="s-sub">Price display</span></div>
-              <select class="s-sel" id="currencySelect">
-                <option value="₹">₹ INR</option>
-                <option value="$">$ USD</option>
-                <option value="€">€ EUR</option>
-              </select>
-            </div>
-            <hr class="s-hr">
-            <button class="s-danger" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> Reset to Demo Data</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="tb-div"></div>
-
-      <!-- Admin Profile -->
-      <div class="dd-wrap">
-        <button class="profile-btn" id="adminPill">
-          <div class="av sm">A</div>
-          <div class="profile-info">
-            <span id="topbarName">Admin</span>
-            <span id="topbarRole">Manager</span>
-          </div>
-          <i class="fa-solid fa-chevron-down" style="font-size:.6rem; color:var(--text-muted); margin-left:.2rem"></i>
-        </button>
-        <div class="dd-panel" id="adminDropdown">
-          <div class="dd-top">
-            <div class="av md" id="ddAvatar">A</div>
+        <div class="brand">
+            <div class="brand-logo"><i class="fa-solid fa-gem"></i></div>
             <div>
-              <div class="user-name" id="ddName"></div>
-              <div style="font-size:.72rem; color:var(--text-muted)" id="ddEmail"></div>
+                <span class="brand-name">NovaNest</span>
+                <span class="brand-tag">Beauty Atelier</span>
             </div>
-          </div>
-          <div class="pm">
-            <button class="pm-item" id="editProfileBtn"><i class="fa-solid fa-user-pen"></i> Edit Profile</button>
-            <button class="pm-item" onclick="navigateTo('analytics'); closeAllPanels()"><i class="fa-solid fa-chart-line"></i> Analytics</button>
-            <button class="pm-item" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> Export CSV</button>
-            <hr class="s-hr" style="margin:.4rem 0">
-            <button class="pm-item danger" id="ddSignOut"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
-          </div>
         </div>
-      </div>
 
-    </div>
-  </header>
+        <nav id="sideNav">
+            <p class="nav-label">Menu</p>
+            <a class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+            <a class="nav-item" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
+            <a class="nav-item" data-page="analytics"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+            <a class="nav-item" data-page="add-product"><i class="fa-solid fa-circle-plus"></i> Add Product</a>
 
-  <!-- Pages -->
-  <main id="mainContent">
+            <p class="nav-label mt">Categories</p>
+            <a class="nav-item cat-filter" data-cat="all"><i class="fa-solid fa-layer-group"></i> All Items <span
+                    class="badge" id="badge-all"></span></a>
+            <a class="nav-item cat-filter" data-cat="Skincare"><i class="fa-solid fa-droplet sk"></i> Skincare <span
+                    class="badge" id="badge-Skincare"></span></a>
+            <a class="nav-item cat-filter" data-cat="Makeup"><i class="fa-solid fa-wand-magic-sparkles mk"></i> Makeup
+                <span class="badge" id="badge-Makeup"></span></a>
+            <a class="nav-item cat-filter" data-cat="Fragrance"><i class="fa-solid fa-wind fr"></i> Fragrance <span
+                    class="badge" id="badge-Fragrance"></span></a>
+            <a class="nav-item cat-filter" data-cat="Haircare"><i class="fa-solid fa-scissors hc"></i> Haircare <span
+                    class="badge" id="badge-Haircare"></span></a>
+            <a class="nav-item cat-filter" data-cat="Wellness"><i class="fa-solid fa-spa wl"></i> Wellness <span
+                    class="badge" id="badge-Wellness"></span></a>
+        </nav>
 
-    <!-- DASHBOARD PAGE -->
-    <section class="page active" id="page-dashboard">
-      <div class="pg-head">
-        <div>
-          <p class="pie"><i class="fa-solid fa-chart-pie"></i> Overview</p>
-          <h1>Dashboard</h1>
-          <p class="pg-sub">Good <span id="timeGreeting">day</span> <span id="greetEmoji">👋</span>, Admin.</p>
+        <div class="side-stats">
+            <div class="ss"><span class="ss-v" id="sideTotal">—</span><span>Products</span></div>
+            <div class="ss-div"></div>
+            <div class="ss"><span class="ss-v danger" id="sideOut">—</span><span>Out</span></div>
+            <div class="ss-div"></div>
+            <div class="ss"><span class="ss-v warn" id="sideLow">—</span><span>Low</span></div>
         </div>
-        <div class="pg-acts">
-          <span class="date-pill"><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
-          <button class="btn-p" data-page="add-product"><i class="fa-solid fa-plus"></i> New Product</button>
-        </div>
-      </div>
 
-      <!-- KPI Stat Cards -->
-      <div class="kpi-grid">
-        <div class="kpi teal">
-          <div class="kpi-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-          <div class="kpi-v" id="statTotal">—</div>
-          <div class="kpi-l">Total Products</div>
-          <div class="kpi-bar"><div class="kpi-fill" style="width:100%"></div></div>
-        </div>
-        <div class="kpi rose">
-          <div class="kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
-          <div class="kpi-v" id="statValue">—</div>
-          <div class="kpi-l">Inventory Value</div>
-          <div class="kpi-bar"><div class="kpi-fill" style="width:100%"></div></div>
-        </div>
-        <div class="kpi amber">
-          <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-          <div class="kpi-v" id="statLowStock">—</div>
-          <div class="kpi-l">Low Stock</div>
-          <div class="kpi-bar"><div id="kpiLowBar"><div class="kpi-fill"></div></div></div>
-        </div>
-        <div class="kpi danger">
-          <div class="kpi-icon"><i class="fa-solid fa-ban"></i></div>
-          <div class="kpi-v" id="statOutOfStock">—</div>
-          <div class="kpi-l">Out of Stock</div>
-          <div class="kpi-bar"><div id="kpiOutBar"><div class="kpi-fill"></div></div></div>
-        </div>
-      </div>
-
-      <!-- Dashboard Cards Grid -->
-      <div class="dash-grid">
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-chart-bar"></i> Categories</h2><span class="live-tag">● Live</span></div>
-          <div id="catBars" class="cat-bars"></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-fire-flame-curved"></i> Top Value</h2></div>
-          <ul id="dashTopValue" class="mini-list"></ul>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Products</h2><a class="card-lnk" data-page="products">All →</a></div>
-          <ul id="recentList" class="mini-list"></ul>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-siren-on"></i> Alerts</h2><a class="card-lnk" data-page="analytics">All →</a></div>
-          <ul id="dashAlerts" class="alert-list"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ANALYTICS PAGE -->
-    <section class="page" id="page-analytics">
-      <div class="pg-head">
-        <div>
-          <p class="pie"><i class="fa-solid fa-chart-line"></i> Insights</p>
-          <h1>Analytics</h1>
-          <p class="pg-sub">Inventory intelligence at a glance.</p>
-        </div>
-        <button class="btn-g" id="analyticsExportBtn"><i class="fa-solid fa-file-export"></i> Export</button>
-      </div>
-
-      <div id="analyticsKpi" class="akpi-row"></div>
-
-      <div class="analytics-grid">
-        <div class="card full">
-          <div class="card-head"><h2><i class="fa-solid fa-chart-pie"></i> Category Performance</h2></div>
-          <div id="catIntel" class="cat-intel"></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-trophy"></i> Top by Value</h2></div>
-          <ul id="rankList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2><i class="fa-solid fa-triangle-exclamation"></i> Stock Alerts <span id="alertCount" class="badge"></span></h2></div>
-          <ul id="alertList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
-        </div>
-        <div class="card full">
-          <div class="card-head"><h2><i class="fa-solid fa-tags"></i> Price Distribution</h2></div>
-          <div id="priceDist" class="price-dist"></div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ADD PRODUCT PAGE -->
-    <section class="page" id="page-add-product">
-      <div class="pg-head">
-        <div>
-          <p class="pie"><i class="fa-solid fa-circle-plus"></i> Inventory</p>
-          <h1>Add Product</h1>
-          <p class="pg-sub">List a new product in your store.</p>
-        </div>
-      </div>
-
-      <div class="form-layout">
-
-        <!-- Main Form -->
-        <div class="card form-card">
-          <p class="form-sec"><i class="fa-solid fa-cube"></i> Product Details</p>
-
-          <div class="fg">
-            <label>Name <span class="req">*</span></label>
-            <input id="fName" placeholder="e.g. Rose Glow Serum">
-          </div>
-
-          <div class="form-row">
-            <div class="fg">
-              <label>Category <span class="req">*</span></label>
-              <div class="sel-wrap full">
-                <i class="fa-solid fa-tag"></i>
-                <select id="fCategory">
-                  <option value="">Choose…</option>
-                  <option>Skincare</option>
-                  <option>Makeup</option>
-                  <option>Fragrance</option>
-                  <option>Haircare</option>
-                  <option>Wellness</option>
-                </select>
-              </div>
+        <div class="side-foot" id="sideUserBtn">
+            <div class="av-wrap">
+                <div class="av">A</div>
+                <span class="dot-online"></span>
             </div>
-            <div class="fg">
-              <label>Brand</label>
-              <input id="fBrand" placeholder="e.g. Lumière">
+            <div>
+                <span class="u-name">Admin User</span>
+                <span class="u-role">Store Manager</span>
             </div>
-          </div>
-
-          <div class="form-row">
-            <div class="fg">
-              <label>Price <span class="req">*</span></label>
-              <div class="inp-pfx">
-                <span class="pfx" id="currencySymbol">₹</span>
-                <input type="number" id="fPrice" placeholder="0" min="0">
-              </div>
-            </div>
-            <div class="fg">
-              <label>Stock Qty <span class="req">*</span></label>
-              <input type="number" id="fStock" placeholder="0" min="0">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="fg">
-              <label>SKU</label>
-              <input id="fSku" placeholder="e.g. NN-SK-001">
-            </div>
-            <div class="fg">
-              <label>Restock At</label>
-              <input type="number" id="fRestock" placeholder="5" min="1">
-            </div>
-          </div>
-
-          <div class="fg">
-            <label>Description</label>
-            <textarea id="fDesc" rows="3" placeholder="Brief product description…"></textarea>
-          </div>
-
-          <div class="fg">
-            <label>Image URL</label>
-            <input id="fImage" placeholder="https://example.com/image.jpg">
-          </div>
-
-          <div class="form-acts">
-            <button class="btn-g" id="clearFormBtn"><i class="fa-solid fa-eraser"></i> Clear</button>
-            <button class="btn-p" id="submitProduct"><i class="fa-solid fa-circle-check"></i> Add to Inventory</button>
-          </div>
+            <i class="fa-solid fa-ellipsis-vertical"
+                style="color:rgba(255,255,255,.2); margin-left:auto; font-size:.75rem"></i>
         </div>
 
-        <!-- Sidebar: Preview + Tips -->
-        <div class="form-side">
+    </aside>
 
-          <div class="card" style="padding:1.2rem">
-            <p class="form-sec"><i class="fa-solid fa-eye"></i> Live Preview</p>
-            <div class="product-card preview-only">
-              <div class="pcard-img">
-                <div id="previewPh" class="pcard-ph"><i class="fa-solid fa-image"></i></div>
-              </div>
-              <div class="pcard-body">
-                <div class="pcard-cat" id="prevCat">Category</div>
-                <div class="pcard-name" id="prevName">Product Name</div>
-                <div class="pcard-brand" id="prevBrand">Brand</div>
-                <div class="pcard-foot">
-                  <span class="pcard-price" id="prevPrice">₹0</span>
-                  <span class="stock-pill in" id="prevStock">Stock: 0</span>
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div id="mainWrap">
+
+        <!-- TOPBAR -->
+        <header id="topbar">
+
+            <div class="tb-left">
+                <button id="bars"><i class="fa-solid fa-bars-staggered"></i></button>
+                <nav class="NN">
+                    <i class="fa-solid fa-gem"></i> NovaNest
+                    <i class="fa-solid fa-chevron-right" style="font-size:.5rem"></i>
+                    <span id="NNPage">Dashboard</span>
+                </nav>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="searchInput" placeholder="Search products…" autocomplete="off">
+                <div id="searchResults"></div>
+            </div>
+
+            <div class="tb-right">
+
+                <!-- Notifications -->
+                <div class="dd-wrap">
+                    <button class="tb-btn" id="notifBtn">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="n-badge" id="notifBadge"></span>
+                    </button>
+                    <div class="dd-panel" id="notifPanel">
+                        <div class="dd-head">
+                            <span>Notifications</span>
+                            <button class="dp-act" id="clearNotifsBtn">Clear all</button>
+                        </div>
+                        <ul id="notifList"></ul>
+                        <div class="dd-foot">
+                            <button onclick="navigateTo('analytics'); closeAllPanels()">View Analytics →</button>
+                        </div>
+                    </div>
                 </div>
-              </div>
+
+                <!-- Settings -->
+                <div class="dd-wrap">
+                    <button class="tb-btn" id="settingsBtn"><i class="fa-solid fa-sliders"></i></button>
+                    <div class="dd-panel" id="settingsPanel">
+                        <div class="dd-head"><span>Preferences</span></div>
+                        <div class="settings-body">
+                            <div class="s-row">
+                                <div><span class="s-label">Dark Mode</span><span class="s-sub">Switch theme</span></div>
+                                <label class="tog"><input type="checkbox" id="darkToggle"><span
+                                        class="tog-s"></span></label>
+                            </div>
+                            <div class="s-row">
+                                <div><span class="s-label">Compact Cards</span><span class="s-sub">Smaller grid</span>
+                                </div>
+                                <label class="tog"><input type="checkbox" id="compactToggle"><span
+                                        class="tog-s"></span></label>
+                            </div>
+                            <div class="s-row">
+                                <div><span class="s-label">Low Stock Alert</span><span class="s-sub">Below
+                                        quantity</span></div>
+                                <input type="number" class="s-input" id="threshInput" value="5" min="1" max="50">
+                            </div>
+                            <div class="s-row">
+                                <div><span class="s-label">Currency</span><span class="s-sub">Price display</span></div>
+                                <select class="s-sel" id="currencySelect">
+                                    <option value="₹">₹ INR</option>
+                                    <option value="$">$ USD</option>
+                                    <option value="€">€ EUR</option>
+                                </select>
+                            </div>
+                            <hr class="s-hr">
+                            <button class="s-danger" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> Reset to
+                                Demo Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tb-div"></div>
+
+                <!-- Admin Profile -->
+                <div class="dd-wrap">
+                    <button class="profile-btn" id="adminPill">
+                        <div class="av sm">A</div>
+                        <div class="profile-info">
+                            <span id="topbarName">Admin</span>
+                            <span id="topbarRole">Manager</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down"
+                            style="font-size:.6rem; color:var(--text-muted); margin-left:.2rem"></i>
+                    </button>
+                    <div class="dd-panel" id="adminDropdown">
+                        <div class="dd-top">
+                            <div class="av md" id="ddAvatar">A</div>
+                            <div>
+                                <div class="user-name" id="ddName"></div>
+                                <div style="font-size:.72rem; color:var(--text-muted)" id="ddEmail"></div>
+                            </div>
+                        </div>
+                        <div class="pm">
+                            <button class="pm-item" id="editProfileBtn"><i class="fa-solid fa-user-pen"></i> Edit
+                                Profile</button>
+                            <button class="pm-item" onclick="navigateTo('analytics'); closeAllPanels()"><i
+                                    class="fa-solid fa-chart-line"></i> Analytics</button>
+                            <button class="pm-item" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> Export
+                                CSV</button>
+                            <hr class="s-hr" style="margin:.4rem 0">
+                            <button class="pm-item danger" id="ddSignOut"><i class="fa-solid fa-right-from-bracket"></i>
+                                Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-          </div>
+        </header>
 
-          <div class="card" style="padding:1.2rem">
-            <p class="form-sec"><i class="fa-solid fa-lightbulb"></i> Tips</p>
-            <ul class="tips-list">
-              <li><i class="fa-solid fa-check"></i> Use a clear, specific product name</li>
-              <li><i class="fa-solid fa-check"></i> SKU helps with unique tracking</li>
-              <li><i class="fa-solid fa-check"></i> Stock below threshold triggers alerts</li>
-              <li><i class="fa-solid fa-check"></i> High-res image URLs look best</li>
-            </ul>
-          </div>
+        <!-- Pages -->
+        <main id="mainContent">
 
+            <!-- DASHBOARD PAGE -->
+            <section class="page active" id="page-dashboard">
+                <div class="pg-head">
+                    <div>
+                        <p class="pie"><i class="fa-solid fa-chart-pie"></i> Overview</p>
+                        <h1>Dashboard</h1>
+                        <p class="pg-sub">Good <span id="timeGreeting">day</span> <span id="greetEmoji">👋</span>,
+                            Admin.</p>
+                    </div>
+                    <div class="pg-acts">
+                        <span class="date-pill"><i class="fa-regular fa-calendar"></i> <span
+                                id="currentDate"></span></span>
+                        <button class="btn-p" data-page="add-product"><i class="fa-solid fa-plus"></i> New
+                            Product</button>
+                    </div>
+                </div>
+
+                <!-- KPI Stat Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi teal">
+                        <div class="kpi-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="kpi-v" id="statTotal">—</div>
+                        <div class="kpi-l">Total Products</div>
+                        <div class="kpi-bar">
+                            <div class="kpi-fill" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="kpi rose">
+                        <div class="kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                        <div class="kpi-v" id="statValue">—</div>
+                        <div class="kpi-l">Inventory Value</div>
+                        <div class="kpi-bar">
+                            <div class="kpi-fill" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="kpi amber">
+                        <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="kpi-v" id="statLowStock">—</div>
+                        <div class="kpi-l">Low Stock</div>
+                        <div class="kpi-bar">
+                            <div id="kpiLowBar">
+                                <div class="kpi-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi danger">
+                        <div class="kpi-icon"><i class="fa-solid fa-ban"></i></div>
+                        <div class="kpi-v" id="statOutOfStock">—</div>
+                        <div class="kpi-l">Out of Stock</div>
+                        <div class="kpi-bar">
+                            <div id="kpiOutBar">
+                                <div class="kpi-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS PAGE -->
+                <section class="page" id="page-products">
+                    <div class="pg-head">
+                        <div>
+                            <p class="pie"><i class="fa-solid fa-box-open"></i> Inventory</p>
+                            <h1>Products</h1>
+                            <p class="pg-sub">Browse and manage your catalogue.</p>
+                        </div>
+                        <div class="pg-acts">
+                            <button class="btn-g" id="exportCsvBtn2"><i class="fa-solid fa-file-export"></i>
+                                Export</button>
+                            <button class="btn-p" data-page="add-product"><i class="fa-solid fa-plus"></i> Add
+                                Product</button>
+                        </div>
+                    </div>
+                    <div class="ctrl-bar">
+                        <div class="ctrls">
+                            <button class="ctrl active" data-stock="all">All</button>
+                            <button class="ctrl" data-stock="instock"><i class="fa-solid fa-circle-check"></i> In
+                                Stock</button>
+                            <button class="ctrl" data-stock="low"><i class="fa-solid fa-circle-exclamation"></i>
+                                Low</button>
+                            <button class="ctrl" data-stock="out"><i class="fa-solid fa-circle-xmark"></i> Out</button>
+                        </div>
+                        <div class="ctrl-right">
+                            <div class="sel-wrap">
+                                <i class="fa-solid fa-sort"></i>
+                                <select id="sortSelect">
+                                    <option value="default">Default</option>
+                                    <option value="price-asc">Price ↑</option>
+                                    <option value="price-desc">Price ↓</option>
+                                    <option value="name-asc">Name A–Z</option>
+                                    <option value="stock-asc">Stock ↑</option>
+                                    <option value="value-desc">Value ↓</option>
+                                </select>
+                            </div>
+                            <div class="view-tog">
+                                <button id="gridViewBtn" class="active"><i class="fa-solid fa-grip"></i></button>
+                                <button id="listViewBtn"><i class="fa-solid fa-list"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="resultsLabel" class="results-label"></p>
+                    <div class="loading-state" id="loadingState">
+                        <div class="spinner"></div>
+                        <p>Loading inventory…</p>
+                    </div>
+                    <div id="productGrid" class="product-grid"></div>
+                    <div class="empty-state hidden" id="emptyState">
+                        <div class="e-icon"><i class="fa-solid fa-box-open"></i></div>
+                        <h3>Nothing found</h3>
+                        <p>Try clearing filters or adding a new product.</p>
+                        <div style="display:flex; gap:.6rem; margin-top:.5rem">
+                            <button class="btn-g" onclick="clearFilters()"><i class="fa-solid fa-rotate-left"></i> Clear
+                                Filters</button>
+                            <button class="btn-p" data-page="add-product"><i class="fa-solid fa-plus"></i> Add
+                                Product</button>
+                        </div>
+                    </div>
+                </section>
+                <!-- Dashboard Cards Grid -->
+                <div class="dash-grid">
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-chart-bar"></i> Categories</h2><span class="live-tag">●
+                                Live</span>
+                        </div>
+                        <div id="catBars" class="cat-bars"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-fire-flame-curved"></i> Top Value</h2>
+                        </div>
+                        <ul id="dashTopValue" class="mini-list"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Products</h2><a class="card-lnk"
+                                data-page="products">All →</a>
+                        </div>
+                        <ul id="recentList" class="mini-list"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-siren-on"></i> Alerts</h2><a class="card-lnk"
+                                data-page="analytics">All →</a>
+                        </div>
+                        <ul id="dashAlerts" class="alert-list"></ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ANALYTICS PAGE -->
+            <section class="page" id="page-analytics">
+                <div class="pg-head">
+                    <div>
+                        <p class="pie"><i class="fa-solid fa-chart-line"></i> Insights</p>
+                        <h1>Analytics</h1>
+                        <p class="pg-sub">Inventory intelligence at a glance.</p>
+                    </div>
+                    <button class="btn-g" id="analyticsExportBtn"><i class="fa-solid fa-file-export"></i>
+                        Export</button>
+                </div>
+
+                <div id="analyticsKpi" class="akpi-row"></div>
+
+                <div class="analytics-grid">
+                    <div class="card full">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-chart-pie"></i> Category Performance</h2>
+                        </div>
+                        <div id="catIntel" class="cat-intel"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-trophy"></i> Top by Value</h2>
+                        </div>
+                        <ul id="rankList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-triangle-exclamation"></i> Stock Alerts <span id="alertCount"
+                                    class="badge"></span></h2>
+                        </div>
+                        <ul id="alertList" class="mini-list" style="padding:.5rem 1.2rem 1rem"></ul>
+                    </div>
+                    <div class="card full">
+                        <div class="card-head">
+                            <h2><i class="fa-solid fa-tags"></i> Price Distribution</h2>
+                        </div>
+                        <div id="priceDist" class="price-dist"></div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ADD PRODUCT PAGE -->
+            <section class="page" id="page-add-product">
+                <div class="pg-head">
+                    <div>
+                        <p class="pie"><i class="fa-solid fa-circle-plus"></i> Inventory</p>
+                        <h1>Add Product</h1>
+                        <p class="pg-sub">List a new product in your store.</p>
+                    </div>
+                </div>
+
+                <div class="form-layout">
+
+                    <!-- Main Form -->
+                    <div class="card form-card">
+                        <p class="form-sec"><i class="fa-solid fa-cube"></i> Product Details</p>
+
+                        <div class="fg">
+                            <label>Name <span class="req">*</span></label>
+                            <input id="fName" placeholder="e.g. Rose Glow Serum">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="fg">
+                                <label>Category <span class="req">*</span></label>
+                                <div class="sel-wrap full">
+                                    <i class="fa-solid fa-tag"></i>
+                                    <select id="fCategory">
+                                        <option value="">Choose…</option>
+                                        <option>Skincare</option>
+                                        <option>Makeup</option>
+                                        <option>Fragrance</option>
+                                        <option>Haircare</option>
+                                        <option>Wellness</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="fg">
+                                <label>Brand</label>
+                                <input id="fBrand" placeholder="e.g. Lumière">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="fg">
+                                <label>Price <span class="req">*</span></label>
+                                <div class="inp-pfx">
+                                    <span class="pfx" id="currencySymbol">₹</span>
+                                    <input type="number" id="fPrice" placeholder="0" min="0">
+                                </div>
+                            </div>
+                            <div class="fg">
+                                <label>Stock Qty <span class="req">*</span></label>
+                                <input type="number" id="fStock" placeholder="0" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="fg">
+                                <label>SKU</label>
+                                <input id="fSku" placeholder="e.g. NN-SK-001">
+                            </div>
+                            <div class="fg">
+                                <label>Restock At</label>
+                                <input type="number" id="fRestock" placeholder="5" min="1">
+                            </div>
+                        </div>
+
+                        <div class="fg">
+                            <label>Description</label>
+                            <textarea id="fDesc" rows="3" placeholder="Brief product description…"></textarea>
+                        </div>
+
+                        <div class="fg">
+                            <label>Image URL</label>
+                            <input id="fImage" placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <div class="form-acts">
+                            <button class="btn-g" id="clearFormBtn"><i class="fa-solid fa-eraser"></i> Clear</button>
+                            <button class="btn-p" id="submitProduct"><i class="fa-solid fa-circle-check"></i> Add to
+                                Inventory</button>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: Preview + Tips -->
+                    <div class="form-side">
+
+                        <div class="card" style="padding:1.2rem">
+                            <p class="form-sec"><i class="fa-solid fa-eye"></i> Live Preview</p>
+                            <div class="product-card preview-only">
+                                <div class="pcard-img">
+                                    <div id="previewPh" class="pcard-ph"><i class="fa-solid fa-image"></i></div>
+                                </div>
+                                <div class="pcard-body">
+                                    <div class="pcard-cat" id="prevCat">Category</div>
+                                    <div class="pcard-name" id="prevName">Product Name</div>
+                                    <div class="pcard-brand" id="prevBrand">Brand</div>
+                                    <div class="pcard-foot">
+                                        <span class="pcard-price" id="prevPrice">₹0</span>
+                                        <span class="stock-pill in" id="prevStock">Stock: 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="padding:1.2rem">
+                            <p class="form-sec"><i class="fa-solid fa-lightbulb"></i> Tips</p>
+                            <ul class="tips-list">
+                                <li><i class="fa-solid fa-check"></i> Use a clear, specific product name</li>
+                                <li><i class="fa-solid fa-check"></i> SKU helps with unique tracking</li>
+                                <li><i class="fa-solid fa-check"></i> Stock below threshold triggers alerts</li>
+                                <li><i class="fa-solid fa-check"></i> High-res image URLs look best</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal-wrap hidden" id="editModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2><i class="fa-solid fa-pen-to-square"></i> Edit Product</h2>
+                <button class="modal-x" id="closeEditBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="fg"><label>Name</label><input id="editName"></div>
+                <div class="form-row">
+                    <div class="fg">
+                        <label>Category</label>
+                        <select id="editCategory">
+                            <option>Skincare</option>
+                            <option>Makeup</option>
+                            <option>Fragrance</option>
+                            <option>Haircare</option>
+                            <option>Wellness</option>
+                        </select>
+                    </div>
+                    <div class="fg"><label>Brand</label><input id="editBrand"></div>
+                </div>
+                <div class="form-row">
+                    <div class="fg"><label>Price</label><input type="number" id="editPrice" min="0"></div>
+                    <div class="fg"><label>Stock</label><input type="number" id="editStock" min="0"></div>
+                </div>
+                <div class="fg"><label>Description</label><textarea id="editDesc" rows="2"></textarea></div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn-g" id="cancelEditBtn">Cancel</button>
+                <button class="btn-p" id="saveEditBtn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+            </div>
         </div>
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<!-- Edit Product Modal -->
-<div class="modal-wrap hidden" id="editModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h2><i class="fa-solid fa-pen-to-square"></i> Edit Product</h2>
-      <button class="modal-x" id="closeEditBtn"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="editId">
-      <div class="fg"><label>Name</label><input id="editName"></div>
-      <div class="form-row">
-        <div class="fg">
-          <label>Category</label>
-          <select id="editCategory">
-            <option>Skincare</option><option>Makeup</option><option>Fragrance</option><option>Haircare</option><option>Wellness</option>
-          </select>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-wrap hidden" id="profileModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2><i class="fa-solid fa-user"></i> Edit Profile</h2>
+                <button class="modal-x" id="closeProfileBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem">
+                    <div class="av lg" id="modalAvatar">A</div>
+                    <div>
+                        <div style="font-weight:700" id="ddName2">Admin User</div>
+                        <div style="font-size:.75rem; color:var(--text-muted)">Store Administrator</div>
+                    </div>
+                </div>
+                <div class="fg"><label>Name</label><input id="pName"></div>
+                <div class="fg"><label>Role</label><input id="pRole"></div>
+                <div class="fg"><label>Email</label><input type="email" id="pEmail"></div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn-g" id="cancelProfileBtn">Cancel</button>
+                <button class="btn-p" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+            </div>
         </div>
-        <div class="fg"><label>Brand</label><input id="editBrand"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>Price</label><input type="number" id="editPrice" min="0"></div>
-        <div class="fg"><label>Stock</label><input type="number" id="editStock" min="0"></div>
-      </div>
-      <div class="fg"><label>Description</label><textarea id="editDesc" rows="2"></textarea></div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-g" id="cancelEditBtn">Cancel</button>
-      <button class="btn-p" id="saveEditBtn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-    </div>
-  </div>
-</div>
 
-<!-- Edit Profile Modal -->
-<div class="modal-wrap hidden" id="profileModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h2><i class="fa-solid fa-user"></i> Edit Profile</h2>
-      <button class="modal-x" id="closeProfileBtn"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem">
-        <div class="av lg" id="modalAvatar">A</div>
-        <div>
-          <div style="font-weight:700" id="ddName2">Admin User</div>
-          <div style="font-size:.75rem; color:var(--text-muted)">Store Administrator</div>
+    <!-- Confirm / Delete Modal -->
+    <div class="modal-wrap hidden" id="confirmModal">
+        <div class="modal confirm-modal">
+            <div class="c-icon"><i class="fa-solid fa-trash-can"></i></div>
+            <h3>Are you sure?</h3>
+            <p id="confirmMsg">This cannot be undone.</p>
+            <div style="display:flex; gap:.65rem; justify-content:center; margin-top:1.2rem">
+                <button class="btn-g" id="confirmCancelBtn">Cancel</button>
+                <button class="btn-danger" id="confirmOkBtn"><i class="fa-solid fa-trash"></i> Confirm</button>
+            </div>
         </div>
-      </div>
-      <div class="fg"><label>Name</label><input id="pName"></div>
-      <div class="fg"><label>Role</label><input id="pRole"></div>
-      <div class="fg"><label>Email</label><input type="email" id="pEmail"></div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-g" id="cancelProfileBtn">Cancel</button>
-      <button class="btn-p" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
-    </div>
-  </div>
-</div>
 
-<!-- Confirm / Delete Modal -->
-<div class="modal-wrap hidden" id="confirmModal">
-  <div class="modal confirm-modal">
-    <div class="c-icon"><i class="fa-solid fa-trash-can"></i></div>
-    <h3>Are you sure?</h3>
-    <p id="confirmMsg">This cannot be undone.</p>
-    <div style="display:flex; gap:.65rem; justify-content:center; margin-top:1.2rem">
-      <button class="btn-g" id="confirmCancelBtn">Cancel</button>
-      <button class="btn-danger" id="confirmOkBtn"><i class="fa-solid fa-trash"></i> Confirm</button>
-    </div>
-  </div>
-</div>
+    <!-- Background overlay (closes dropdowns when clicked) -->
+    <div id="overlay"></div>
 
-<!-- Background overlay (closes dropdowns when clicked) -->
-<div id="overlay"></div>
+    <!-- notification stack -->
+    <div id="toastStack"></div>
 
-<!-- notification stack -->
-<div id="toastStack"></div>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>

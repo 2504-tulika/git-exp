@@ -129,6 +129,16 @@ function simulateLoad() {
   });
 }
 
+// Set time-based greeting on dashboard
+function setGreeting() {
+  const hour = new Date().getHours();
+  setText('timeGreeting', hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening');
+  setText('greetEmoji',   hour < 12 ? '☀️' : hour < 17 ? '🌤️' : '🌙');
+  setText('currentDate',  new Date().toLocaleDateString('en-IN', {
+    weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
+  }));
+}
+
 // Update topbar and sidebar with profile info
 function loadProfile() {
   const initials = (profile.name || 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -472,8 +482,8 @@ function clearFilters() {
   activeCat   = 'all';
   activeStock = 'all';
   el('searchInput').value = '';
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  document.querySelector('.chip[data-stock="all"]')?.classList.add('active');
+  document.querySelectorAll('.ctrl').forEach(c => c.classList.remove('active'));
+  document.querySelector('.ctrl[data-stock="all"]')?.classList.add('active');
   renderProducts();
 }
 
@@ -902,7 +912,7 @@ function bindEvents() {
   });
 
   // Hamburger button (sidebar toggle)
-  el('bar')?.addEventListener('click', () => {
+  el('bars')?.addEventListener('click', () => {
     if (window.innerWidth < 768) {
       document.body.classList.toggle('sidebar-open');
     } else {
@@ -954,12 +964,12 @@ function bindEvents() {
     renderProducts();
   });
 
-  // Stock filter chips
-  document.querySelectorAll('.chip[data-stock]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      activeStock = chip.dataset.stock;
-      document.querySelectorAll('.chip[data-stock]').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
+  // Stock filter ctrls
+  document.querySelectorAll('.ctrl[data-stock]').forEach(ctrl => {
+    ctrl.addEventListener('click', () => {
+      activeStock = ctrl.dataset.stock;
+      document.querySelectorAll('.ctrl[data-stock]').forEach(c => c.classList.remove('active'));
+      ctrl.classList.add('active');
       renderProducts();
     });
   });
