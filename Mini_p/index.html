@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaNest — Beauty Inventory</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
+
+  <div class="brand">
+    <div class="brand-logo"><i class="fa-solid fa-gem"></i></div>
+    <div>
+      <span class="brand-name">NovaNest</span>
+      <span class="brand-tag">Beauty Atelier</span>
+    </div>
+  </div>
+
+  <nav id="sideNav">
+    <p class="nav-label">Menu</p>
+    <a class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+    <a class="nav-item" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
+    <a class="nav-item" data-page="analytics"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    <a class="nav-item" data-page="add-product"><i class="fa-solid fa-circle-plus"></i> Add Product</a>
+
+    <p class="nav-label mt">Categories</p>
+    <a class="nav-item cat-filter" data-cat="all"><i class="fa-solid fa-layer-group"></i> All Items <span class="badge" id="badge-all"></span></a>
+    <a class="nav-item cat-filter" data-cat="Skincare"><i class="fa-solid fa-droplet sk"></i> Skincare <span class="badge" id="badge-Skincare"></span></a>
+    <a class="nav-item cat-filter" data-cat="Makeup"><i class="fa-solid fa-wand-magic-sparkles mk"></i> Makeup <span class="badge" id="badge-Makeup"></span></a>
+    <a class="nav-item cat-filter" data-cat="Fragrance"><i class="fa-solid fa-wind fr"></i> Fragrance <span class="badge" id="badge-Fragrance"></span></a>
+    <a class="nav-item cat-filter" data-cat="Haircare"><i class="fa-solid fa-scissors hc"></i> Haircare <span class="badge" id="badge-Haircare"></span></a>
+    <a class="nav-item cat-filter" data-cat="Wellness"><i class="fa-solid fa-spa wl"></i> Wellness <span class="badge" id="badge-Wellness"></span></a>
+  </nav>
