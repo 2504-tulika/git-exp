@@ -1,0 +1,199 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ---- CSS Variables (Theme Colors) ---- */
+:root {
+  --primary: #c8626e;
+  --primary-light: rgba(200, 98, 110, 0.12);
+  --gold: #c48a35;
+  --gold-light: rgba(196, 138, 53, 0.12);
+  --teal: #2e8c87;
+  --teal-light: rgba(46, 140, 135, 0.12);
+  --amber: #c49a2e;
+  --amber-light: rgba(196, 154, 46, 0.12);
+  --danger: #d94f4f;
+  --danger-light: rgba(217, 79, 79, 0.12);
+  --success: #3a9c6a;
+  --success-light: rgba(58, 156, 106, 0.12);
+
+  --bg: #f7f4f0;
+  --bg-alt: #eee9e2;
+  --surface: #ffffff;
+  --border: #e5ddd3;
+  --border-dark: #d4cac0;
+
+  --text: #18120e;
+  --text-muted: #7a6b5e;
+  --text-light: #b0a090;
+
+  --sidebar-width: 260px;
+  --topbar-height: 62px;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 16px 56px rgba(0, 0, 0, 0.16);
+  --transition: 0.2s ease;
+
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/* ---- Dark Theme ---- */
+[data-theme="dark"] {
+  --bg: #100d0b;
+  --bg-alt: #1a1512;
+  --surface: #1f1a16;
+  --border: #332a22;
+  --border-dark: #4a3d32;
+  --text: #f5ede6;
+  --text-muted: #8c7a6a;
+  --text-light: #5a4a3a;
+  --primary-light: rgba(200, 98, 110, 0.15);
+  --gold-light: rgba(196, 138, 53, 0.15);
+  --teal-light: rgba(46, 140, 135, 0.15);
+  --amber-light: rgba(196, 154, 46, 0.15);
+  --danger-light: rgba(217, 79, 79, 0.15);
+  --success-light: rgba(58, 156, 106, 0.15);
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 15px;
+  transition: background var(--transition), color var(--transition);
+}
+
+a { text-decoration: none; color: inherit; cursor: pointer; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+ul { list-style: none; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 99px; }
+
+/* =============================================
+   SIDEBAR
+   ============================================= */
+
+#sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--text);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition);
+  overflow: hidden;
+}
+
+[data-theme="dark"] #sidebar { background: #0d0a08; }
+
+/* Brand Logo Area */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.4rem 1.1rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--primary), var(--gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(200, 98, 110, 0.4);
+}
+
+.brand-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.brand-tag {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 0.1rem;
+}
+
+/* Navigation Links */
+#sideNav {
+  flex: 1;
+  padding: 0.85rem 0.7rem;
+  overflow-y: auto;
+}
+
+.nav-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  padding: 0.25rem 0.65rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-label.mt { margin-top: 1.4rem; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.83rem;
+  margin-bottom: 0.1rem;
+  transition: all var(--transition);
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(200, 98, 110, 0.2), rgba(196, 138, 53, 0.1));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.nav-item .badge {
+  margin-left: auto;
+  background: rgba(200, 98, 110, 0.2);
+  color: var(--primary);
+}
+
+/* Category icon colors */
+.sk { color: #f4a0a0; }
+.mk { color: #d4a0e8; }
+.fr { color: #a0c8f4; }
+.hc { color: #a0e8c8; }
+.wl { color: #f4d4a0; }
