@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<!-- ===== SIDEBAR ===== -->
+<!-- Sidebar structure -->
 <aside id="sidebar">
 
   <div class="brand">
@@ -37,3 +37,25 @@
     <a class="nav-item cat-filter" data-cat="Haircare"><i class="fa-solid fa-scissors hc"></i> Haircare <span class="badge" id="badge-Haircare"></span></a>
     <a class="nav-item cat-filter" data-cat="Wellness"><i class="fa-solid fa-spa wl"></i> Wellness <span class="badge" id="badge-Wellness"></span></a>
   </nav>
+
+  <div class="side-stats">
+    <div class="ss"><span class="ss-v" id="sideTotal">—</span><span>Products</span></div>
+    <div class="ss-div"></div>
+    <div class="ss"><span class="ss-v danger" id="sideOut">—</span><span>Out</span></div>
+    <div class="ss-div"></div>
+    <div class="ss"><span class="ss-v warn" id="sideLow">—</span><span>Low</span></div>
+  </div>
+
+  <div class="side-foot" id="sideUserBtn">
+    <div class="av-wrap">
+      <div class="av">A</div>
+      <span class="dot-online"></span>
+    </div>
+    <div>
+      <span class="u-name">Admin User</span>
+      <span class="u-role">Store Manager</span>
+    </div>
+    <i class="fa-solid fa-ellipsis-vertical" style="color:rgba(255,255,255,.2); margin-left:auto; font-size:.75rem"></i>
+  </div>
+
+</aside>

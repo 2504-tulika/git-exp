@@ -1,7 +1,6 @@
-/* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-/* ---- CSS Variables (Theme Colors) ---- */
+/* Theme Colors */
 :root {
   --primary: #c8626e;
   --primary-light: rgba(200, 98, 110, 0.12);
@@ -57,7 +56,7 @@
   --success-light: rgba(58, 156, 106, 0.15);
 }
 
-/* ---- Reset ---- */
+/* To Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -82,9 +81,7 @@ ul { list-style: none; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 99px; }
 
-/* =============================================
-   SIDEBAR
-   ============================================= */
+/* SIDEBAR */
 
 #sidebar {
   width: var(--sidebar-width);
@@ -102,7 +99,7 @@ ul { list-style: none; }
 
 [data-theme="dark"] #sidebar { background: #0d0a08; }
 
-/* Brand Logo Area */
+/* Brand Logo */
 .brand {
   display: flex;
   align-items: center;
