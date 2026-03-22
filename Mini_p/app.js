@@ -38,6 +38,24 @@ const COLORS = {
 
 const CATS = ['Skincare', 'Makeup', 'Fragrance', 'Haircare', 'Wellness'];
 
+// ---- App State ----
+let products    = [];
+let nextId      = 200;
+let searchQuery = '';
+let activeCat   = 'all';
+let activeStock = 'all';
+let activeSort  = 'default';
+let isListMode  = false;
+let isCompact   = false;
+let confirmCb   = null;
+
+let profile = {
+  name:  'Admin',
+  role:  'Store Manager',
+  email: 'admin@novanest.com'
+};
+
+let notifications = [];
 // Helper Functions
 
 // Get element by ID
@@ -51,13 +69,26 @@ function setText(id, value) {
   if (elem) elem.textContent = value;
 }
 
+// Escape HTML to prevent XSS
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Format number with Indian locale (e.g. 1,23,456)
+function fmt(num) {
+  return Number(num).toLocaleString('en-IN');
+}
+
 // Save data to localStorage
 function save() {
   localStorage.setItem('nn_products', JSON.stringify(products));
   localStorage.setItem('nn_nextId', nextId);
   localStorage.setItem('nn_profile', JSON.stringify(profile));
 }
-
 
 async function init() {
   // Load saved data from localStorage
@@ -126,9 +157,7 @@ function renderAll() {
   updateBadges();
 }
 
-
 // ---- Notifications ----
-
 function buildNotifications() {
   notifications = [];
 
@@ -832,3 +861,255 @@ function toast(message, type = '') {
     setTimeout(() => div.remove(), 300);
   }, 3000);
 }
+
+// ---- Bind All Events ----
+
+function bindEvents() {
+
+  // Sidebar navigation links
+  document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      navigateTo(item.dataset.page);
+    });
+  });
+
+  // Category filter links in sidebar
+  document.querySelectorAll('.cat-filter').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      activeCat = item.dataset.cat;
+      document.querySelectorAll('.cat-filter').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      navigateTo('products');
+    });
+  });
+
+  // Any button with data-page attribute (not nav items)
+  document.querySelectorAll('[data-page]:not(.nav-item):not(.cat-filter)').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      navigateTo(btn.dataset.page);
+    });
+  });
+
+  // Card "All →" links
+  document.querySelectorAll('.card-lnk[data-page]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      navigateTo(link.dataset.page);
+    });
+  });
+
+  // Hamburger button (sidebar toggle)
+  el('bar')?.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      document.body.classList.toggle('sidebar-open');
+    } else {
+      document.body.classList.toggle('sb-collapsed');
+    }
+  });
+
+  // Search input
+  const searchInput = el('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim();
+      renderSearchDropdown(searchQuery.toLowerCase());
+      renderProducts();
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        el('searchResults').classList.remove('open');
+        searchInput.blur();
+      }
+    });
+  }
+
+  // Close search dropdown when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-box')) {
+      el('searchResults')?.classList.remove('open');
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    // Cmd/Ctrl + K to focus search
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      el('searchInput')?.focus();
+    }
+    // Escape to close modals and panels
+    if (e.key === 'Escape') {
+      closeAllPanels();
+      ['editModal', 'profileModal', 'confirmModal'].forEach(id => closeModal(id));
+    }
+  });
+
+  // Sort select
+  el('sortSelect')?.addEventListener('change', () => {
+    activeSort = el('sortSelect').value;
+    renderProducts();
+  });
+
+  // Stock filter chips
+  document.querySelectorAll('.chip[data-stock]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeStock = chip.dataset.stock;
+      document.querySelectorAll('.chip[data-stock]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderProducts();
+    });
+  });
+
+  // Grid / List view toggle
+  el('gridViewBtn')?.addEventListener('click', () => {
+    isListMode = false;
+    el('gridViewBtn').classList.add('active');
+    el('listViewBtn').classList.remove('active');
+    renderProducts();
+  });
+
+  el('listViewBtn')?.addEventListener('click', () => {
+    isListMode = true;
+    el('listViewBtn').classList.add('active');
+    el('gridViewBtn').classList.remove('active');
+    renderProducts();
+  });
+
+  // Notifications button
+  el('notifBtn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    togglePanel('notifPanel');
+  });
+
+  el('clearNotifsBtn')?.addEventListener('click', () => {
+    notifications.forEach(n => n.unread = false);
+    renderNotifications();
+  });
+
+  // Settings button
+  el('settingsBtn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    togglePanel('settingsPanel');
+  });
+
+  // Admin profile button
+  el('adminPill')?.addEventListener('click', e => {
+    e.stopPropagation();
+    togglePanel('adminDropdown');
+  });
+
+  // Close panels when overlay is clicked
+  el('overlay')?.addEventListener('click', closeAllPanels);
+
+  // Dark mode toggle
+  el('darkToggle')?.addEventListener('change', function () {
+    const isDark = this.checked;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('nn_dark', isDark ? '1' : '0');
+  });
+
+  // Compact cards toggle
+  el('compactToggle')?.addEventListener('change', function () {
+    isCompact = this.checked;
+    renderProducts();
+  });
+
+  // Reset demo data
+  el('resetDataBtn')?.addEventListener('click', () => {
+    setText('confirmMsg', 'Reset all data to demo? All custom products will be lost.');
+    confirmCb = () => {
+      products = JSON.parse(JSON.stringify(PRODUCTS_DEFAULT));
+      nextId   = 200;
+      save();
+      buildNotifications();
+      renderAll();
+      toast('Data reset to demo.', 'warn');
+    };
+    openModal('confirmModal');
+    closeAllPanels();
+  });
+
+  // Edit Profile
+  el('editProfileBtn')?.addEventListener('click', () => {
+    el('pName').value  = profile.name;
+    el('pRole').value  = profile.role;
+    el('pEmail').value = profile.email;
+    el('modalAvatar').textContent = (profile.name || 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    openModal('profileModal');
+    closeAllPanels();
+  });
+
+  el('saveProfileBtn')?.addEventListener('click', () => {
+    profile.name  = el('pName').value.trim()  || profile.name;
+    profile.role  = el('pRole').value.trim()  || profile.role;
+    profile.email = el('pEmail').value.trim() || profile.email;
+    save();
+    loadProfile();
+    closeModal('profileModal');
+    toast('Profile updated!', 'success');
+  });
+
+  ['closeProfileBtn', 'cancelProfileBtn'].forEach(id => {
+    el(id)?.addEventListener('click', () => closeModal('profileModal'));
+  });
+
+  // Edit Product modal
+  el('saveEditBtn')?.addEventListener('click', saveEdit);
+  ['closeEditBtn', 'cancelEditBtn'].forEach(id => {
+    el(id)?.addEventListener('click', () => closeModal('editModal'));
+  });
+
+  // Confirm modal
+  el('confirmOkBtn')?.addEventListener('click', () => {
+    if (confirmCb) { confirmCb(); confirmCb = null; }
+    closeModal('confirmModal');
+  });
+
+  el('confirmCancelBtn')?.addEventListener('click', () => {
+    confirmCb = null;
+    closeModal('confirmModal');
+  });
+
+  // Add product form
+  el('submitProduct')?.addEventListener('click', submitProduct);
+  el('clearFormBtn')?.addEventListener('click', clearForm);
+
+  ['fName', 'fCategory', 'fBrand', 'fPrice', 'fStock', 'fImage'].forEach(id => {
+    el(id)?.addEventListener('input', updatePreview);
+  });
+
+  // Export CSV buttons
+  ['exportCsvBtn', 'exportCsvBtn2', 'analyticsExportBtn'].forEach(id => {
+    el(id)?.addEventListener('click', exportCSV);
+  });
+
+  // Currency change
+  el('currencySelect')?.addEventListener('change', function () {
+    setText('currencySymbol', this.value);
+    renderAll();
+  });
+
+  // Sign out
+  el('ddSignOut')?.addEventListener('click', () => {
+    setText('confirmMsg', 'Sign out of NovaNest?');
+    confirmCb = () => toast('Signed out. (Demo only)', 'warn');
+    openModal('confirmModal');
+    closeAllPanels();
+  });
+}
+
+// Expose functions used in inline onclick handlers on product cards
+window.openEdit     = openEdit;
+window.confirmDelete = confirmDelete;
+window.markNotifRead = markNotifRead;
+window.navigateTo   = navigateTo;
+window.closeAllPanels = closeAllPanels;
+window.searchGoTo   = searchGoTo;
+window.clearFilters = clearFilters;
+
+// Start the app
+document.addEventListener('DOMContentLoaded', init);
