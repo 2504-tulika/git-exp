@@ -1,4 +1,4 @@
-package Java.session1.OOP;
+package Java.session1.Strings;
 
 import java.util.Scanner;
 
