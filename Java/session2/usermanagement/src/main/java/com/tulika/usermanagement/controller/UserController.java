@@ -45,4 +45,11 @@ public class UserController {
     public String sendNotification(@RequestParam("message") String message) {
         return userService.triggerNotification(message);
     }
+
+    // Dynamic Message API
+    @GetMapping("/message")
+    public String getMessage(@RequestParam String type,
+                             @RequestParam String message) {
+        return userService.getFormattedMessage(type, message);
+    }
 }
