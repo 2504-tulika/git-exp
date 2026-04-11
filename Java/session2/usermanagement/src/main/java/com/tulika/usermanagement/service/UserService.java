@@ -3,6 +3,7 @@ package com.tulika.usermanagement.service;
 import com.tulika.usermanagement.model.User;
 import com.tulika.usermanagement.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.tulika.usermanagement.component.NotificationComponent;
 
 import java.util.List;
 
@@ -11,12 +12,13 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-
+    private final NotificationComponent notificationComponent;
     // Constructor Injection
     // Spring will automatically inject UserRepository here
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, NotificationComponent notificationComponent) {
         this.userRepository = userRepository;
+        this.notificationComponent = notificationComponent;
     }
 
     // Get all users
@@ -32,5 +34,11 @@ public class UserService {
     //Get user by ID
     public User getUserById(int id) {
         return userRepository.getUserById(id);
+    }
+
+    //Trigger notification
+
+    public String triggerNotification(String message) {
+        return notificationComponent.sendNotification(message);
     }
 }

@@ -38,4 +38,11 @@ public class UserController {
     public User getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
+
+    //API to trigger notification
+
+    @PostMapping("/notify")
+    public String sendNotification(@RequestParam("message") String message) {
+        return userService.triggerNotification(message);
+    }
 }
