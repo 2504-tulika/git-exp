@@ -1,6 +1,7 @@
 package com.tulika.usermanagement.service;
 
 import com.tulika.usermanagement.component.MessageFormatter;
+import com.tulika.usermanagement.exception.UserNotFoundException;
 import com.tulika.usermanagement.model.User;
 import com.tulika.usermanagement.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,13 @@ public class UserService {
 
     //Get user by ID
     public User getUserById(int id) {
-        return userRepository.getUserById(id);
+        User user = userRepository.getUserById(id);
+
+        if (user == null) {
+            throw new UserNotFoundException("User with ID " + id + " not found");
+        }
+
+        return user;
     }
 
     //Trigger notification
