@@ -34,4 +34,12 @@ public class UserController {
         userService.addUser(user);
         return "User added successfully";
     }
+
+    @DeleteMapping("/delete/{id}")
+    public String deleteUser(
+            @PathVariable int id,
+            @RequestParam boolean confirm
+    ) {
+        return userService.deleteUser(id, confirm);
+    }
 }
