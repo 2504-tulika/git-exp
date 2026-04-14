@@ -1,13 +1,13 @@
-package com.tulika.UserManagementV2;
+package com.tulika.usermanagementv2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UserManagementV2Application {
+public class Usermanagementv2Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UserManagementV2Application.class, args);
+		SpringApplication.run(Usermanagementv2Application.class, args);
 	}
 
 }
