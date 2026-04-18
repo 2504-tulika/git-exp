@@ -1,9 +1,9 @@
+package com.tulika.todoapp.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import com.tulika.todoapp.entity.Status;
 
 public class TodoDTO {
-
     @NotNull
     @Size(min = 3, message = "Title must be at least 3 characters")
     private String title;
