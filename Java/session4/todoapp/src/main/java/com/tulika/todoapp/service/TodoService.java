@@ -62,6 +62,14 @@ public class TodoService {
         todoRepository.delete(todo);
     }
 
+    public TodoDTO convertToDTO(Todo todo) {
+        TodoDTO dto = new TodoDTO();
+        dto.setTitle(todo.getTitle());
+        dto.setDescription(todo.getDescription());
+        dto.setStatus(todo.getStatus());
+        return dto;
+    }
+
     // BUSINESS RULE
     private void validateStatusTransition(Status oldStatus, Status newStatus) {
         if ((oldStatus == Status.PENDING && newStatus == Status.COMPLETED) ||
