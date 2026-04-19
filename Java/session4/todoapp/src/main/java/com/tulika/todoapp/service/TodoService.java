@@ -7,12 +7,14 @@ import com.tulika.todoapp.dto.TodoDTO;
 import com.tulika.todoapp.entity.Todo;
 import com.tulika.todoapp.entity.Status;
 import com.tulika.todoapp.repository.TodoRepository;
+import com.tulika.todoapp.client.NotificationServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @Service
 public class TodoService {
-
+    private final NotificationServiceClient notificationServiceClient;
     private final TodoRepository todoRepository;
     private Todo getTodoEntityById(Long id) {
         return todoRepository.findById(id)
@@ -20,11 +22,14 @@ public class TodoService {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
-    // Constructor Injection (best practice)
-    public TodoService(TodoRepository todoRepository) {
-        this.todoRepository = todoRepository;
-    }
 
+    // Constructor Injection (best practice)
+
+    public TodoService(TodoRepository todoRepository,
+                       NotificationServiceClient notificationServiceClient) {
+        this.todoRepository = todoRepository;
+        this.notificationServiceClient = notificationServiceClient;
+    }
     // CREATE
     public TodoDTO createTodo(TodoDTO dto) {
         Todo todo = new Todo();
@@ -35,11 +40,14 @@ public class TodoService {
         todo.setCreatedAt(LocalDateTime.now());
 
         Todo saved = todoRepository.save(todo);
+        notificationServiceClient.sendNotification("New TODO created: " + dto.getTitle());
         return convertToDTO(saved);
+
     }
 
     // READ ALL
     public List<TodoDTO> getAllTodos() {
+        logger.info("Fetching all TODOs");
         return todoRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
@@ -48,7 +56,7 @@ public class TodoService {
 
     // READ BY ID
     public TodoDTO getTodoById(Long id) {
-        logger.info("Fetching all TODOs");
+        logger.info("Fetching TODO with id: {}", id);
         return convertToDTO(getTodoEntityById(id));
     }
 
