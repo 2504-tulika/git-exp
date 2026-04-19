@@ -1,7 +1,7 @@
 # Todo Management System 
 
 ---
-## Session 4 --
+## Session 4 -
 ## 1. Project Overview
 
 This project is a RESTful Todo Management API built using Spring Boot, designed with a strong focus on **clean architecture, data validation, and controlled business logic**.
@@ -183,4 +183,141 @@ http://localhost:8081/h2-console
 * Strong validation and error handling
 * Business rule enforcement for state transitions
 * Fully tested REST APIs
+
+## Session 5: Advanced Enhancements (Logging, External Integration & Testing)
+
+### 1. Overview
+
+In this phase, the application was enhanced with production-level practices including structured logging, external service integration, and unit testing. These improvements ensure better observability, modularity, and reliability of the system.
+
+---
+
+### 2. Logging Implementation
+
+Structured logging was implemented in the Service layer using SLF4J to track application behavior and improve debugging.
+
+#### Key Highlights:
+
+* Logger initialized using:
+
+```java
+private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
+```
+
+* Logs added for key operations:
+
+```java
+logger.info("Creating new TODO with title: {}", dto.getTitle());
+logger.info("Fetching TODO with id: {}", id);
+logger.info("Updating TODO with id: {}", id);
+logger.info("Deleting TODO with id: {}", id);
+```
+
+#### Benefits:
+
+* Improves debugging and traceability
+* Provides runtime visibility into application flow
+* Follows production-level logging practices
+
+---
+
+### 3. External Service Integration (Notification Client)
+
+A simulated external service was introduced to demonstrate backend communication with external systems.
+
+#### Implementation:
+
+* Created a client:
+
+```java
+NotificationServiceClient
+```
+
+* Injected using constructor injection:
+
+```java
+private final NotificationServiceClient notificationServiceClient;
+```
+
+* Triggered during TODO creation:
+
+```java
+notificationServiceClient.sendNotification("New TODO created: " + dto.getTitle());
+```
+
+#### Purpose:
+
+* Demonstrates microservice communication pattern
+* Keeps external concerns separate from business logic
+* Follows Dependency Injection principles
+
+#### Benefits:
+
+* Improves modularity and extensibility
+* Easily replaceable with real APIs (Email, SMS, etc.)
+
+---
+
+### 4. Unit Testing (JUnit + Mockito)
+
+Unit tests were implemented to validate business logic in isolation without relying on database or external services.
+
+#### Tools Used:
+
+* JUnit 5
+* Mockito
+
+#### Key Concepts Applied:
+
+* Mocking dependencies:
+
+```java
+@Mock
+private TodoRepository todoRepository;
+```
+
+* Injecting mocks:
+
+```java
+todoService = new TodoService(todoRepository, notificationServiceClient);
+```
+
+* Stubbing behavior:
+
+```java
+when(todoRepository.findById(1L))
+        .thenReturn(Optional.of(todo));
+```
+
+* Assertions:
+
+```java
+assertEquals("Test", result.getTitle());
+```
+
+* Verifying interactions:
+
+```java
+verify(todoRepository, times(1)).delete(todo);
+```
+
+---
+
+### 5. Test Coverage
+
+The following scenarios were tested:
+
+* Get TODO by ID → verifies correct data retrieval and DTO mapping
+* Delete TODO → ensures repository delete operation is invoked
+* Invalid Status Transition → validates business rule enforcement and exception handling
+
+---
+
+### 6. Key Learning Outcomes
+
+* Implemented structured logging for better debugging
+* Understood external service integration patterns
+* Applied unit testing with mocking for isolated testing
+* Improved code reliability and maintainability
+
 
