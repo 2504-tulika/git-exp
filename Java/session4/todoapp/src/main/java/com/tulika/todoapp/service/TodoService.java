@@ -7,6 +7,8 @@ import com.tulika.todoapp.dto.TodoDTO;
 import com.tulika.todoapp.entity.Todo;
 import com.tulika.todoapp.entity.Status;
 import com.tulika.todoapp.repository.TodoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class TodoService {
@@ -17,6 +19,7 @@ public class TodoService {
                 .orElseThrow(() -> new RuntimeException("Todo not found"));
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
     // Constructor Injection (best practice)
     public TodoService(TodoRepository todoRepository) {
         this.todoRepository = todoRepository;
@@ -25,7 +28,7 @@ public class TodoService {
     // CREATE
     public TodoDTO createTodo(TodoDTO dto) {
         Todo todo = new Todo();
-
+        logger.info("Creating new TODO with title: {}", dto.getTitle());
         todo.setTitle(dto.getTitle());
         todo.setDescription(dto.getDescription());
         todo.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.PENDING);
@@ -45,13 +48,14 @@ public class TodoService {
 
     // READ BY ID
     public TodoDTO getTodoById(Long id) {
+        logger.info("Fetching all TODOs");
         return convertToDTO(getTodoEntityById(id));
     }
 
     // UPDATE
     public TodoDTO updateTodo(Long id, TodoDTO dto) {
         Todo todo = getTodoEntityById(id); // FIXED
-
+        logger.info("Updating TODO with id: {}", id);
         if (dto.getStatus() != null) {
             validateStatusTransition(todo.getStatus(), dto.getStatus());
             todo.setStatus(dto.getStatus());
@@ -66,6 +70,7 @@ public class TodoService {
 
     // DELETE
     public void deleteTodo(Long id) {
+        logger.info("Deleting TODO with id: {}", id);
         Todo todo = getTodoEntityById(id); // FIXED
         todoRepository.delete(todo);
     }
