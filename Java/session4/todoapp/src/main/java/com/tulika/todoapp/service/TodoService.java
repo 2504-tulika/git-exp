@@ -12,6 +12,10 @@ import com.tulika.todoapp.repository.TodoRepository;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private Todo getTodoEntityById(Long id) {
+        return todoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Todo not found"));
+    }
 
     // Constructor Injection (best practice)
     public TodoService(TodoRepository todoRepository) {
@@ -19,7 +23,7 @@ public class TodoService {
     }
 
     // CREATE
-    public Todo createTodo(TodoDTO dto) {
+    public TodoDTO createTodo(TodoDTO dto) {
         Todo todo = new Todo();
 
         todo.setTitle(dto.getTitle());
@@ -27,23 +31,26 @@ public class TodoService {
         todo.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.PENDING);
         todo.setCreatedAt(LocalDateTime.now());
 
-        return todoRepository.save(todo);
+        Todo saved = todoRepository.save(todo);
+        return convertToDTO(saved);
     }
 
     // READ ALL
-    public List<Todo> getAllTodos() {
-        return todoRepository.findAll();
+    public List<TodoDTO> getAllTodos() {
+        return todoRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     // READ BY ID
-    public Todo getTodoById(Long id) {
-        return todoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found"));
+    public TodoDTO getTodoById(Long id) {
+        return convertToDTO(getTodoEntityById(id));
     }
 
     // UPDATE
-    public Todo updateTodo(Long id, TodoDTO dto) {
-        Todo todo = getTodoById(id);
+    public TodoDTO updateTodo(Long id, TodoDTO dto) {
+        Todo todo = getTodoEntityById(id); // FIXED
 
         if (dto.getStatus() != null) {
             validateStatusTransition(todo.getStatus(), dto.getStatus());
@@ -53,17 +60,20 @@ public class TodoService {
         todo.setTitle(dto.getTitle());
         todo.setDescription(dto.getDescription());
 
-        return todoRepository.save(todo);
+        Todo updated = todoRepository.save(todo);
+        return convertToDTO(updated);
     }
 
     // DELETE
     public void deleteTodo(Long id) {
-        Todo todo = getTodoById(id);
+        Todo todo = getTodoEntityById(id); // FIXED
         todoRepository.delete(todo);
     }
 
     public TodoDTO convertToDTO(Todo todo) {
         TodoDTO dto = new TodoDTO();
+
+        dto.setId(todo.getId());
         dto.setTitle(todo.getTitle());
         dto.setDescription(todo.getDescription());
         dto.setStatus(todo.getStatus());
