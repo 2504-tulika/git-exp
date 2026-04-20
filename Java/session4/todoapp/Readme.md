@@ -1,7 +1,7 @@
 # Todo Management System 
 
 ---
-## Session 4 -
+## Session 4 - Spring Advance(ToDo Application)
 ## 1. Project Overview
 
 This project is a RESTful Todo Management API built using Spring Boot, designed with a strong focus on **clean architecture, data validation, and controlled business logic**.
@@ -110,7 +110,7 @@ The application follows a **Layered Architecture**, ensuring separation of conce
 
 ## 6. Testing & Verification
 
-All APIs were thoroughly tested using Postman to ensure correctness and reliability.
+All APIs were thoroughly tested using Postman and validated through automated unit and controller tests to ensure correctness and reliability.
 
 ### Test Scenarios Covered
 
@@ -183,6 +183,7 @@ http://localhost:8081/h2-console
 * Strong validation and error handling
 * Business rule enforcement for state transitions
 * Fully tested REST APIs
+--- 
 
 ## Session 5: Advanced Enhancements (Logging, External Integration & Testing)
 
@@ -305,13 +306,79 @@ verify(todoRepository, times(1)).delete(todo);
 
 ### 5. Test Coverage
 
-The following scenarios were tested:
-
-* Get TODO by ID → verifies correct data retrieval and DTO mapping
-* Delete TODO → ensures repository delete operation is invoked
-* Invalid Status Transition → validates business rule enforcement and exception handling
+| Test File                 | Layer            | Purpose                                                  | Key Scenarios Covered                                                                                                                                         | Tools Used                |
+| ------------------------- | ---------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `TodoServiceTest.java`    | Service Layer    | Validates business logic independently of Spring context | - Fetch TODO by ID<br>- Create TODO<br>- Update TODO (valid & invalid transitions)<br>- Delete TODO<br>- Get all TODOs<br>- Notification trigger verification | JUnit 5, Mockito          |
+| `TodoControllerTest.java` | Controller Layer | Tests REST API endpoints and HTTP behavior               | - Create TODO (201 Created)<br>- Get all TODOs<br>- Get TODO by ID<br>- Delete TODO<br>- Request/Response validation<br>- JSON request handling               | Spring Boot Test, MockMvc |
 
 ---
+### Service Layer Testing (`TodoServiceTest`)
+
+The service layer is tested in isolation using **Mockito**, ensuring that business logic works correctly without relying on the database or Spring Boot context.
+
+#### Key Highlights:
+- Mocked `TodoRepository` to simulate database interactions  
+- Mocked `NotificationServiceClient` to verify external integration  
+- Validated status transition rules (**PENDING ↔ COMPLETED**)  
+- Ensured correct behavior for:
+  - Create  
+  - Read  
+  - Update  
+  - Delete  
+- Verified that notifications are triggered on TODO creation  
+
+#### Example Assertions:
+- Ensures correct title mapping in DTO  
+- Verifies repository interaction (`save`, `delete`)  
+- Validates exception handling for invalid updates  
+
+---
+
+### Controller Layer Testing (`TodoControllerTest`)
+
+The controller layer is tested using **MockMvc**, which simulates HTTP requests and validates API responses without starting a real server.
+
+#### Key Highlights:
+- Full API testing using simulated HTTP calls  
+- Validates correct HTTP status codes:
+  - **201 CREATED** for POST  
+  - **200 OK** for GET  
+  - **204 NO CONTENT / 200 OK** for DELETE  
+- Tests JSON request/response structure  
+- Ensures correct routing and endpoint behavior  
+
+#### Example Scenarios:
+- Sending POST request with JSON body and verifying response  
+- Fetching all TODOs via GET endpoint  
+- Deleting TODO and validating response  
+- Handling path variables (`/todos/{id}`)  
+
+---
+
+### Combined Testing Strategy
+
+The project follows a **layered testing approach**:
+
+- **Service Tests** → Focus on business logic correctness  
+- **Controller Tests** → Focus on API contract and HTTP behavior  
+
+This ensures:
+
+- High confidence in both internal logic and external API reliability  
+- Clear separation of concerns during testing
+  
+---  
+#### ✔ Test Results
+
+All test cases were executed successfully:
+
+- Total Tests: 12+
+- Failures: 0
+- Build Status: **SUCCESS**
+
+This confirms the correctness of both business logic and API behavior.
+
+--- 
 
 ### 6. Key Learning Outcomes
 
