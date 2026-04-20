@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.tulika.todoapp.dto.TodoDTO;
 import com.tulika.todoapp.entity.Todo;
@@ -24,7 +25,10 @@ public class TodoController {
     @PostMapping
     public ResponseEntity<TodoDTO> create(@Valid @RequestBody TodoDTO dto) {
         logger.info("Received request to create TODO");
-        return ResponseEntity.ok(todoService.createTodo(dto));
+
+        TodoDTO created = todoService.createTodo(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
