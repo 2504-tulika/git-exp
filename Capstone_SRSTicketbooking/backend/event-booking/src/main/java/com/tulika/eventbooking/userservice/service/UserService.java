@@ -1,9 +1,12 @@
 package com.tulika.eventbooking.userservice.service;
 
+import com.tulika.eventbooking.userservice.dto.LoginRequest;
+import com.tulika.eventbooking.userservice.dto.LoginResponse;
 import com.tulika.eventbooking.userservice.dto.RegisterRequest;
 import com.tulika.eventbooking.userservice.dto.UserResponse;
 import com.tulika.eventbooking.userservice.model.User;
 import com.tulika.eventbooking.userservice.repository.UserRepository;
+import com.tulika.eventbooking.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,10 +19,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public UserResponse registerUser(RegisterRequest request) {
@@ -45,5 +52,23 @@ public class UserService {
                 savedUser.getPhone(),
                 savedUser.getRole().name()
         );
+    }
+
+    public LoginResponse loginUser(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    logger.warn("Login failed - email not found: {}", request.getEmail());
+                    return new RuntimeException("Invalid email or password");
+                });
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.warn("Login failed - wrong password for: {}", request.getEmail());
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        logger.info("User logged in successfully: {} | role: {}", user.getEmail(), user.getRole());
+
+        return new LoginResponse(token, user.getEmail(), user.getName(), user.getRole().name());
     }
 }
