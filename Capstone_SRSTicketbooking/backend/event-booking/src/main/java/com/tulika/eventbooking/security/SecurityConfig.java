@@ -2,6 +2,7 @@ package com.tulika.eventbooking.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -33,16 +35,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // public endpoints - no token needed
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        // organizer only endpoints
-                        .requestMatchers("/api/events/create").hasRole("ORGANIZER")
-                        .requestMatchers("/api/events/my-events").hasRole("ORGANIZER")
-                        // customer only endpoints
-                        .requestMatchers("/api/bookings/**").hasRole("CUSTOMER")
-                        // both roles can access these
-                        .requestMatchers("/api/events/**").authenticated()
-                        // everything else needs authentication
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
