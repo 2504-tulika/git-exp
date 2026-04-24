@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — EventHive</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+    <!-- LEFT SIDE — branding panel -->
+    <div class="auth-left">
+        <div class="auth-brand">Event<span>Hive</span></div>
+        <p class="auth-tagline">
+            Your one-stop platform for discovering and booking amazing events near you.
+        </p>
+
+        <div class="auth-features">
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">🎟️</div>
+                <span>Book tickets for events instantly</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">📅</div>
+                <span>Manage your bookings in one place</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">🎤</div>
+                <span>Organizers can create and manage events</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">🔒</div>
+                <span>Secure and seamless experience</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE — login form -->
+    <div class="auth-right">
+        <div class="auth-form-container">
+
+            <h2 class="auth-form-title">Welcome back!</h2>
+            <p class="auth-form-subtitle">Login to your EventHive account</p>
+
+            <div class="auth-form-box">
+
+                <!-- error/success messages -->
+                <div id="alertBox" class="alert alert-error"></div>
+
+                <!-- email -->
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input
+                            type="email"
+                            id="email"
+                            class="form-control"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                    />
+                </div>
+
+                <!-- password -->
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-with-toggle">
+                        <input
+                                type="password"
+                                id="password"
+                                class="form-control"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                        />
+                        <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                    </div>
+                </div>
+
+                <!-- login button -->
+                <button
+                        id="loginBtn"
+                        class="btn btn-primary btn-full mt-10"
+                        onclick="handleLogin()"
+                >
+                    Login
+                </button>
+
+            </div>
+
+            <!-- link to register -->
+            <div class="auth-bottom-link">
+                Don't have an account?
+                <a href="register.html">Register here</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+
+    // redirect away if already logged in
+    redirectIfLoggedIn();
+
+    // show/hide password
+    function togglePassword() {
+        const input = document.getElementById("password");
+        input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // handle login form submit
+    async function handleLogin() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        // basic client side validation
+        if (!email || !password) {
+            showAlert("alertBox", "Please fill in all fields.", "error");
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            showAlert("alertBox", "Please enter a valid email address.", "error");
+            return;
+        }
+
+        setButtonLoading("loginBtn", "Logging in...");
+
+        try {
+            const response = await loginUser(email, password);
+
+            if (response._status === 200) {
+                // save token and user info
+                saveUserSession(
+                    response.token,
+                    response.email,
+                    response.name,
+                    response.role
+                );
+
+                // redirect based on role
+                if (response.role === "ORGANIZER") {
+                    window.location.href = "pages/organizer/dashboard.html";
+                } else {
+                    window.location.href = "pages/customer/home.html";
+                }
+
+            } else {
+                showAlert("alertBox", response.message || "Invalid email or password.", "error");
+                resetButton("loginBtn");
+            }
+
+        } catch (error) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+            resetButton("loginBtn");
+        }
+    }
+
+    // allow pressing Enter key to submit
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") handleLogin();
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — EventHive</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+    <!-- LEFT SIDE — branding panel -->
+    <div class="auth-left">
+        <div class="auth-brand">Event<span>Hive</span></div>
+        <p class="auth-tagline">
+            Join thousands of event lovers and organizers on EventHive today.
+        </p>
+
+        <div class="auth-features">
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">🎟️</div>
+                <span>Browse and book tickets easily</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">📊</div>
+                <span>Organizers get a powerful dashboard</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">💳</div>
+                <span>Safe and secure payments</span>
+            </div>
+            <div class="auth-feature-item">
+                <div class="auth-feature-icon">📱</div>
+                <span>Access your tickets anytime</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE — register form -->
+    <div class="auth-right">
+        <div class="auth-form-container">
+
+            <h2 class="auth-form-title">Create an account</h2>
+            <p class="auth-form-subtitle">Fill in the details below to get started</p>
+
+            <div class="auth-form-box">
+
+                <!-- error/success messages -->
+                <div id="alertBox" class="alert alert-error"></div>
+
+                <!-- role selector -->
+                <div class="role-selector">
+                    <div class="role-option selected" id="roleCustomer" onclick="selectRole('CUSTOMER')">
+                        <div class="role-option-icon">🎟️</div>
+                        <div class="role-option-label">Customer</div>
+                        <div class="role-option-desc">Browse & book events</div>
+                    </div>
+                    <div class="role-option" id="roleOrganizer" onclick="selectRole('ORGANIZER')">
+                        <div class="role-option-icon">🎤</div>
+                        <div class="role-option-label">Organizer</div>
+                        <div class="role-option-desc">Create & manage events</div>
+                    </div>
+                </div>
+
+                <!-- hidden role input -->
+                <input type="hidden" id="selectedRole" value="CUSTOMER" />
+
+                <!-- full name -->
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            placeholder="Your full name"
+                            autocomplete="name"
+                    />
+                </div>
+
+                <!-- email -->
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input
+                            type="email"
+                            id="email"
+                            class="form-control"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                    />
+                </div>
+
+                <!-- phone -->
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input
+                            type="tel"
+                            id="phone"
+                            class="form-control"
+                            placeholder="10-digit mobile number"
+                            maxlength="10"
+                    />
+                </div>
+
+                <!-- password -->
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-with-toggle">
+                        <input
+                                type="password"
+                                id="password"
+                                class="form-control"
+                                placeholder="8-12 chars, 1 uppercase, 1 special char"
+                                autocomplete="new-password"
+                                oninput="checkPasswordStrength()"
+                        />
+                        <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                    </div>
+                    <!-- password strength indicator -->
+                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                        <div class="strength-bar" id="strengthBar"></div>
+                        <span class="strength-text" id="strengthText"></span>
+                    </div>
+                </div>
+
+                <!-- register button -->
+                <button
+                        id="registerBtn"
+                        class="btn btn-primary btn-full mt-10"
+                        onclick="handleRegister()"
+                >
+                    Create Account
+                </button>
+
+            </div>
+
+            <!-- link to login -->
+            <div class="auth-bottom-link">
+                Already have an account?
+                <a href="login.html">Login here</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+
+    // redirect away if already logged in
+    redirectIfLoggedIn();
+
+    // track selected role
+    let selectedRole = "CUSTOMER";
+
+    // highlight the selected role card
+    function selectRole(role) {
+        selectedRole = role;
+        document.getElementById("selectedRole").value = role;
+
+        document.getElementById("roleCustomer").classList.remove("selected");
+        document.getElementById("roleOrganizer").classList.remove("selected");
+
+        if (role === "CUSTOMER") {
+            document.getElementById("roleCustomer").classList.add("selected");
+        } else {
+            document.getElementById("roleOrganizer").classList.add("selected");
+        }
+    }
+
+    // show/hide password
+    function togglePassword() {
+        const input = document.getElementById("password");
+        input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // live password strength indicator
+    function checkPasswordStrength() {
+        const password = document.getElementById("password").value;
+        const strengthDiv = document.getElementById("passwordStrength");
+        const bar = document.getElementById("strengthBar");
+        const text = document.getElementById("strengthText");
+
+        if (password.length === 0) {
+            strengthDiv.style.display = "none";
+            return;
+        }
+
+        strengthDiv.style.display = "block";
+        const strength = getPasswordStrength(password);
+
+        bar.className = "strength-bar " + strength;
+        text.className = "strength-text " + strength;
+
+        const labels = {
+            weak: "Weak password",
+            medium: "Medium strength",
+            strong: "Strong password"
+        };
+        text.textContent = labels[strength];
+    }
+
+    // handle register form submit
+    async function handleRegister() {
+        const name     = document.getElementById("name").value.trim();
+        const email    = document.getElementById("email").value.trim();
+        const phone    = document.getElementById("phone").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const role     = selectedRole;
+
+        // client side validation
+        if (!name || !email || !phone || !password) {
+            showAlert("alertBox", "Please fill in all fields.", "error");
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            showAlert("alertBox", "Please enter a valid email address.", "error");
+            return;
+        }
+
+        if (!/^\d{10}$/.test(phone)) {
+            showAlert("alertBox", "Phone number must be exactly 10 digits.", "error");
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            showAlert("alertBox",
+                "Password must be 8-12 characters with at least one uppercase letter and one special character (@#$%^&+=!).",
+                "error"
+            );
+            return;
+        }
+
+        setButtonLoading("registerBtn", "Creating account...");
+
+        try {
+            const response = await registerUser(name, email, password, phone, role);
+
+            if (response._status === 201) {
+                showAlert("alertBox", "Account created successfully! Redirecting to login...", "success");
+
+                // wait 1.5 seconds then redirect to login
+                setTimeout(function () {
+                    window.location.href = "login.html";
+                }, 1500);
+
+            } else {
+                showAlert("alertBox", response.message || "Registration failed. Please try again.", "error");
+                resetButton("registerBtn");
+            }
+
+        } catch (error) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+            resetButton("registerBtn");
+        }
+    }
+
+    // allow pressing Enter key to submit
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") handleRegister();
+    });
+
+</script>
+
+</body>
+</html>
