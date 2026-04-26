@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.tulika.eventbooking.eventservice.dto.CapacityRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,53 @@ public class EventController {
             Map<String, String> error = new HashMap<>();
             error.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+    }
+
+    // ORGANIZER — update event details
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<?> updateEvent(@PathVariable Long id,
+                                         @Valid @RequestBody EventRequest request,
+                                         @AuthenticationPrincipal String organizerEmail) {
+        try {
+            EventResponse response = eventService.updateEvent(id, request, organizerEmail);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    // ORGANIZER — update event capacity only
+    @PutMapping("/{id}/capacity")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<?> updateCapacity(@PathVariable Long id,
+                                            @Valid @RequestBody CapacityRequest request,
+                                            @AuthenticationPrincipal String organizerEmail) {
+        try {
+            EventResponse response = eventService.updateCapacity(id, request.getNewTotalSeats(), organizerEmail);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    // ORGANIZER — cancel event
+    @PutMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<?> cancelEvent(@PathVariable Long id,
+                                         @AuthenticationPrincipal String organizerEmail) {
+        try {
+            EventResponse response = eventService.cancelEvent(id, organizerEmail);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 }
