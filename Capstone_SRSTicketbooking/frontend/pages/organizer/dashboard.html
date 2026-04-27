@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — EventHive</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .dashboard-wrapper {
+            max-width: 1100px;
+            margin: 36px auto;
+            padding: 0 24px;
+        }
+
+        /* stats row at top */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 22px 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            border-left: 4px solid #e94560;
+        }
+
+        .stat-card.blue   { border-left-color: #0f3460; }
+        .stat-card.green  { border-left-color: #28a745; }
+        .stat-card.yellow { border-left-color: #ffc107; }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        /* section header with action button */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        /* event row in table */
+        .event-name-cell {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .event-name-cell small {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* seats progress bar */
+        .seats-bar-wrap {
+            width: 120px;
+        }
+
+        .seats-bar-track {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .seats-bar-fill {
+            height: 100%;
+            background: #28a745;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .seats-bar-fill.low  { background: #dc3545; }
+        .seats-bar-fill.mid  { background: #ffc107; }
+
+        .seats-text {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* action buttons in table */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- navbar injected here -->
+
+<div class="dashboard-wrapper">
+
+    <div class="page-header" style="border-radius: 10px; margin-bottom: 28px;">
+        <h1>Organizer Dashboard</h1>
+        <p id="welcomeMsg">Manage your events and track bookings</p>
+    </div>
+
+    <!-- alert box -->
+    <div id="alertBox" class="alert"></div>
+
+    <!-- loader -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>Loading your dashboard...</p>
+    </div>
+
+    <!-- main content hidden until loaded -->
+    <div id="mainContent" style="display:none;">
+
+        <!-- STATS ROW -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Events</div>
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-sub">created by you</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-label">Active Events</div>
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-sub">currently live</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Total Seats</div>
+                <div class="stat-value" id="statSeats">0</div>
+                <div class="stat-sub">across all events</div>
+            </div>
+            <div class="stat-card yellow">
+                <div class="stat-label">Cancelled</div>
+                <div class="stat-value" id="statCancelled">0</div>
+                <div class="stat-sub">events cancelled</div>
+            </div>
+        </div>
+
+        <!-- EVENTS TABLE -->
+        <div class="section-header">
+            <h2>Your Events</h2>
+            <a href="create-event.html" class="btn btn-primary btn-sm">+ Create New Event</a>
+        </div>
+
+        <div class="table-container" style="margin: 0 0 30px;">
+            <table>
+                <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Venue</th>
+                    <th>Price</th>
+                    <th>Seats</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="eventsTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- footer -->
+<div class="footer">
+    &copy; 2026 <span>EventHive</span>. All rights reserved.
+</div>
+
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script>
+
+    requireRole("ORGANIZER");
+    buildNavbar("dashboard");
+
+    window.onload = async function () {
+        document.getElementById("welcomeMsg").textContent =
+            "Welcome back, " + getUserName() + "! Here's your event overview.";
+
+        showLoader("loader");
+
+        try {
+            try {
+    const events = await getMyEvents();
+
+    if (events._isArray) {
+        populateDashboard(events._data);
+        document.getElementById("mainContent").style.display = "block";
+    } else {
+        showAlert("alertBox", "Failed to load dashboard.", "error");
+    }
+
+} catch (err) {
+            showAlert("alertBox", "Something went wrong. Please refresh.", "error");
+        }
+
+        hideLoader("loader");
+    };
+
+    function populateDashboard(events) {
+        // calculate stats
+        const total     = events.length;
+        const active    = events.filter(e => e.status === "ACTIVE").length;
+        const cancelled = events.filter(e => e.status === "CANCELLED").length;
+        const totalSeats = events.reduce((sum, e) => sum + (e.totalSeats - e.availableSeats), 0);
+
+        document.getElementById("statTotal").textContent     = total;
+        document.getElementById("statActive").textContent    = active;
+        document.getElementById("statCancelled").textContent = cancelled;
+        document.getElementById("statSeats").textContent     = totalSeats;
+
+        // fill events table
+        const tbody = document.getElementById("eventsTableBody");
+        tbody.innerHTML = "";
+
+        if (events.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align:center; padding:40px; color:#6c757d;">
+                        No events yet.
+                        <a href="create-event.html" style="color:#e94560; font-weight:600;">
+                            Create your first event
+                        </a>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        events.forEach(function (event) {
+            const booked   = event.totalSeats - event.availableSeats;
+            const percent  = Math.round((booked / event.totalSeats) * 100);
+            const barClass = percent >= 90 ? "low" : percent >= 60 ? "mid" : "";
+
+            // disable edit/cancel for cancelled events
+            const isActive   = event.status === "ACTIVE";
+            const editBtn    = isActive
+                ? `<a href="edit-event.html?id=${event.id}" class="btn btn-secondary btn-sm">Edit</a>`
+                : `<button class="btn btn-secondary btn-sm" disabled>Edit</button>`;
+
+            const cancelBtn  = isActive
+                ? `<button class="btn btn-danger btn-sm"
+                        onclick="handleCancelEvent(${event.id}, '${event.name}')">
+                        Cancel
+                   </button>`
+                : "";
+
+            const viewBtn = `<a href="event-details.html?id=${event.id}"
+                                class="btn btn-outline btn-sm">View</a>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <div class="event-name-cell">
+                            ${event.name}
+                            <small>Max ${event.maxTicketsPerUser} ticket(s)/person</small>
+                        </div>
+                    </td>
+                    <td>${formatDateTime(event.eventDate)}</td>
+                    <td>${event.venue}</td>
+                    <td>${formatCurrency(event.ticketPrice)}</td>
+                    <td>
+                        <div class="seats-bar-wrap">
+                            <div class="seats-bar-track">
+                                <div class="seats-bar-fill ${barClass}"
+                                     style="width:${percent}%"></div>
+                            </div>
+                            <div class="seats-text">
+                                ${booked}/${event.totalSeats} booked
+                            </div>
+                        </div>
+                    </td>
+                    <td>${getBadgeHTML(event.status)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${viewBtn}
+                            ${editBtn}
+                            ${cancelBtn}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // cancel event directly from dashboard
+    async function handleCancelEvent(eventId, eventName) {
+        const confirmed = confirm(
+            "Are you sure you want to cancel \"" + eventName + "\"?\n" +
+            "All confirmed bookings will be marked as cancelled."
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const response = await cancelEvent(eventId);
+
+            if (response && response.id) {
+                showAlert("alertBox", "Event cancelled successfully.", "success");
+                // reload dashboard
+                window.location.reload();
+            } else {
+                showAlert("alertBox", response.message || "Failed to cancel event.", "error");
+            }
+
+        } catch (err) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+        }
+    }
+
+</script>
+
+</body>
+</html>

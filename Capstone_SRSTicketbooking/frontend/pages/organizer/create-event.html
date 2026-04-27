@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event — EventHive</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .form-wrapper {
+            max-width: 720px;
+            margin: 36px auto;
+            padding: 0 24px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+
+        .form-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* two inputs side by side */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .section-divider {
+            margin: 24px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- navbar injected here -->
+
+<div class="form-wrapper">
+
+    <div class="page-header" style="border-radius: 10px; margin-bottom: 24px;">
+        <h1>Create New Event</h1>
+        <p>Fill in the details below to publish your event</p>
+    </div>
+
+    <!-- alert box -->
+    <div id="alertBox" class="alert"></div>
+
+    <div class="form-card">
+
+        <!-- BASIC DETAILS -->
+        <h3>📋 Basic Details</h3>
+
+        <div class="form-group">
+            <label class="form-label" for="eventName">Event Name</label>
+            <input
+                    type="text"
+                    id="eventName"
+                    class="form-control"
+                    placeholder="e.g. Tech Summit 2027"
+            />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Description</label>
+            <textarea
+                    id="description"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Describe your event — what attendees can expect..."
+            ></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="eventDate">Event Date & Time</label>
+                <input
+                        type="datetime-local"
+                        id="eventDate"
+                        class="form-control"
+                />
+                <div class="form-hint">Must be a future date</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="venue">Venue</label>
+                <input
+                        type="text"
+                        id="venue"
+                        class="form-control"
+                        placeholder="e.g. Bangalore Convention Center"
+                />
+            </div>
+        </div>
+
+        <!-- TICKET DETAILS -->
+        <div class="section-divider">🎟️ Ticket Details</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="ticketPrice">Ticket Price (₹)</label>
+                <input
+                        type="number"
+                        id="ticketPrice"
+                        class="form-control"
+                        placeholder="0 for free event"
+                        min="0"
+                />
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="totalSeats">Total Seats</label>
+                <input
+                        type="number"
+                        id="totalSeats"
+                        class="form-control"
+                        placeholder="e.g. 200"
+                        min="1"
+                />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="maxTickets">Max Tickets Per Person</label>
+                <input
+                        type="number"
+                        id="maxTickets"
+                        class="form-control"
+                        placeholder="e.g. 2"
+                        min="1"
+                />
+                <div class="form-hint">Maximum tickets one person can book</div>
+            </div>
+        </div>
+
+        <!-- ADDITIONAL INFO -->
+        <div class="section-divider">📌 Additional Information</div>
+
+        <div class="form-group">
+            <label class="form-label" for="additionalInfo">
+                Additional Info
+                <span style="color:#aaa; font-weight:400;">(optional)</span>
+            </label>
+            <textarea
+                    id="additionalInfo"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Dress code, parking info, what to bring, etc."
+            ></textarea>
+        </div>
+
+        <!-- FORM ACTIONS -->
+        <div class="form-actions">
+            <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+            <button
+                    id="createBtn"
+                    class="btn btn-primary"
+                    onclick="handleCreateEvent()"
+            >
+                Publish Event
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- footer -->
+<div class="footer">
+    &copy; 2026 <span>EventHive</span>. All rights reserved.
+</div>
+
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script>
+
+    requireRole("ORGANIZER");
+    buildNavbar("create");
+
+    async function handleCreateEvent() {
+        const name           = document.getElementById("eventName").value.trim();
+        const description    = document.getElementById("description").value.trim();
+        const eventDate      = document.getElementById("eventDate").value;
+        const venue          = document.getElementById("venue").value.trim();
+        const ticketPrice    = document.getElementById("ticketPrice").value;
+        const totalSeats     = document.getElementById("totalSeats").value;
+        const maxTickets     = document.getElementById("maxTickets").value;
+        const additionalInfo = document.getElementById("additionalInfo").value.trim();
+
+        // validation
+        if (!name || !description || !eventDate || !venue || !ticketPrice || !totalSeats || !maxTickets) {
+            showAlert("alertBox", "Please fill in all required fields.", "error");
+            return;
+        }
+
+        if (new Date(eventDate) <= new Date()) {
+            showAlert("alertBox", "Event date must be in the future.", "error");
+            return;
+        }
+
+        if (parseFloat(ticketPrice) < 0) {
+            showAlert("alertBox", "Ticket price cannot be negative.", "error");
+            return;
+        }
+
+        if (parseInt(totalSeats) < 1) {
+            showAlert("alertBox", "Total seats must be at least 1.", "error");
+            return;
+        }
+
+        if (parseInt(maxTickets) < 1) {
+            showAlert("alertBox", "Max tickets per person must be at least 1.", "error");
+            return;
+        }
+
+        if (parseInt(maxTickets) > parseInt(totalSeats)) {
+            showAlert("alertBox", "Max tickets per person cannot exceed total seats.", "error");
+            return;
+        }
+
+        setButtonLoading("createBtn", "Publishing...");
+
+        try {
+            const response = await createEvent({
+                name:             name,
+                description:      description,
+                eventDate:        toISOFormat(eventDate),
+                venue:            venue,
+                ticketPrice:      parseFloat(ticketPrice),
+                totalSeats:       parseInt(totalSeats),
+                maxTicketsPerUser: parseInt(maxTickets),
+                additionalInfo:   additionalInfo || null
+            });
+
+            if (response && response.id) {
+                showAlert("alertBox", "Event published successfully! Redirecting...", "success");
+                setTimeout(function () {
+                    window.location.href = "dashboard.html";
+                }, 1500);
+            } else {
+                showAlert("alertBox", response.message || "Failed to create event.", "error");
+                resetButton("createBtn");
+            }
+
+        } catch (err) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+            resetButton("createBtn");
+        }
+    }
+
+</script>
+
+</body>
+</html>

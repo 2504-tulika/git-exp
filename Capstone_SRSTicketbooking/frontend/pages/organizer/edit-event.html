@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event — EventHive</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .form-wrapper {
+            max-width: 720px;
+            margin: 36px auto;
+            padding: 0 24px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+
+        .form-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .section-divider {
+            margin: 24px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* capacity section — separate card below */
+        .capacity-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 28px 32px;
+            margin-top: 24px;
+        }
+
+        .capacity-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .capacity-card p {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .capacity-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .capacity-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        /* warning notice shown for events close to start time */
+        .edit-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: #856404;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- navbar injected here -->
+
+<!-- loader -->
+<div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p>Loading event details...</p>
+</div>
+
+<div id="mainContent" style="display:none;">
+
+    <div class="form-wrapper">
+
+        <div class="page-header" style="border-radius: 10px; margin-bottom: 24px;">
+            <h1>Edit Event</h1>
+            <p>Update your event details below</p>
+        </div>
+
+        <!-- alert box -->
+        <div id="alertBox" class="alert"></div>
+
+        <!-- warning if event is less than 4 hours away -->
+        <div class="edit-warning" id="editWarning">
+            ⚠️ This event starts in less than 4 hours.
+            Editing may not be allowed by the server.
+        </div>
+
+        <!-- EDIT FORM -->
+        <div class="form-card">
+
+            <h3>📋 Basic Details</h3>
+
+            <div class="form-group">
+                <label class="form-label" for="eventName">Event Name</label>
+                <input
+                        type="text"
+                        id="eventName"
+                        class="form-control"
+                        placeholder="Event name"
+                />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description</label>
+                <textarea
+                        id="description"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Event description"
+                ></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="eventDate">Event Date & Time</label>
+                    <input
+                            type="datetime-local"
+                            id="eventDate"
+                            class="form-control"
+                    />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="venue">Venue</label>
+                    <input
+                            type="text"
+                            id="venue"
+                            class="form-control"
+                            placeholder="Venue"
+                    />
+                </div>
+            </div>
+
+            <div class="section-divider">🎟️ Ticket Details</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="ticketPrice">Ticket Price (₹)</label>
+                    <input
+                            type="number"
+                            id="ticketPrice"
+                            class="form-control"
+                            min="0"
+                    />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="maxTickets">Max Tickets Per Person</label>
+                    <input
+                            type="number"
+                            id="maxTickets"
+                            class="form-control"
+                            min="1"
+                    />
+                </div>
+            </div>
+
+            <div class="section-divider">📌 Additional Information</div>
+
+            <div class="form-group">
+                <label class="form-label" for="additionalInfo">
+                    Additional Info
+                    <span style="color:#aaa; font-weight:400;">(optional)</span>
+                </label>
+                <textarea
+                        id="additionalInfo"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Dress code, parking info, etc."
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+                <button
+                        id="updateBtn"
+                        class="btn btn-primary"
+                        onclick="handleUpdateEvent()"
+                >
+                    Save Changes
+                </button>
+            </div>
+
+        </div>
+
+        <!-- CAPACITY CARD — separate section -->
+        <div class="capacity-card">
+            <h3>💺 Manage Capacity</h3>
+            <p>
+                Update total seat count. Cannot be reduced below already booked seats.
+                Currently booked: <strong id="bookedSeats">—</strong>
+            </p>
+
+            <div id="capacityAlert" class="alert"></div>
+
+            <div class="capacity-row">
+                <div class="form-group">
+                    <label class="form-label" for="newCapacity">New Total Seats</label>
+                    <input
+                            type="number"
+                            id="newCapacity"
+                            class="form-control"
+                            min="1"
+                            placeholder="Enter new total seats"
+                    />
+                    <div class="form-hint" id="capacityHint"></div>
+                </div>
+                <button
+                        id="capacityBtn"
+                        class="btn btn-secondary"
+                        style="margin-bottom: 0; white-space: nowrap;"
+                        onclick="handleUpdateCapacity()"
+                >
+                    Update Capacity
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- footer -->
+<div class="footer">
+    &copy; 2026 <span>EventHive</span>. All rights reserved.
+</div>
+
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script>
+
+    requireRole("ORGANIZER");
+    buildNavbar("dashboard");
+
+    const eventId = getParam("id");
+    let currentEvent = null;
+
+    // redirect if no event id in URL
+    if (!eventId) {
+        window.location.href = "dashboard.html";
+    }
+
+    // load existing event data and pre-fill the form
+    window.onload = async function () {
+        showLoader("loader");
+
+        try {
+            const event = await getEventById(eventId);
+
+            if (event && event.id) {
+                currentEvent = event;
+                prefillForm(event);
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                showAlert("alertBox", "Event not found.", "error");
+            }
+
+        } catch (err) {
+            showAlert("alertBox", "Failed to load event. Please try again.", "error");
+        }
+
+        hideLoader("loader");
+    };
+
+    // fill form fields with existing event data
+    function prefillForm(event) {
+        document.getElementById("eventName").value      = event.name;
+        document.getElementById("description").value    = event.description;
+        document.getElementById("eventDate").value      = toDatetimeLocal(event.eventDate);
+        document.getElementById("venue").value          = event.venue;
+        document.getElementById("ticketPrice").value    = event.ticketPrice;
+        document.getElementById("maxTickets").value     = event.maxTicketsPerUser;
+        document.getElementById("additionalInfo").value = event.additionalInfo || "";
+
+        // capacity info
+        const booked = event.totalSeats - event.availableSeats;
+        document.getElementById("bookedSeats").textContent = booked + " seat(s)";
+        document.getElementById("newCapacity").value       = event.totalSeats;
+        document.getElementById("capacityHint").textContent =
+            "Current total: " + event.totalSeats + " | Available: " + event.availableSeats;
+
+        // show warning if event is within 4 hours
+        const hoursUntilEvent = (new Date(event.eventDate) - new Date()) / (1000 * 60 * 60);
+        if (hoursUntilEvent < 4 && hoursUntilEvent > 0) {
+            document.getElementById("editWarning").style.display = "block";
+        }
+    }
+
+    // handle update form submit
+    async function handleUpdateEvent() {
+        const name           = document.getElementById("eventName").value.trim();
+        const description    = document.getElementById("description").value.trim();
+        const eventDate      = document.getElementById("eventDate").value;
+        const venue          = document.getElementById("venue").value.trim();
+        const ticketPrice    = document.getElementById("ticketPrice").value;
+        const maxTickets     = document.getElementById("maxTickets").value;
+        const additionalInfo = document.getElementById("additionalInfo").value.trim();
+
+        if (!name || !description || !eventDate || !venue || !ticketPrice || !maxTickets) {
+            showAlert("alertBox", "Please fill in all required fields.", "error");
+            return;
+        }
+
+        if (new Date(eventDate) <= new Date()) {
+            showAlert("alertBox", "Event date must be in the future.", "error");
+            return;
+        }
+
+        setButtonLoading("updateBtn", "Saving...");
+
+        try {
+            const response = await updateEvent(eventId, {
+                name:              name,
+                description:       description,
+                eventDate:         toISOFormat(eventDate),
+                venue:             venue,
+                ticketPrice:       parseFloat(ticketPrice),
+                totalSeats:        currentEvent.totalSeats,
+                maxTicketsPerUser: parseInt(maxTickets),
+                additionalInfo:    additionalInfo || null
+            });
+
+            if (response && response.id) {
+                showAlert("alertBox", "Event updated successfully!", "success");
+                setTimeout(function () {
+                    window.location.href = "dashboard.html";
+                }, 1500);
+            } else {
+                showAlert("alertBox", response.message || "Failed to update event.", "error");
+                resetButton("updateBtn");
+            }
+
+        } catch (err) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+            resetButton("updateBtn");
+        }
+    }
+
+    // handle capacity update
+    async function handleUpdateCapacity() {
+        const newCapacity = parseInt(document.getElementById("newCapacity").value);
+
+        if (!newCapacity || newCapacity < 1) {
+            showAlert("capacityAlert", "Please enter a valid seat count.", "error");
+            return;
+        }
+
+        setButtonLoading("capacityBtn", "Updating...");
+
+        try {
+            const response = await updateEventCapacity(eventId, newCapacity);
+
+            if (response && response.id) {
+                showAlert("capacityAlert", "Capacity updated successfully!", "success");
+
+                // update current event and refresh hints
+                currentEvent = response;
+                const booked = response.totalSeats - response.availableSeats;
+                document.getElementById("bookedSeats").textContent = booked + " seat(s)";
+                document.getElementById("capacityHint").textContent =
+                    "Current total: " + response.totalSeats +
+                    " | Available: " + response.availableSeats;
+
+            } else {
+                showAlert("capacityAlert", response.message || "Failed to update capacity.", "error");
+            }
+
+        } catch (err) {
+            showAlert("capacityAlert", "Something went wrong. Please try again.", "error");
+        }
+
+        resetButton("capacityBtn");
+    }
+
+</script>
+
+</body>
+</html>

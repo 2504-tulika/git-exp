@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details — EventHive</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .details-wrapper {
+            max-width: 1100px;
+            margin: 36px auto;
+            padding: 0 24px;
+        }
+
+        /* top info grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        /* event summary card */
+        .event-summary-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .event-banner {
+            height: 120px;
+            background: linear-gradient(135deg, #1a1a2e, #e94560);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .event-summary-body {
+            padding: 22px;
+        }
+
+        .event-summary-body h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 14px;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .summary-row strong {
+            color: #1a1a2e;
+        }
+
+        /* stats card on the right */
+        .stats-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+
+        .stats-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-row strong {
+            font-size: 18px;
+            color: #1a1a2e;
+        }
+
+        /* capacity progress bar */
+        .capacity-bar-track {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 14px 0 6px;
+        }
+
+        .capacity-bar-fill {
+            height: 100%;
+            background: #28a745;
+            border-radius: 4px;
+            transition: width 0.4s;
+        }
+
+        .capacity-bar-fill.mid { background: #ffc107; }
+        .capacity-bar-fill.low { background: #dc3545; }
+
+        .capacity-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* action buttons row */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        /* attendees section */
+        .attendees-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .attendees-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .attendee-count {
+            font-size: 13px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- navbar injected here -->
+
+<!-- loader -->
+<div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p>Loading event details...</p>
+</div>
+
+<div id="mainContent" style="display:none;">
+
+    <div class="details-wrapper">
+
+        <!-- alert box -->
+        <div id="alertBox" class="alert"></div>
+
+        <!-- TOP — event info + stats -->
+        <div class="info-grid">
+
+            <!-- LEFT — event summary -->
+            <div class="event-summary-card">
+                <div class="event-banner">🎉</div>
+                <div class="event-summary-body">
+                    <div id="statusBadge" style="margin-bottom: 10px;"></div>
+                    <h2 id="eventName"></h2>
+                    <div class="summary-row">
+                        <span>📅</span>
+                        <span id="eventDate"></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>📍</span>
+                        <span id="eventVenue"></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>💰</span>
+                        <span id="ticketPrice"></span> per ticket
+                    </div>
+                    <div class="summary-row">
+                        <span>🎟️</span>
+                        Max <strong id="maxPerUser"></strong> ticket(s) per person
+                    </div>
+                    <div class="summary-row" id="additionalRow" style="display:none;">
+                        <span>📌</span>
+                        <span id="additionalInfo"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT — booking stats -->
+            <div class="stats-card">
+                <h3>📊 Booking Statistics</h3>
+
+                <div class="stat-row">
+                    <span>Total Seats</span>
+                    <strong id="totalSeats">—</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Seats Booked</span>
+                    <strong id="seatsBooked">—</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Seats Available</span>
+                    <strong id="seatsAvailable">—</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Total Revenue</span>
+                    <strong id="totalRevenue">—</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Confirmed Bookings</span>
+                    <strong id="confirmedBookings">—</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Cancelled Bookings</span>
+                    <strong id="cancelledBookings">—</strong>
+                </div>
+
+                <!-- capacity fill bar -->
+                <div class="capacity-bar-track">
+                    <div class="capacity-bar-fill" id="capacityBar" style="width:0%"></div>
+                </div>
+                <div class="capacity-label">
+                    <span id="capacityPercent">0% filled</span>
+                    <span id="capacityRemaining"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-row" id="actionRow"></div>
+
+        <!-- ATTENDEES TABLE -->
+        <div class="attendees-header">
+            <h2>Attendee List</h2>
+            <span class="attendee-count" id="attendeeCount">0 bookings</span>
+        </div>
+
+        <div class="table-container" style="margin: 0 0 30px;">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer Email</th>
+                    <th>Tickets</th>
+                    <th>Amount Paid</th>
+                    <th>Booked On</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody id="attendeesBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- footer -->
+<div class="footer">
+    &copy; 2026 <span>EventHive</span>. All rights reserved.
+</div>
+
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script>
+
+    requireRole("ORGANIZER");
+    buildNavbar("dashboard");
+
+    const eventId = getParam("id");
+
+    if (!eventId) {
+        window.location.href = "dashboard.html";
+    }
+
+    window.onload = async function () {
+        showLoader("loader");
+
+        try {
+            // fetch event details and bookings in parallel
+            try {
+    const [event, bookingsResponse] = await Promise.all([
+        getEventById(eventId),
+        getBookingsForEvent(eventId)
+    ]);
+
+    const bookings = bookingsResponse._isArray ? bookingsResponse._data : [];
+
+    document.getElementById("mainContent").style.display = "block";
+
+    if (event && event.id) {
+        populateEventInfo(event);
+        populateBookings(bookings, event);
+    } else {
+        showAlert("alertBox", "Event not found.", "error");
+    }
+
+} catch (err) {
+    document.getElementById("mainContent").style.display = "block";
+    showAlert("alertBox", "Failed to load event details.", "error");
+}
+
+hideLoader("loader");
+};
+
+    function populateEventInfo(event) {
+        document.title = event.name + " — EventHive";
+
+        document.getElementById("eventName").textContent    = event.name;
+        document.getElementById("eventDate").textContent    = formatDateTime(event.eventDate);
+        document.getElementById("eventVenue").textContent   = event.venue;
+        document.getElementById("ticketPrice").textContent  = formatCurrency(event.ticketPrice);
+        document.getElementById("maxPerUser").textContent   = event.maxTicketsPerUser;
+        document.getElementById("statusBadge").innerHTML    = getBadgeHTML(event.status);
+        document.getElementById("totalSeats").textContent   = event.totalSeats;
+        document.getElementById("seatsAvailable").textContent = event.availableSeats;
+
+        const booked  = event.totalSeats - event.availableSeats;
+        const percent = Math.round((booked / event.totalSeats) * 100);
+
+        document.getElementById("seatsBooked").textContent     = booked;
+        document.getElementById("capacityPercent").textContent = percent + "% filled";
+        document.getElementById("capacityRemaining").textContent =
+            event.availableSeats + " seats left";
+
+        // color the bar based on fill level
+        const bar      = document.getElementById("capacityBar");
+        bar.style.width = percent + "%";
+        if (percent >= 90) bar.classList.add("low");
+        else if (percent >= 60) bar.classList.add("mid");
+
+        // additional info
+        if (event.additionalInfo) {
+            document.getElementById("additionalInfo").textContent = event.additionalInfo;
+            document.getElementById("additionalRow").style.display = "flex";
+        }
+
+        // action buttons — only for active events
+        const actionRow = document.getElementById("actionRow");
+        if (event.status === "ACTIVE") {
+            actionRow.innerHTML = `
+                <a href="edit-event.html?id=${event.id}" class="btn btn-secondary">
+                    Edit Event
+                </a>
+                <button class="btn btn-danger" onclick="handleCancel(${event.id}, '${event.name}')">
+                    Cancel Event
+                </button>
+                <a href="dashboard.html" class="btn btn-outline">
+                    ← Back to Dashboard
+                </a>
+            `;
+        } else {
+            actionRow.innerHTML = `
+                <a href="dashboard.html" class="btn btn-outline">
+                    ← Back to Dashboard
+                </a>
+            `;
+        }
+    }
+
+    function populateBookings(bookings, event) {
+        const tbody = document.getElementById("attendeesBody");
+        tbody.innerHTML = "";
+
+        // bookings might not be an array if event has no bookings
+        const list = Array.isArray(bookings) ? bookings : [];
+
+        document.getElementById("attendeeCount").textContent = list.length + " booking(s)";
+
+        // calculate revenue and counts
+        const confirmed  = list.filter(b => b.status === "CONFIRMED");
+        const cancelled  = list.filter(b => b.status !== "CONFIRMED");
+        const revenue    = confirmed.reduce((sum, b) => sum + b.totalAmount, 0);
+
+        document.getElementById("confirmedBookings").textContent = confirmed.length;
+        document.getElementById("cancelledBookings").textContent = cancelled.length;
+        document.getElementById("totalRevenue").textContent      = formatCurrency(revenue);
+
+        if (list.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6"
+                        style="text-align:center; padding:40px; color:#6c757d;">
+                        No bookings yet for this event.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        list.forEach(function (booking, index) {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${booking.customerEmail}</td>
+                    <td>${booking.ticketsBooked}</td>
+                    <td>${formatCurrency(booking.totalAmount)}</td>
+                    <td>${formatDateTime(booking.bookedAt)}</td>
+                    <td>${getBadgeHTML(booking.status)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // cancel event from this page
+    async function handleCancel(eventId, eventName) {
+        const confirmed = confirm(
+            "Cancel \"" + eventName + "\"?\n" +
+            "All confirmed bookings will be marked as cancelled."
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const response = await cancelEvent(eventId);
+
+            if (response && response.id) {
+                showAlert("alertBox", "Event cancelled successfully.", "success");
+                setTimeout(function () {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert("alertBox", response.message || "Failed to cancel event.", "error");
+            }
+
+        } catch (err) {
+            showAlert("alertBox", "Something went wrong. Please try again.", "error");
+        }
+    }
+
+</script>
+
+</body>
+</html>
