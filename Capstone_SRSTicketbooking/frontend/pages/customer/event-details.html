@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details — EventHive</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .details-wrapper {
+            max-width: 1100px;
+            margin: 36px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 28px;
+        }
+
+        /* left column — event info */
+        .event-banner {
+            height: 220px;
+            background: linear-gradient(135deg, #1a1a2e, #e94560);
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .event-info-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .event-info-body {
+            padding: 28px;
+        }
+
+        .event-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .meta-item strong {
+            color: #1a1a2e;
+        }
+
+        .meta-icon {
+            font-size: 18px;
+        }
+
+        .event-description {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .additional-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #e94560;
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .additional-info strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #1a1a2e;
+        }
+
+        /* right column — booking card */
+        .booking-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        .booking-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .price-display {
+            font-size: 28px;
+            font-weight: 800;
+            color: #e94560;
+            margin-bottom: 4px;
+        }
+
+        .price-per {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .seats-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .seats-info strong {
+            color: #1a1a2e;
+            font-size: 16px;
+        }
+
+        .total-amount {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .total-amount span {
+            font-size: 20px;
+            color: #e94560;
+        }
+
+        /* cancelled event overlay */
+        .cancelled-notice {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            color: #721c24;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- navbar injected here -->
+
+<!-- loader -->
+<div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p>Loading event details...</p>
+</div>
+
+<!-- main content — hidden until loaded -->
+<div id="mainContent" style="display: none;">
+
+    <div class="details-wrapper">
+
+        <!-- LEFT — event details -->
+        <div>
+            <div class="event-info-card">
+                <div class="event-banner">🎉</div>
+                <div class="event-info-body">
+
+                    <div id="statusBadge" style="margin-bottom: 12px;"></div>
+                    <div class="event-title" id="eventName"></div>
+
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Date & Time</div>
+                                <strong id="eventDate"></strong>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Venue</div>
+                                <strong id="eventVenue"></strong>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👤</span>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Organised by</div>
+                                <strong id="eventOrganizer"></strong>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🎟️</span>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Max per person</div>
+                                <strong id="maxPerUser"></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-description" id="eventDescription"></div>
+
+                    <div class="additional-info" id="additionalInfoBox" style="display:none;">
+                        <strong>📌 Additional Information</strong>
+                        <span id="additionalInfo"></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT — booking card -->
+        <div>
+            <div class="booking-card">
+                <h3>Book Tickets</h3>
+
+                <!-- alert for booking messages -->
+                <div id="bookingAlert" class="alert"></div>
+
+                <div class="price-display" id="ticketPrice"></div>
+                <div class="price-per">per ticket</div>
+
+                <div class="seats-info">
+                    <span>Available Seats</span>
+                    <strong id="availableSeats"></strong>
+                </div>
+
+                <!-- booking form — hidden if event cancelled -->
+                <div id="bookingForm">
+                    <div class="form-group">
+                        <label class="form-label" for="ticketCount">
+                            Number of Tickets
+                        </label>
+                        <input
+                                type="number"
+                                id="ticketCount"
+                                class="form-control"
+                                value="1"
+                                min="1"
+                                onchange="updateTotal()"
+                                oninput="updateTotal()"
+                        />
+                        <small style="color:#6c757d; font-size:12px;" id="maxTicketsHint"></small>
+                    </div>
+
+                    <div class="total-amount">
+                        <span>Total Amount</span>
+                        <span id="totalAmount">₹0.00</span>
+                    </div>
+
+                    <button
+                            id="bookBtn"
+                            class="btn btn-primary btn-full"
+                            onclick="handleBooking()"
+                    >
+                        Proceed to Payment
+                    </button>
+                </div>
+
+                <!-- shown if event is cancelled -->
+                <div id="cancelledNotice" class="cancelled-notice" style="display:none;">
+                    ❌ This event has been cancelled.<br>Bookings are no longer available.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- footer -->
+<div class="footer">
+    &copy; 2026 <span>EventHive</span>. All rights reserved.
+</div>
+
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script>
+
+    requireRole("CUSTOMER");
+    buildNavbar("home");
+
+    // get event id from URL — e.g. event-details.html?id=3
+    const eventId = getParam("id");
+    let currentEvent = null;
+
+    if (!eventId) {
+        window.location.href = "home.html";
+    }
+
+    // load event details on page open
+    window.onload = async function () {
+        showLoader("loader");
+
+        try {
+            const event = await getEventById(eventId);
+
+            if (event && event.id) {
+                currentEvent = event;
+                populatePage(event);
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                showAlert("bookingAlert", "Event not found.", "error");
+            }
+
+        } catch (err) {
+            showAlert("bookingAlert", "Failed to load event. Please try again.", "error");
+        }
+
+        hideLoader("loader");
+    };
+
+    // fill all the page fields with event data
+    function populatePage(event) {
+        document.title = event.name + " — EventHive";
+
+        document.getElementById("eventName").textContent        = event.name;
+        document.getElementById("eventDate").textContent        = formatDateTime(event.eventDate);
+        document.getElementById("eventVenue").textContent       = event.venue;
+        document.getElementById("eventOrganizer").textContent   = event.organizerEmail;
+        document.getElementById("maxPerUser").textContent       = event.maxTicketsPerUser + " ticket(s)";
+        document.getElementById("eventDescription").textContent = event.description;
+        document.getElementById("ticketPrice").textContent      = formatCurrency(event.ticketPrice);
+        document.getElementById("availableSeats").textContent   = event.availableSeats;
+        document.getElementById("statusBadge").innerHTML        = getBadgeHTML(event.status);
+        document.getElementById("maxTicketsHint").textContent   =
+            "Maximum " + event.maxTicketsPerUser + " ticket(s) allowed per person";
+
+        // show additional info if present
+        if (event.additionalInfo) {
+            document.getElementById("additionalInfo").textContent = event.additionalInfo;
+            document.getElementById("additionalInfoBox").style.display = "block";
+        }
+
+        // set max on ticket input
+        document.getElementById("ticketCount").max = event.maxTicketsPerUser;
+
+        // update total amount
+        updateTotal();
+
+        // if event is cancelled — hide booking form
+        if (event.status === "CANCELLED") {
+            document.getElementById("bookingForm").style.display    = "none";
+            document.getElementById("cancelledNotice").style.display = "block";
+        }
+    }
+
+    // recalculate total when ticket count changes
+    function updateTotal() {
+        if (!currentEvent) return;
+
+        const count = parseInt(document.getElementById("ticketCount").value) || 1;
+        const total = count * currentEvent.ticketPrice;
+        document.getElementById("totalAmount").textContent = formatCurrency(total);
+    }
+
+    // handle book button click
+    async function handleBooking() {
+        const ticketCount = parseInt(document.getElementById("ticketCount").value);
+
+        if (!ticketCount || ticketCount < 1) {
+            showAlert("bookingAlert", "Please enter a valid number of tickets.", "error");
+            return;
+        }
+
+        if (ticketCount > currentEvent.maxTicketsPerUser) {
+            showAlert("bookingAlert",
+                "Maximum " + currentEvent.maxTicketsPerUser + " tickets allowed per person.",
+                "error"
+            );
+            return;
+        }
+
+        if (ticketCount > currentEvent.availableSeats) {
+            showAlert("bookingAlert",
+                "Only " + currentEvent.availableSeats + " seats available.",
+                "error"
+            );
+            return;
+        }
+
+        // store booking details and go to payment page
+        localStorage.setItem("pendingBooking", JSON.stringify({
+            eventId:   currentEvent.id,
+            eventName: currentEvent.name,
+            venue:     currentEvent.venue,
+            eventDate: currentEvent.eventDate,
+            tickets:   ticketCount,
+            price:     currentEvent.ticketPrice,
+            total:     ticketCount * currentEvent.ticketPrice
+        }));
+
+        window.location.href = "payment.html";
+    }
+
+</script>
+
+</body>
+</html>
