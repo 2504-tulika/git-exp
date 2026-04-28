@@ -296,30 +296,25 @@
 
         try {
             // fetch event details and bookings in parallel
-            try {
-    const [event, bookingsResponse] = await Promise.all([
-        getEventById(eventId),
-        getBookingsForEvent(eventId)
-    ]);
+            const [event, bookings] = await Promise.all([
+                getEventById(eventId),
+                getBookingsForEvent(eventId)
+            ]);
 
-    const bookings = bookingsResponse._isArray ? bookingsResponse._data : [];
+            if (event && event.id) {
+                populateEventInfo(event);
+                populateBookings(bookings, event);
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                showAlert("alertBox", "Event not found.", "error");
+            }
 
-    document.getElementById("mainContent").style.display = "block";
+        } catch (err) {
+            showAlert("alertBox", "Failed to load event details.", "error");
+        }
 
-    if (event && event.id) {
-        populateEventInfo(event);
-        populateBookings(bookings, event);
-    } else {
-        showAlert("alertBox", "Event not found.", "error");
-    }
-
-} catch (err) {
-    document.getElementById("mainContent").style.display = "block";
-    showAlert("alertBox", "Failed to load event details.", "error");
-}
-
-hideLoader("loader");
-};
+        hideLoader("loader");
+    };
 
     function populateEventInfo(event) {
         document.title = event.name + " — EventHive";

@@ -254,18 +254,18 @@
         showLoader("loader");
 
         try {
-            try {
-    const response = await getMyBookings();
+            const response = await getMyBookings();
 
-    if (response._isArray) {
-        allBookings = response._data;
-        document.getElementById("tabsRow").style.display = "flex";
-        renderBookings("all");
-    } else {
-        showAlert("alertBox", response.message || "Failed to load bookings.", "error");
-    }
+            // response is an array of bookings
+            if (Array.isArray(response)) {
+                allBookings = response;
+                document.getElementById("tabsRow").style.display = "flex";
+                renderBookings("all");
+            } else {
+                showAlert("alertBox", "Failed to load bookings.", "error");
+            }
 
-} catch (err) {
+        } catch (err) {
             showAlert("alertBox", "Something went wrong. Please refresh.", "error");
         }
 
