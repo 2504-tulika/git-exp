@@ -135,6 +135,7 @@ public class BookingService {
     }
 
     // get all bookings for a customer
+    @Transactional
     public List<BookingResponse> getMyBookings(String customerEmail) {
         return bookingRepository.findByCustomerEmail(customerEmail)
                 .stream()
@@ -143,6 +144,7 @@ public class BookingService {
     }
 
     // get all bookings for a specific event (organizer use)
+    @Transactional
     public List<BookingResponse> getBookingsForEvent(Long eventId) {
         return bookingRepository.findByEventId(eventId)
                 .stream()
