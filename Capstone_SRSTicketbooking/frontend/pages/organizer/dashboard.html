@@ -209,17 +209,16 @@
         showLoader("loader");
 
         try {
-            try {
-    const events = await getMyEvents();
+            const events = await getMyEvents();
 
-    if (events._isArray) {
-        populateDashboard(events._data);
-        document.getElementById("mainContent").style.display = "block";
-    } else {
-        showAlert("alertBox", "Failed to load dashboard.", "error");
-    }
+            if (Array.isArray(events)) {
+                populateDashboard(events);
+                document.getElementById("mainContent").style.display = "block";
+            } else {
+                showAlert("alertBox", "Failed to load dashboard.", "error");
+            }
 
-} catch (err) {
+        } catch (err) {
             showAlert("alertBox", "Something went wrong. Please refresh.", "error");
         }
 

@@ -220,18 +220,18 @@
         showLoader("loader");
 
         try {
-           try {
-    const events = await getAllEvents();
+            const events = await getAllEvents();
 
-    if (events._isArray) {
-        allEvents = events._data;
-        renderEvents(allEvents);
-        document.getElementById("totalEventsCount").textContent = allEvents.length;
-    } else {
-        showAlert("alertBox", "Failed to load events.", "error");
-    }
+            if (events._status === 200 || Array.isArray(events)) {
+                // getAllEvents returns array directly
+                allEvents = Array.isArray(events) ? events : [];
+                renderEvents(allEvents);
+                document.getElementById("totalEventsCount").textContent = allEvents.length;
+            } else {
+                showAlert("alertBox", "Failed to load events. Please try again.", "error");
+            }
 
-} catch (err) {
+        } catch (err) {
             showAlert("alertBox", "Something went wrong. Please refresh.", "error");
         }
 
