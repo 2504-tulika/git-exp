@@ -12,7 +12,6 @@
             padding: 0 24px;
         }
 
-        /* tabs — All / Upcoming / Cancelled */
         .tabs {
             display: flex;
             gap: 4px;
@@ -46,7 +45,6 @@
             color: #1a1a2e;
         }
 
-        /* individual booking card */
         .booking-item {
             background: #ffffff;
             border-radius: 10px;
@@ -65,7 +63,6 @@
             transform: translateX(4px);
         }
 
-        /* left border color based on status */
         .booking-item.cancelled {
             border-left-color: #dc3545;
             opacity: 0.8;
@@ -118,7 +115,6 @@
             margin-top: 4px;
         }
 
-        /* cancel button only shown on confirmed upcoming bookings */
         .cancel-btn {
             background: transparent;
             border: 1.5px solid #dc3545;
@@ -136,7 +132,6 @@
             color: #ffffff;
         }
 
-        /* cancel confirmation modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -194,33 +189,27 @@
         <p>View and manage all your event bookings</p>
     </div>
 
-    <!-- alert box -->
     <div id="alertBox" class="alert"></div>
 
-    <!-- loader -->
     <div class="loader" id="loader">
         <div class="spinner"></div>
         <p>Loading your bookings...</p>
     </div>
 
-    <!-- tabs -->
     <div class="tabs" id="tabsRow" style="display:none;">
         <button class="tab active" onclick="switchTab('all')">All Bookings</button>
         <button class="tab" onclick="switchTab('upcoming')">Upcoming</button>
         <button class="tab" onclick="switchTab('cancelled')">Cancelled</button>
     </div>
 
-    <!-- bookings list -->
     <div id="bookingsList"></div>
 
 </div>
 
-<!-- footer -->
 <div class="footer">
     &copy; 2026 <span>EventHive</span>. All rights reserved.
 </div>
 
-<!-- CANCEL CONFIRMATION MODAL -->
 <div class="modal-overlay" id="cancelModal">
     <div class="modal">
         <h3>Cancel Booking?</h3>
@@ -246,23 +235,26 @@
     buildNavbar("bookings");
 
     let allBookings = [];
-    let currentTab  = "all";
+    let currentTab = "all";
     let cancelBookingId = null;
 
-    // load bookings on page open
+    // load bookings when page opens
     window.onload = async function () {
         showLoader("loader");
 
         try {
             const response = await getMyBookings();
 
-            // response is an array of bookings
             if (Array.isArray(response)) {
                 allBookings = response;
                 document.getElementById("tabsRow").style.display = "flex";
                 renderBookings("all");
+            } else if (response && response._status === 401) {
+                showAlert("alertBox", "Session expired. Please login again.", "error");
+                setTimeout(function () { logout(); }, 2000);
             } else {
-                showAlert("alertBox", "Failed to load bookings.", "error");
+                showAlert("alertBox",
+                    response.message || "Failed to load bookings.", "error");
             }
 
         } catch (err) {
@@ -272,11 +264,10 @@
         hideLoader("loader");
     };
 
-    // switch between tabs
+    // switch between All / Upcoming / Cancelled tabs
     function switchTab(tab) {
         currentTab = tab;
 
-        // update active tab styling
         document.querySelectorAll(".tab").forEach(function (t) {
             t.classList.remove("active");
         });
@@ -285,7 +276,7 @@
         renderBookings(tab);
     }
 
-    // filter and render bookings based on tab
+    // render booking cards based on active tab
     function renderBookings(tab) {
         const list = document.getElementById("bookingsList");
         list.innerHTML = "";
@@ -298,7 +289,8 @@
             });
         } else if (tab === "cancelled") {
             filtered = allBookings.filter(function (b) {
-                return b.status === "CANCELLED" || b.status === "CANCELLED_BY_ORGANIZER";
+                return b.status === "CANCELLED" ||
+                       b.status === "CANCELLED_BY_ORGANIZER";
             });
         }
 
@@ -317,11 +309,8 @@
         }
 
         filtered.forEach(function (booking) {
-            const isPast      = isPastEvent(booking.eventDate);
-            const isCancelled = booking.status === "CANCELLED" ||
-                                booking.status === "CANCELLED_BY_ORGANIZER";
+            const isPast = isPastEvent(booking.eventDate);
 
-            // determine card style based on status
             let cardClass = "booking-item";
             if (booking.status === "CANCELLED") cardClass += " cancelled";
             if (booking.status === "CANCELLED_BY_ORGANIZER") cardClass += " cancelled-organizer";
@@ -330,12 +319,12 @@
             const showCancelBtn = booking.status === "CONFIRMED" && !isPast;
 
             const cancelBtnHTML = showCancelBtn
-                ? `<button class="cancel-btn" onclick="openCancelModal(${booking.bookingId})">
+                ? `<button class="cancel-btn"
+                       onclick="openCancelModal(${booking.bookingId})">
                        Cancel Booking
                    </button>`
                 : "";
 
-            // cancellation note for organizer-cancelled bookings
             const cancelNote = booking.status === "CANCELLED_BY_ORGANIZER"
                 ? `<div style="font-size:12px; color:#856404; margin-top:4px;">
                        ⚠️ Cancelled by organizer
@@ -347,9 +336,15 @@
                     <div>
                         <div class="booking-event-name">${booking.eventName}</div>
                         <div class="booking-meta">
-                            <div class="booking-meta-item">📅 ${formatDateTime(booking.eventDate)}</div>
-                            <div class="booking-meta-item">📍 ${booking.eventVenue}</div>
-                            <div class="booking-meta-item">🎟️ ${booking.ticketsBooked} ticket(s)</div>
+                            <div class="booking-meta-item">
+                                📅 ${formatDateTime(booking.eventDate)}
+                            </div>
+                            <div class="booking-meta-item">
+                                📍 ${booking.eventVenue}
+                            </div>
+                            <div class="booking-meta-item">
+                                🎟️ ${booking.ticketsBooked} ticket(s)
+                            </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
                             ${getBadgeHTML(booking.status)}
@@ -358,7 +353,9 @@
                         <div class="booking-id">Booking ID: #${booking.bookingId}</div>
                     </div>
                     <div class="booking-right">
-                        <div class="booking-amount">${formatCurrency(booking.totalAmount)}</div>
+                        <div class="booking-amount">
+                            ${formatCurrency(booking.totalAmount)}
+                        </div>
                         ${cancelBtnHTML}
                     </div>
                 </div>
@@ -366,7 +363,6 @@
         });
     }
 
-    // open cancel confirmation modal
     function openCancelModal(bookingId) {
         cancelBookingId = bookingId;
         document.getElementById("cancelModal").classList.add("show");
@@ -377,7 +373,6 @@
         document.getElementById("cancelModal").classList.remove("show");
     }
 
-    // confirm cancellation
     async function confirmCancel() {
         if (!cancelBookingId) return;
 
@@ -388,16 +383,21 @@
 
             if (response && response.bookingId) {
                 closeModal();
-                showAlert("alertBox", "Booking cancelled successfully. Seats have been released.", "success");
+                showAlert("alertBox",
+                    "Booking cancelled successfully. Seats have been released.",
+                    "success");
 
-                // update booking status in local array
-                const booking = allBookings.find(b => b.bookingId === cancelBookingId);
+                // update status in local array without refetching
+                const booking = allBookings.find(
+                    b => b.bookingId === cancelBookingId
+                );
                 if (booking) booking.status = "CANCELLED";
 
                 renderBookings(currentTab);
             } else {
                 closeModal();
-                showAlert("alertBox", response.message || "Failed to cancel booking.", "error");
+                showAlert("alertBox",
+                    response.message || "Failed to cancel booking.", "error");
             }
 
         } catch (err) {

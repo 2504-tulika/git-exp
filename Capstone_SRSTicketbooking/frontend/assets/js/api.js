@@ -118,8 +118,30 @@ async function cancelBooking(bookingId) {
 }
 
 // customer — get their own booking history
+// customer — get their own booking history
 async function getMyBookings() {
-    return await apiRequest("/bookings/my-bookings", "GET", null, true);
+    const headers = { "Content-Type": "application/json" };
+    const token = localStorage.getItem("token");
+    if (token) headers["Authorization"] = "Bearer " + token;
+
+    const response = await fetch(BASE_URL + "/bookings/my-bookings", {
+        method: "GET",
+        headers: headers
+    });
+
+    const status = response.status;
+    const text = await response.text();
+
+    if (!text || text.trim() === "") return [];
+
+    const data = JSON.parse(text);
+
+    // return plain array — my-bookings.html handles it directly
+    if (Array.isArray(data)) return data;
+
+    // if error object returned — attach status and return
+    data._status = status;
+    return data;
 }
 
 // organizer — get all bookings for a specific event
