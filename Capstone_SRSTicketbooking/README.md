@@ -3,8 +3,6 @@
 A full-stack web application that allows customers to browse and book event tickets, 
 and organizers to create and manage events.
 
-Built as a capstone project during training at Tudip Technologies.
-
 ---
 
 ## Tech Stack
@@ -92,14 +90,13 @@ Capstone_EventTicketBooking/
 │       └── pom.xml
 │
 └── frontend/
-    ├── assets/
-    │   ├── css/
-    │   │   ├── style.css
-    │   │   └── auth.css
-    │   └── js/
-    │       ├── api.js
-    │       ├── auth.js
-    │       └── utils.js
+    ├── css/
+    │ │   ├── style.css
+    │ │   └── auth.css
+    │ └── js/
+    │      ├── api.js
+    │      ├── auth.js
+    │      └── utils.js
     │
     ├── pages/
     │   ├── customer/
