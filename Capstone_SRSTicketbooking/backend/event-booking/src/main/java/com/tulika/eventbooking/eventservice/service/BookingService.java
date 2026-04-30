@@ -128,6 +128,13 @@ public class BookingService {
         booking.setCancelledAt(LocalDateTime.now());
         bookingRepository.save(booking);
 
+        // cannot cancel within 3 hours of event start
+        LocalDateTime cutoff = event.getEventDate().minusHours(3);
+        if (LocalDateTime.now().isAfter(cutoff)) {
+            throw new RuntimeException(
+                    "Cannot cancel booking within 3 hours of event start time");
+        }
+
         logger.info("Booking {} cancelled by customer {}. {} seats restored for event '{}'",
                 bookingId, customerEmail, booking.getTicketsBooked(), event.getName());
 
