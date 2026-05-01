@@ -183,7 +183,8 @@ function getPasswordStrength(password) {
 
 // checks if a string is a valid email
 function validateEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // only gmail addresses allowed
+    const regex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     return regex.test(email);
 }
 

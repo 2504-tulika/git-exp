@@ -23,4 +23,8 @@ public class BookingResponse {
     private String status;
     private LocalDateTime bookedAt;
     private LocalDateTime cancelledAt;
+    public String getBookingReference() {
+        return "EVT-" + LocalDateTime.now().getYear() + "-"
+                + String.format("%05d", this.bookingId);
+    }
 }
