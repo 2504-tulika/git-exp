@@ -13,8 +13,11 @@ public class RegisterRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @Email(message = "Enter a valid email")
     @NotBlank(message = "Email is required")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$",
+            message = "Only Gmail addresses are allowed (@gmail.com)"
+    )
     private String email;
 
     // min 8, max 12, at least one uppercase, one special character

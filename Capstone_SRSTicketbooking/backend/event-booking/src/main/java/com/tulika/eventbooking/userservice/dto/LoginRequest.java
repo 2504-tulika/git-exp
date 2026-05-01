@@ -1,7 +1,7 @@
 package com.tulika.eventbooking.userservice.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,8 +9,11 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
 
-    @Email(message = "Enter a valid email")
     @NotBlank(message = "Email is required")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$",
+            message = "Only Gmail addresses are allowed (@gmail.com)"
+    )
     private String email;
 
     @NotBlank(message = "Password is required")

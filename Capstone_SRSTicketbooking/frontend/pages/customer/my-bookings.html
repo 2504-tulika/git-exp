@@ -327,7 +327,7 @@
 
             const cancelNote = booking.status === "CANCELLED_BY_ORGANIZER"
                 ? `<div style="font-size:12px; color:#856404; margin-top:4px;">
-                       ⚠️ Cancelled by organizer
+                       Cancelled by organizer
                    </div>`
                 : "";
 
@@ -337,13 +337,13 @@
                         <div class="booking-event-name">${booking.eventName}</div>
                         <div class="booking-meta">
                             <div class="booking-meta-item">
-                                📅 ${formatDateTime(booking.eventDate)}
+                                ${formatDateTime(booking.eventDate)}
                             </div>
                             <div class="booking-meta-item">
-                                📍 ${booking.eventVenue}
+                                ${booking.eventVenue}
                             </div>
                             <div class="booking-meta-item">
-                                🎟️ ${booking.ticketsBooked} ticket(s)
+                                ${booking.ticketsBooked} ticket(s)
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
