@@ -3,7 +3,7 @@ package com.tulika.eventbooking.eventservice.dto;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-
+//import lombok.Data;
 import java.time.LocalDateTime;
 
 @Getter
