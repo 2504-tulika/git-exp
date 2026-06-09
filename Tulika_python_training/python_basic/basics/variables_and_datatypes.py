@@ -19,11 +19,11 @@ print("Before Swapping:")
 print("First Number:", first_num)
 print("Second Number:", second_num)
 
-first_number, second_number = second_number, first_number
+first_num, second_num = second_num, first_num
 
 print("\nAfter Swapping:")
-print("First Number:", first_number)
-print("Second Number:", second_number)
+print("First Number:", first_num)
+print("Second Number:", second_num)
 
 # Question 6
 num1 = float(input("Enter first number: "))
