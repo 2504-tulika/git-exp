@@ -4,7 +4,6 @@ Basic introductory Python programs.
 
 import sys
 
-
 # Question 1
 print("Welcome to Python Training")
 

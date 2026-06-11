@@ -2,6 +2,8 @@
 
 # Question 25
 def list_operations():
+    """Create a list of numbers and find its sum, max, sorted version, and unique values."""
+
     numbers = [10, 5, 20, 10, 30, 5, 40, 50, 20, 60]
 
     print("Original List:", numbers)
@@ -16,6 +18,8 @@ list_operations()
 
 # Question 26
 def count_even_odd():
+    """Count and print the number of even and odd numbers in a list."""
+
     numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     even_count = 0
     odd_count = 0
@@ -33,6 +37,8 @@ count_even_odd()
 
 # Question 27
 def reverse_list():
+    """Reverse a list using slicing without using the built-in reverse() method."""
+
     numbers = [10, 20, 30, 40, 50]
 
     reversed_numbers = numbers[::-1]
@@ -44,6 +50,8 @@ reverse_list()
 
 # Question 28
 def tuple_operations():
+    """Create a tuple of fruits and access its elements by index."""
+
     fruits = ("Apple", "Banana", "Mango")
 
     print("First Fruit:", fruits[0])
@@ -54,6 +62,8 @@ tuple_operations()
 
 # Question 29
 def modify_tuple():
+    """Convert a tuple into a list and modify it by adding a new element."""
+
     fruits = ("Apple", "Banana", "Mango")
 
     fruits_list = list(fruits)
@@ -65,6 +75,8 @@ modify_tuple()
 
 # Question 30
 def set_operations():
+    """Perform union, intersection, and difference operations on two sets."""
+
     set1 = {1, 2, 3, 4}
     set2 = {3, 4, 5, 6}
 
@@ -76,6 +88,8 @@ set_operations()
 
 # Question 31
 def remove_duplicates():
+    """Remove duplicate values from a list using a set."""
+
     numbers = [1, 2, 2, 3, 4, 4, 5]
 
     unique_numbers = list(set(numbers))
@@ -86,6 +100,8 @@ remove_duplicates()
 
 # Question 32
 def student_dictionary():
+    """Create a student dictionary and access its values by key."""
+
     student = {
         "name": "Tulika",
         "age": 21,
@@ -100,6 +116,8 @@ student_dictionary()
 
 # Question 33
 def character_frequency():
+    """Count the frequency of each character in a string using a dictionary."""
+
     text = "python"
     frequency = {}
 
@@ -115,6 +133,8 @@ character_frequency()
 
 # Question 34
 def merge_dictionaries():
+    """Merge two dictionaries into one using the dictionary unpacking operator."""
+
     student = {
         "name": "Tulika",
         "age": 21
