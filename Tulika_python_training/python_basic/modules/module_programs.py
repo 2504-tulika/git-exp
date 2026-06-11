@@ -2,21 +2,42 @@
 
 # Question 22
 import math
+def demonstrate_math_operations() -> None:
+    number = 25
 
-number = 25
+    square_root = math.sqrt(number)
+    power_value = math.pow(5, 3)
+    factorial_value = math.factorial(5)
 
-print("Square Root:", math.sqrt(number))
-print("Power:", math.pow(5, 2))
-print("Factorial:", math.factorial(5))
+    print(f"Square root of {number}: {square_root}")
+    print(f"5 raised to power 3: {power_value}")
+    print(f"Factorial of 5: {factorial_value}")
+
+if __name__ == "__main__":
+    demonstrate_math_operations()
 
 # Question 23
 import random
+def generate_random_numbers() -> None:
 
-print("Random Integer:", random.randint(1, 100))
-print("Random Float:", random.uniform(1, 10))
+    random_integer = random.randint(1, 100)
+    random_float = random.uniform(1, 10)
+
+    print(f"Random Integer: {random_integer}")
+    print(f"Random Float: {random_float:.2f}")
+
+if __name__ == "__main__":
+    generate_random_numbers()
 
 # Question 24
-from custom_math_utils import add, multiply
+from python_basic.modules.custom_math_utils import (
+    add,
+    multiply
+)
 
-print("Addition:", add(10, 20))
-print("Multiplication:", multiply(10, 20))
+def dem_custom_module() -> None:
+    print(f"Addition Result: {add(10, 20)}")
+    print(f"Multiplication Result: {multiply(10, 20)}")
+
+if __name__ == "__main__":
+    dem_custom_module()
