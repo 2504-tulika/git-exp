@@ -1,6 +1,4 @@
-"""
-Question 1: Iterate through a list using an iterator and the next() function.
-"""
+# Question 1: Iterate through a list using an iterator and the next() function.
 def iterate_list_using_next() -> None:
     """
     Create an iterator from a list and access elements
@@ -20,9 +18,8 @@ def iterate_list_using_next() -> None:
     print(next(lang_iterator))
     print(next(lang_iterator))
 
-"""
-Question 2: Create a custom iterator that generates numbers from 1 to N.
-"""
+
+# Question 2: Create a custom iterator that generates numbers from 1 to N.
 class NumberIterator:
     """
     Custom iterator that generates numbers from 1 to N.
