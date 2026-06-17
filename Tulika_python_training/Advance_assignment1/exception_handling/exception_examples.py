@@ -17,8 +17,6 @@ def get_integer_input() -> None:
         print("Error: Please enter a valid integer value.")
 
 
-get_integer_input()
-
 """
 Question 2: ZeroDivisionError Handling
 """
@@ -39,8 +37,6 @@ def divide_numbers() -> None:
 
     except ValueError:
         print("Error: Please enter valid numeric values.")
-
-divide_numbers()
 
 """
 Question 3: try-except-else-finally
@@ -68,7 +64,6 @@ def read_num_and_square(file_path: str) -> None:
     finally:
         print("File operation completed.")
 
-read_num_and_square("number.txt")
 
 """
 Question 4: Multiple Exceptions
@@ -91,7 +86,6 @@ def multiple_exceptions() -> None:
     except ZeroDivisionError:
         print("Error: Cannot divide by zero.")
 
-multiple_exceptions()
 
 """Question 5: Catch all exceptions
 """
@@ -110,7 +104,6 @@ def catch_all_exceptions() -> None:
     except Exception as error:
         print(f"An error occurred: {error}")
 
-catch_all_exceptions()
 
 """
 Question 6: Raise ValueError for negative number
@@ -130,10 +123,6 @@ def validate_positive_number(number: int) -> None:
 
     print(f"Valid number entered: {number}")
 
-try:
-    validate_positive_number(-5)
-except ValueError as error:
-    print(error)
 
 """
 Question 7: AgeException
@@ -155,10 +144,6 @@ def validate_age(age: int) -> None:
         )
 
     print("Age verification successful.")
-try:
-    validate_age(15)
-except AgeException as error:
-    print(error)
 
 """
 Question 8: FileNotFoundError
@@ -176,4 +161,34 @@ def open_file(file_path: str) -> None:
 
     except FileNotFoundError:
         print(f"Error: '{file_path}' does not exist.")
-open_file("missing_file.txt")
+
+if __name__ == "__main__":
+    print("\n--- Question 1 ---")
+    get_integer_input()
+
+    print("\n--- Question 2 ---")
+    divide_numbers()
+
+    print("\n--- Question 3 ---")
+    read_num_and_square("number.txt")
+
+    print("\n--- Question 4 ---")
+    multiple_exceptions()
+
+    print("\n--- Question 5 ---")
+    catch_all_exceptions()
+
+    print("\n--- Question 6 ---")
+    try:
+        validate_positive_number(-5)
+    except ValueError as error:
+        print(error)
+
+    print("\n--- Question 7 ---")
+    try:
+        validate_age(15)
+    except AgeException as error:
+        print(error)
+
+    print("\n--- Question 8 ---")
+    open_file("missing_file.txt")
