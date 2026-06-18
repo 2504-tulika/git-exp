@@ -2,7 +2,7 @@
 Demonstrate package usage.
 """
 
-from packaging_Que.math_package import (
+from packaging.math_package import (
     add,
     subtract,
     multiply,
