@@ -63,6 +63,86 @@ def search_word(
     else:
         print(f"'{word}' not found.")
 
+# Question 5: Demonstrate re.findall()
+def extract_hashtags(
+    text: str
+) -> list[str]:
+    """
+    Extract hashtags using re.findall().
+    """
+    return re.findall(
+        r"#\w+",
+        text
+    )
+
+# Question 6: Replace spaces with hyphens using re.sub()
+def replace_spaces_with_hyphen(
+    text: str
+) -> str:
+    """
+    Replace spaces with hyphens using re.sub().
+
+    Args:
+        text (str): Input text.
+
+    Returns:
+        str: Modified text.
+    """
+    return re.sub(
+        r"\s+",
+        "-",
+        text
+    )
+
+# Question 7: Check if a string contains only alphabets.
+def contains_only_alphabets(
+    text: str
+) -> bool:
+    """
+    Check whether a string contains only alphabetic characters.
+
+    Args:
+        text (str): Input text.
+
+    Returns:
+        bool: True if valid.
+    """
+    pattern = r"^[A-Za-z]+$"
+
+    return bool(
+        re.fullmatch(
+            pattern,
+            text
+        )
+    )
+
+def validate_password(
+    password: str
+) -> bool:
+    """
+    Validate password strength.
+
+    Requirements:
+    - At least 8 characters
+    - One uppercase letter
+    - One lowercase letter
+    - One digit
+    - One special character
+    """
+    pattern = (
+        r"^(?=.*[a-z])"
+        r"(?=.*[A-Z])"
+        r"(?=.*\d)"
+        r"(?=.*[@$!%*?&])"
+        r"[A-Za-z\d@$!%*?&]{8,}$"
+    )
+
+    return bool(
+        re.fullmatch(
+            pattern,
+            password
+        )
+    )
 
 if __name__ == "__main__":
     print("\n--- Question 1 ---")
@@ -92,3 +172,36 @@ if __name__ == "__main__":
     text = input("Enter a sentence: ")
     word = input("Enter a word to search: ")
     search_word(text, word)
+
+    print("\n--- Question 5 ---")
+    text = input("Enter a string with hashtags: ")
+    print(
+        "Hashtags found:",
+        extract_hashtags(text)
+    )
+
+    print("\n--- Question 6 ---")
+    text = input("Enter a sentence: ")
+    print(
+        replace_spaces_with_hyphen(text)
+    )
+
+    print("\n--- Question 7 ---")
+    text = input(
+        "Enter text: "
+    )
+    if contains_only_alphabets(text):
+        print("Valid input.")
+    else:
+        print(
+            "Input contains non-alphabet characters."
+        )
+
+    print("\n--- Question 8 ---")
+    password = input(
+        "Enter password: "
+    )
+    if validate_password(password):
+        print("Strong password.")
+    else:
+        print("Weak password.")
