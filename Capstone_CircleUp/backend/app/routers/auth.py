@@ -38,7 +38,8 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     response_model=LoginResponse,
     summary="Login and receive access token",
 )
-def login(data: UserLogin, db: Session = Depends(get_db)):    """
+def login(data: UserLogin, db: Session = Depends(get_db)):    
+    """
     Authenticate with email and password.
 
     Returns a JWT access token valid for 90 minutes.
