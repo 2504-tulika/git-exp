@@ -92,6 +92,62 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=1)
 
+class UserUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
+    city: str | None = Field(default=None, max_length=100)
+    bio: str | None = Field(default=None, max_length=500)
+    social_handle: str | None = Field(default=None, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if not re.match(r"^[a-zA-Z\s\-'.]+$", v):
+            raise ValueError("Name can only contain letters, spaces, hyphens, apostrophes, and dots.")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if not re.match(r"^[1-9][0-9]{9}$", v):
+            raise ValueError("Enter a valid 10-digit mobile number.")
+        return v
+
+    @field_validator("social_handle")
+    @classmethod
+    def validate_social_handle(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if not re.match(r"^@[\w.]{1,99}$", v):
+            raise ValueError("Social handle must start with @ (e.g. @username).")
+        return v
+
+    @field_validator("bio")
+    @classmethod
+    def validate_bio(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if len(v) < 10:
+            raise ValueError("Bio must be at least 10 characters if provided.")
+        return v
+
+    @field_validator("city")
+    @classmethod
+    def validate_city(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        v = v.strip()
+        if not re.match(r"^[a-zA-Z\s\-'.]+$", v):
+            raise ValueError("City name can only contain letters, spaces, and hyphens.")
+        return v
 
 # ───────────────────────────── Response Schemas ─────────────────────────────
 
