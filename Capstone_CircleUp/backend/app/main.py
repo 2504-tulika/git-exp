@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.routers import auth
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -33,6 +34,5 @@ def health_check():
     return {"status": "ok", "service": settings.PROJECT_NAME}
 
 
-# Routers will be added here like:
-# from app.routers import auth, users, activities, participation
-# app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
+# Routers
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
