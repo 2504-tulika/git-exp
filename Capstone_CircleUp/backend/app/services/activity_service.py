@@ -5,7 +5,7 @@ All ownership checks, status validations, and SRS rules live here.
 Routers call these functions and never touch the database directly.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -35,7 +35,7 @@ def create_activity(db: Session, data: ActivityCreate, current_user: User) -> Ac
     )
 
     db.add(new_activity)
-    db.commit()
+    _commit(db)
     db.refresh(new_activity)
     return new_activity
 
@@ -50,12 +50,8 @@ def get_activity_by_id(db: Session, activity_id: int) -> Activity:
     activity = db.query(Activity).filter(Activity.id == activity_id).first()
 
     if not activity:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Activity not found.",
-        )
+        _not_found("Activity not found.")
 
-    # Lazy status transition — if date has passed, mark as Completed
     activity = _check_and_complete(db, activity)
     return activity
 
@@ -72,25 +68,17 @@ def update_activity(
     activity = get_activity_by_id(db, activity_id)
 
     _check_ownership(activity, current_user)
-
-    if activity.status in [ActivityStatus.CANCELLED.value, ActivityStatus.COMPLETED.value]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Cannot edit a {activity.status} activity.",
-        )
+    _check_editable(activity)
 
     update_data = data.model_dump(exclude_unset=True)
 
     if not update_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No fields provided to update.",
-        )
+        _bad_request("No fields provided to update.")
 
     for field, value in update_data.items():
         setattr(activity, field, value)
 
-    db.commit()
+    _commit(db)
     db.refresh(activity)
     return activity
 
@@ -109,24 +97,41 @@ def cancel_activity(
     _check_ownership(activity, current_user)
 
     if activity.status == ActivityStatus.CANCELLED.value:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Activity is already cancelled.",
-        )
+        _bad_request("Activity is already cancelled.")
 
     if activity.status == ActivityStatus.COMPLETED.value:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot cancel a completed activity.",
-        )
+        _bad_request("Cannot cancel a completed activity.")
 
     activity.status = ActivityStatus.CANCELLED.value
-    db.commit()
+    _commit(db)
     db.refresh(activity)
     return activity
 
 
-# Private Helpers 
+# Private Helpers
+
+def _commit(db: Session) -> None:
+    """
+    Commit the current session, rolling back on failure.
+
+    Centralizes commit/rollback so every write path in this service handles DB errors the same way 
+    """
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
+def _bad_request(detail: str) -> None:
+    """Raise a centralized 400 Bad Request."""
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+def _not_found(detail: str) -> None:
+    """Raise a centralized 404 Not Found."""
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
 
 def _check_ownership(activity: Activity, current_user: User) -> None:
     """
@@ -142,6 +147,16 @@ def _check_ownership(activity: Activity, current_user: User) -> None:
         )
 
 
+def _check_editable(activity: Activity) -> None:
+    """
+    Raise 400 if the activity is in a terminal state (Cancelled/Completed)
+    and therefore cannot be edited. Centralized since update_activity and
+    similar future write-paths share this exact rule.
+    """
+    if activity.status in (ActivityStatus.CANCELLED.value, ActivityStatus.COMPLETED.value):
+        _bad_request(f"Cannot edit a {activity.status} activity.")
+
+
 def _check_and_complete(db: Session, activity: Activity) -> Activity:
     """
     Lazily transition activity to Completed if its date/time has passed.
@@ -150,13 +165,13 @@ def _check_and_complete(db: Session, activity: Activity) -> Activity:
     Only Open or Full activities transition to Completed.
     Cancelled stays Cancelled.
     """
-    if activity.status in [ActivityStatus.OPEN.value, ActivityStatus.FULL.value]:
+    if activity.status in (ActivityStatus.OPEN.value, ActivityStatus.FULL.value):
         activity_datetime = datetime.combine(
             activity.activity_date,
             activity.activity_time,
         )
         if activity_datetime < datetime.now():
             activity.status = ActivityStatus.COMPLETED.value
-            db.commit()
+            _commit(db)
             db.refresh(activity)
     return activity
