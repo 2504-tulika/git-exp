@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CircleUp</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="landing-nav">
+  <div class="landing-nav-logo">CircleUp</div>
+  <div class="landing-nav-actions">
+    <a href="pages/auth.html#login" class="btn btn-ghost btn-sm">Sign in</a>
+    <a href="pages/auth.html#register" class="btn btn-primary btn-sm">Get started</a>
+  </div>
+</nav>
+
+<!-- Full-screen Hero -->
+<section class="hero">
+
+  <div class="floating-cards">
+    <div class="float-card float-card-1">
+      <div class="float-card-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="float-card-info">
+        <div class="float-card-title">Cricket Match</div>
+        <div class="float-card-meta">Sunday · Sector 4 Ground</div>
+      </div>
+    </div>
+    <div class="float-card float-card-2">
+      <div class="float-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="float-card-info">
+        <div class="float-card-title">Study Group</div>
+        <div class="float-card-meta">Sat · Central Library</div>
+      </div>
+    </div>
+    <div class="float-card float-card-3">
+      <div class="float-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+      </div>
+      <div class="float-card-info">
+        <div class="float-card-title">Weekend Trek</div>
+        <div class="float-card-meta">Next Sat · Pachmarhi</div>
+      </div>
+    </div>
+    <div class="float-card float-card-4">
+      <div class="float-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      </div>
+      <div class="float-card-info">
+        <div class="float-card-title">Café Meetup</div>
+        <div class="float-card-meta">Fri · Brewhouse, MG Road</div>
+      </div>
+    </div>
+    <div class="float-card float-card-5">
+      <div class="float-card-icon">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div class="float-card-info">
+        <div class="float-card-title">Badminton</div>
+        <div class="float-card-meta">Daily · Sports Complex</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Activities happening near you
+    </div>
+
+    <h1 class="hero-title">
+      Find Your Own<br>
+      <span class="hero-title-accent">CIRCLE.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Real activities. Real people. No algorithms, no feed —
+      just sports, meetups, trips and study sessions waiting for one more person.
+    </p>
+
+    <div class="hero-actions">
+      <a href="pages/auth.html#register" class="btn btn-primary btn-lg">
+        Join CircleUp
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+      <a href="pages/auth.html#login" class="btn btn-secondary btn-lg">Sign in</a>
+    </div>
+  </div>
+
+</section>
+
+<script src="js/transitions.js"></script>
+<script>
+  const cards = document.querySelectorAll('.float-card');
+  document.addEventListener('mousemove', (e) => {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    cards.forEach((card, i) => {
+      const depth = 0.007 + i * 0.004;
+      const tx = dx * window.innerWidth * depth;
+      const ty = dy * window.innerHeight * depth;
+      card.style.transform = `translate(${tx}px, ${ty}px)`;
+    });
+  }, { passive: true });
+</script>
+
+</body>
+</html>
