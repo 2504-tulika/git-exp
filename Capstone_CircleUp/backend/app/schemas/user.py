@@ -12,13 +12,17 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
 
 
+ALLOWED_GENDERS = {"Male", "Female", "Other"}
+
+
 # ───────────────────────────── Request Schemas ──────────────────────────────
 
 class UserRegister(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(..., min_length=8)
-    phone: str | None = Field(default=None, max_length=20)
+    phone: str = Field(..., max_length=20)
+    gender: str = Field(...)
     city: str | None = Field(default=None, max_length=100)
     bio: str | None = Field(default=None, max_length=500)
     social_handle: str | None = Field(default=None, max_length=100)
@@ -32,6 +36,13 @@ class UserRegister(BaseModel):
         if not re.match(r"^[a-zA-Z\s\-'.]+$", v):
             raise ValueError("Name can only contain letters, spaces, hyphens, apostrophes, and dots.")
         return v
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_domain(cls, v: str) -> str:
+        if not v.lower().endswith("@gmail.com"):
+            raise ValueError("Only Gmail addresses are accepted.")
+        return v.lower()
 
     @field_validator("password")
     @classmethod
@@ -48,12 +59,18 @@ class UserRegister(BaseModel):
 
     @field_validator("phone")
     @classmethod
-    def validate_phone(cls, v: str | None) -> str | None:
-        if v is None:
-            return v
+    def validate_phone(cls, v: str) -> str:
         v = v.strip()
         if not re.match(r"^[1-9][0-9]{9}$", v):
             raise ValueError("Enter a valid 10-digit mobile number.")
+        return v
+
+    @field_validator("gender")
+    @classmethod
+    def validate_gender(cls, v: str) -> str:
+        v = v.strip().capitalize()
+        if v not in ALLOWED_GENDERS:
+            raise ValueError(f"Gender must be one of: {', '.join(sorted(ALLOWED_GENDERS))}.")
         return v
 
     @field_validator("social_handle")
@@ -91,6 +108,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=1)
+
 
 class UserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=100)
@@ -149,13 +167,15 @@ class UserUpdate(BaseModel):
             raise ValueError("City name can only contain letters, spaces, and hyphens.")
         return v
 
+
 # ───────────────────────────── Response Schemas ─────────────────────────────
 
 class UserResponse(BaseModel):
     id: int
     name: str
     email: str
-    phone: str | None
+    phone: str
+    gender: str
     city: str | None
     bio: str | None
     social_handle: str | None
