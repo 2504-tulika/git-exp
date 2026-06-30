@@ -109,19 +109,20 @@
           <div class="section-label">Account details</div>
 
           <div class="form-group">
-            <label class="form-label" for="reg-name">Full name</label>
+            <label class="form-label" for="reg-name">Full name <span class="required-mark">*</span></label>
             <input class="form-input" type="text" id="reg-name"
               placeholder="Your full name" autocomplete="name" />
             <span class="form-error" id="reg-name-error" style="display:none;"></span>
           </div>
           <div class="form-group">
-            <label class="form-label" for="reg-email">Email address</label>
+            <label class="form-label" for="reg-email">Email address <span class="required-mark">*</span></label>
             <input class="form-input" type="email" id="reg-email"
               placeholder="you@gmail.com" autocomplete="email" />
             <span class="form-error" id="reg-email-error" style="display:none;"></span>
+            <span class="form-hint">Only Gmail addresses are accepted.</span>
           </div>
           <div class="form-group">
-            <label class="form-label" for="reg-password">Password</label>
+            <label class="form-label" for="reg-password">Password <span class="required-mark">*</span></label>
             <input class="form-input" type="password" id="reg-password"
               placeholder="Min 8 chars, uppercase, number, special"
               autocomplete="new-password" />
@@ -129,22 +130,35 @@
             <span class="form-hint">Must include uppercase, lowercase, number, and special character.</span>
           </div>
 
-          <div class="section-label" style="margin-top:4px;">
-            Profile <span class="optional-tag">— optional</span>
-          </div>
-
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="reg-phone">Phone</label>
+              <label class="form-label" for="reg-phone">Phone <span class="required-mark">*</span></label>
               <input class="form-input" type="tel" id="reg-phone"
-                placeholder="10-digit number" autocomplete="tel" />
+                placeholder="10-digit number" autocomplete="tel"
+                maxlength="10" inputmode="numeric"
+                oninput="this.value=this.value.replace(/\D/g,'')" />
               <span class="form-error" id="reg-phone-error" style="display:none;"></span>
             </div>
             <div class="form-group">
-              <label class="form-label" for="reg-city">City</label>
-              <input class="form-input" type="text" id="reg-city" placeholder="Your city" />
-              <span class="form-error" id="reg-city-error" style="display:none;"></span>
+              <label class="form-label" for="reg-gender">Gender <span class="required-mark">*</span></label>
+              <select class="form-select" id="reg-gender">
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <span class="form-error" id="reg-gender-error" style="display:none;"></span>
             </div>
+          </div>
+
+          <div class="section-label" style="margin-top:4px;">
+            More about you <span class="optional-tag">— optional</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-city">City</label>
+            <input class="form-input" type="text" id="reg-city" placeholder="Your city" />
+            <span class="form-error" id="reg-city-error" style="display:none;"></span>
           </div>
 
           <div class="form-group">

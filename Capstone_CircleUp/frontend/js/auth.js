@@ -63,8 +63,8 @@ function clearFieldError(id) {
 }
 function clearAllErrors() {
   ['login-email', 'login-password'].forEach(clearFieldError);
-  ['reg-name', 'reg-email', 'reg-password',
-   'reg-phone', 'reg-city', 'reg-bio', 'reg-social'].forEach(clearFieldError);
+  ['reg-name', 'reg-email', 'reg-password', 'reg-phone', 'reg-gender',
+   'reg-city', 'reg-bio', 'reg-social'].forEach(clearFieldError);
 }
 
 // Toast
@@ -145,7 +145,8 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const name     = document.getElementById('reg-name').value.trim();
   const email    = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
-  const phone    = document.getElementById('reg-phone').value.trim() || null;
+  const phone    = document.getElementById('reg-phone').value.trim();
+  const gender   = document.getElementById('reg-gender').value;
   const city     = document.getElementById('reg-city').value.trim() || null;
   const bio      = document.getElementById('reg-bio').value.trim() || null;
   const social   = document.getElementById('reg-social').value.trim() || null;
@@ -154,12 +155,13 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   if (!name)     { showFieldError('reg-name',     'Name is required.');     valid = false; }
   if (!email)    { showFieldError('reg-email',    'Email is required.');    valid = false; }
   if (!password) { showFieldError('reg-password', 'Password is required.'); valid = false; }
+  if (!phone)    { showFieldError('reg-phone',    'Phone is required.');    valid = false; }
+  if (!gender)   { showFieldError('reg-gender',   'Gender is required.');   valid = false; }
   if (!valid) return;
 
   setRegisterLoading(true);
 
-  const payload = { name, email, password };
-  if (phone)  payload.phone         = phone;
+  const payload = { name, email, password, phone, gender };
   if (city)   payload.city          = city;
   if (bio)    payload.bio           = bio;
   if (social) payload.social_handle = social;
@@ -175,6 +177,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
           email:         'reg-email',
           password:      'reg-password',
           phone:         'reg-phone',
+          gender:        'reg-gender',
           city:          'reg-city',
           bio:           'reg-bio',
           social_handle: 'reg-social',

@@ -352,6 +352,11 @@ textarea.form-input {
   box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
 }
 
+.required-mark {
+  color: var(--error);
+  margin-left: 2px;
+}
+
 /* Cards */
 .card {
   background: var(--surface);
