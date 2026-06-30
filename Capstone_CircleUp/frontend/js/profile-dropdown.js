@@ -52,6 +52,7 @@ function renderDropdown(p) {
   document.getElementById('pd-email').textContent      = p.email          || '—';
   document.getElementById('pd-city').textContent       = p.city           || '—';
   document.getElementById('pd-phone').textContent      = p.phone          || '—';
+  document.getElementById('pd-gender').textContent     = p.gender         || '—';
   document.getElementById('pd-social').textContent     = p.social_handle  || '—';
   document.getElementById('pd-bio').textContent        = p.bio            || '—';
 }
