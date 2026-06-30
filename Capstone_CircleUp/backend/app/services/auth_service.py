@@ -43,6 +43,7 @@ def register_user(db: Session, data: UserRegister) -> User:
         email=data.email,
         password_hash=hash_password(data.password),
         phone=data.phone,
+        gender=data.gender,
         city=data.city,
         bio=data.bio,
         social_handle=data.social_handle,
