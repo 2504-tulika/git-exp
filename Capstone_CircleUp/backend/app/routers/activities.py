@@ -1,11 +1,11 @@
 """
-Activities router — CRUD endpoints for activities.
+Activities router — CRUD + discovery endpoints for activities.
 
 Routes are thin — they only handle HTTP concerns.
 All business logic lives in activity_service.py.
 """
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
@@ -16,10 +16,36 @@ from app.services.activity_service import (
     cancel_activity,
     create_activity,
     get_activity_by_id,
+    list_activities,
     update_activity,
 )
 
 router = APIRouter(prefix="/activities", tags=["Activities"])
+
+
+@router.get(
+    "",
+    response_model=list[ActivityResponse],
+    summary="Browse and filter activities",
+)
+def list_all(
+    category: str | None = Query(default=None, description="Filter by category (exact match)"),
+    location: str | None = Query(default=None, description="Filter by location (partial match)"),
+    date: str | None = Query(default=None, description="Filter by date (YYYY-MM-DD)"),
+    sort: str = Query(default="date_asc", description="Sort order: date_asc or date_desc"),
+    skip: int = Query(default=0, ge=0, description="Pagination offset"),
+    limit: int = Query(default=20, ge=1, le=50, description="Page size (max 50)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Browse available activities with optional filters.
+
+    Shows Open, Full, and Cancelled activities.
+    Completed activities are excluded from the discovery feed.
+    All filters are optional and can be combined.
+    """
+    return list_activities(db, category=category, location=location, date=date, sort=sort, skip=skip, limit=limit)
 
 
 @router.post(
