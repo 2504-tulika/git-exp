@@ -6,6 +6,7 @@
   <title>CircleUp — Activities</title>
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/profile.css" />
+  <link rel="stylesheet" href="../css/activities.css" />
 </head>
 <body>
 
@@ -16,18 +17,10 @@
       <a href="activities.html" class="navbar-link active">Activities</a>
     </div>
     <div class="navbar-user">
-
-      <!-- Profile dropdown trigger + panel -->
       <div id="profile-trigger-mount">
         <div class="profile-trigger" id="profile-trigger">
-
-          <!-- Avatar button (click to open) -->
           <div class="navbar-avatar" id="pd-nav-avatar" onclick="toggleDropdown()">?</div>
-
-          <!-- Dropdown panel -->
           <div class="profile-dropdown" id="profile-dropdown">
-
-            <!-- Header: avatar + name + email -->
             <div class="pd-header">
               <div class="pd-avatar" id="pd-avatar">?</div>
               <div class="pd-identity">
@@ -35,8 +28,6 @@
                 <div class="pd-email" id="pd-email"></div>
               </div>
             </div>
-
-            <!-- View: profile fields -->
             <div class="pd-fields" id="pd-fields">
               <div class="pd-field">
                 <span class="pd-field-label">City</span>
@@ -59,8 +50,6 @@
                 <span class="pd-field-value" id="pd-bio">—</span>
               </div>
             </div>
-
-            <!-- Edit form (hidden until "Edit profile" clicked) -->
             <form class="pd-edit-form" id="pd-edit-form" novalidate>
               <div class="form-group">
                 <label class="form-label">Full name</label>
@@ -89,13 +78,9 @@
                 <button type="button" class="btn btn-ghost" onclick="cancelProfileEdit()">Cancel</button>
               </div>
             </form>
-
-            <!-- Saving indicator -->
             <div class="pd-saving" id="pd-saving">
               <span class="spinner spinner-teal"></span> Saving...
             </div>
-
-            <!-- Footer: edit + sign out -->
             <div class="pd-footer">
               <button class="pd-action" onclick="startProfileEdit()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -113,49 +98,93 @@
                 Sign out
               </button>
             </div>
-
           </div>
         </div>
-
-        <!-- Overlay: click outside to close dropdown -->
         <div class="profile-overlay" id="profile-overlay" onclick="closeDropdown()"></div>
       </div>
-
     </div>
   </div>
 </nav>
 
-<main class="container" style="padding-top: 48px; padding-bottom: 64px;">
-  <div style="
-    min-height: 60vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 16px;
-  ">
-    <div style="
-      width: 56px; height: 56px;
-      background: var(--teal-light);
-      border-radius: var(--r-lg);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto;
-    ">
+<main class="container" style="padding-top: 40px; padding-bottom: 64px;">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Activities</h1>
+    <p class="page-subtitle">Find something happening near you</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="activities-filters">
+    <div class="filter-group">
+      <select class="form-select filter-select" id="filter-category">
+        <option value="">All categories</option>
+        <option value="sports">Sports</option>
+        <option value="study">Study</option>
+        <option value="food">Food</option>
+        <option value="travel">Travel</option>
+        <option value="social">Social</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <input class="form-input filter-input" type="text" id="filter-location"
+        placeholder="Filter by location" />
+    </div>
+    <div class="filter-group">
+      <input class="form-input filter-input" type="date" id="filter-date" />
+    </div>
+    <div class="filter-group">
+      <select class="form-select filter-select" id="filter-sort">
+        <option value="date_asc">Soonest first</option>
+        <option value="date_desc">Latest first</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="clear-filters">Clear</button>
+  </div>
+
+  <!-- Loading skeletons -->
+  <div id="activities-loading" class="activities-grid">
+    <div class="activity-card skeleton-card">
+      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
+      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
+    </div>
+    <div class="activity-card skeleton-card">
+      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
+      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
+    </div>
+    <div class="activity-card skeleton-card">
+      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
+      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
+    </div>
+  </div>
+
+  <!-- Activities grid -->
+  <div id="activities-grid" class="activities-grid" style="display:none;"></div>
+
+  <!-- Empty state -->
+  <div id="activities-empty" class="empty-state" style="display:none;">
+    <div class="empty-icon">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
     </div>
-    <h1 style="font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2rem);font-weight:800;color:var(--text-1);letter-spacing:-0.02em;">
-      Activities feed
-    </h1>
-    <p style="font-size:1rem;color:var(--text-3);max-width:360px;line-height:1.7;">
-      Browse, filter and join activities here.
-    </p>
+    <p class="empty-title">No activities found</p>
+    <p class="empty-desc">Try adjusting your filters or check back later.</p>
+    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear filters</button>
   </div>
+
+  <!-- Load more -->
+  <div id="load-more-wrap" style="display:none; text-align:center; margin-top:32px;">
+    <button class="btn btn-secondary" id="load-more-btn" onclick="loadMore()">Load more</button>
+  </div>
+
 </main>
 
 <div class="toast-container" id="toast-container"></div>
@@ -163,14 +192,14 @@
 <script src="../js/transitions.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/profile-dropdown.js"></script>
+<script src="../js/activities.js"></script>
 <script>
-  // Auth guard — redirect to login if no token
   if (!isLoggedIn()) {
     window.location.href = 'auth.html#login';
   }
-
   window.addEventListener('DOMContentLoaded', () => {
     initProfileDropdown();
+    initActivities();
   });
 </script>
 

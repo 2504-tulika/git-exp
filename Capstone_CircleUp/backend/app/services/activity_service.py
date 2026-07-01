@@ -56,6 +56,71 @@ def get_activity_by_id(db: Session, activity_id: int) -> Activity:
     return activity
 
 
+def list_activities(
+    db: Session,
+    category: str | None = None,
+    location: str | None = None,
+    date: str | None = None,
+    sort: str = "date_asc",
+    skip: int = 0,
+    limit: int = 20,
+) -> list[Activity]:
+    """
+    Browse activities with optional filters and sorting.
+
+    Shows Open, Full, and Cancelled activities.
+    Completed activities are hidden — past activities aren't discoverable.
+    Filters can be combined freely.
+
+    Params:
+        category  — exact match on activity category
+        location  — case-insensitive partial match on location
+        date      — filter to activities on this exact date (YYYY-MM-DD)
+        sort      — 'date_asc' (soonest first, default) or 'date_desc'
+        skip      — pagination offset
+        limit     — page size (max 50)
+    """
+    # Never show completed activities in the discovery feed
+    visible_statuses = [
+        ActivityStatus.OPEN.value,
+        ActivityStatus.FULL.value,
+        ActivityStatus.CANCELLED.value,
+    ]
+
+    query = db.query(Activity).filter(Activity.status.in_(visible_statuses))
+
+    # Apply filters
+    if category:
+        query = query.filter(Activity.category == category.lower())
+
+    if location:
+        # Case-insensitive partial match — "pune" matches "Pune" or "Kothrud, Pune"
+        query = query.filter(Activity.location.ilike(f"%{location}%"))
+
+    if date:
+        from datetime import date as date_type
+        parsed_date = date_type.fromisoformat(date)
+        query = query.filter(Activity.activity_date == parsed_date)
+
+    # Apply sort
+    if sort == "date_desc":
+        query = query.order_by(
+            Activity.activity_date.desc(),
+            Activity.activity_time.desc(),
+        )
+    else:
+        # Default: soonest first
+        query = query.order_by(
+            Activity.activity_date.asc(),
+            Activity.activity_time.asc(),
+        )
+
+    # Clamp limit to 50 to prevent abuse
+    limit = min(limit, 50)
+
+    return query.offset(skip).limit(limit).all()
+
+
 def update_activity(
     db: Session, activity_id: int, data: ActivityUpdate, current_user: User
 ) -> Activity:
@@ -150,8 +215,6 @@ def _check_ownership(activity: Activity, current_user: User) -> None:
 def _check_editable(activity: Activity) -> None:
     """
     Raise 400 if the activity is in a terminal state (Cancelled/Completed)
-    and therefore cannot be edited. Centralized since update_activity and
-    similar future write-paths share this exact rule.
     """
     if activity.status in (ActivityStatus.CANCELLED.value, ActivityStatus.COMPLETED.value):
         _bad_request(f"Cannot edit a {activity.status} activity.")
