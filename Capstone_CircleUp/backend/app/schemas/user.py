@@ -9,6 +9,7 @@ we never accidentally expose password_hash in a response.
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
+from app.schemas.activity import ActivityResponse
 import re
 
 
@@ -193,3 +194,18 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class DashboardStats(BaseModel):
+    created: int
+    joined: int
+    pending: int
+    completed: int
+
+
+class UserActivitiesResponse(BaseModel):
+    created: list[ActivityResponse]
+    joined: list[ActivityResponse]
+    pending: list[ActivityResponse]
+    rejected: list[ActivityResponse]
+    stats: DashboardStats

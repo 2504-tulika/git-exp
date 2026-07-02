@@ -49,13 +49,13 @@ async function request(method, endpoint, body = null, auth = true) {
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, options);
     if (res.status === 401 && auth) {
-    clearSession();
-    window.location.href = '../pages/auth.html#login';
-    return;
+      clearSession();
+      window.location.href = '../pages/auth.html#login';
+      return;
     }
     const data = await res.json();
     return { data, ok: res.ok, status: res.status };
-  } 
+  }
   catch (err) {
     return {
       data: { detail: 'Network error. Please check your connection.' },
@@ -96,9 +96,9 @@ async function apiGetActivities(filters = {}) {
   const params = new URLSearchParams();
   if (filters.category) params.append('category', filters.category);
   if (filters.location) params.append('location', filters.location);
-  if (filters.date)     params.append('date', filters.date);
-  if (filters.sort)     params.append('sort', filters.sort);
-  if (filters.skip  !== undefined) params.append('skip',  filters.skip);
+  if (filters.date) params.append('date', filters.date);
+  if (filters.sort) params.append('sort', filters.sort);
+  if (filters.skip !== undefined) params.append('skip', filters.skip);
   if (filters.limit !== undefined) params.append('limit', filters.limit);
   const query = params.toString();
   return request('GET', `/activities${query ? '?' + query : ''}`);
@@ -124,6 +124,10 @@ async function apiCancelActivity(id) {
 
 async function apiRequestParticipation(activityId) {
   return request('POST', `/activities/${activityId}/requests`);
+}
+
+async function apiGetMyRequest(activityId) {
+  return request('GET', `/activities/${activityId}/requests/me`);
 }
 
 async function apiGetActivityRequests(activityId) {

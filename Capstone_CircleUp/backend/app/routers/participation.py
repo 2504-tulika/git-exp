@@ -1,7 +1,6 @@
 """
 Participation router — endpoints for requesting, approving,
 and rejecting participation in activities.
-
 Routes are thin — all business logic lives in participation_service.py.
 """
 
@@ -18,6 +17,7 @@ from app.schemas.participation_request import (
 from app.services.participation_service import (
     create_request,
     get_approved_contact,
+    get_user_request,
     list_requests,
     update_request_status,
 )
@@ -34,7 +34,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Request to join an activity",
 )
-def request_to_join(
+def join_activity(
     activity_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -47,12 +47,28 @@ def request_to_join(
     """
     return create_request(db, activity_id, current_user)
 
+@router.get(
+    "/me",
+    response_model=ParticipationRequestResponse,
+    summary="Get logged-in user's request status for this activity",
+)
+def get_my_request(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the current user's participation request for the activity.
+    Returns 404 if no request exists.
+    """
+    return get_user_request(db, activity_id, current_user)
 
 @router.get(
     "",
     response_model=list[ParticipationRequestResponse],
     summary="List participation requests (creator only)",
 )
+
 def get_requests(
     activity_id: int,
     db: Session = Depends(get_db),
@@ -60,7 +76,6 @@ def get_requests(
 ):
     """
     List all participation requests for an activity.
-
     Only the activity creator can access this endpoint.
     """
     return list_requests(db, activity_id, current_user)
@@ -101,7 +116,6 @@ def view_contact(
     """
     Get contact info (phone) for both parties once a request is approved.
 
-    SRS Section 8: contact info only visible after approval.
     Creator sees participant's phone, participant sees creator's phone.
     """
     return get_approved_contact(db, activity_id, request_id, current_user)

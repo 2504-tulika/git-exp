@@ -80,6 +80,23 @@ def list_requests(
         ParticipationRequest.activity_id == activity_id,
     ).all()
 
+def get_user_request(
+    db: Session, activity_id: int, current_user: User
+) -> ParticipationRequest:
+    """
+    Get the participation request of the current user for a specific activity.
+    Raises 404 if not found.
+    """
+    req = db.query(ParticipationRequest).filter(
+        ParticipationRequest.activity_id == activity_id,
+        ParticipationRequest.user_id == current_user.id,
+    ).first()
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="You have not requested to join this activity.",
+        )
+    return req
 
 def update_request_status(
     db: Session,
