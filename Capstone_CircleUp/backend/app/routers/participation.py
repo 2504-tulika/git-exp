@@ -1,0 +1,107 @@
+"""
+Participation router — endpoints for requesting, approving,
+and rejecting participation in activities.
+
+Routes are thin — all business logic lives in participation_service.py.
+"""
+
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+
+from app.core.dependencies import get_current_user
+from app.db.session import get_db
+from app.models.user import User
+from app.schemas.participation_request import (
+    ParticipationRequestResponse,
+    ParticipationRequestUpdate,
+)
+from app.services.participation_service import (
+    create_request,
+    get_approved_contact,
+    list_requests,
+    update_request_status,
+)
+
+router = APIRouter(
+    prefix="/activities/{activity_id}/requests",
+    tags=["Participation"],
+)
+
+
+@router.post(
+    "",
+    response_model=ParticipationRequestResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Request to join an activity",
+)
+def request_to_join(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Submit a participation request for an activity.
+
+    Cannot request own activity, duplicate requests, or
+    join Full/Cancelled/Completed activities.
+    """
+    return create_request(db, activity_id, current_user)
+
+
+@router.get(
+    "",
+    response_model=list[ParticipationRequestResponse],
+    summary="List participation requests (creator only)",
+)
+def get_requests(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    List all participation requests for an activity.
+
+    Only the activity creator can access this endpoint.
+    """
+    return list_requests(db, activity_id, current_user)
+
+
+@router.put(
+    "/{request_id}",
+    response_model=ParticipationRequestResponse,
+    summary="Approve or reject a participation request",
+)
+def update_status(
+    activity_id: int,
+    request_id: int,
+    data: ParticipationRequestUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Approve or reject a participation request.
+
+    Only the activity creator can approve or reject.
+    Approval is concurrency-safe — won't exceed max_participants.
+    Auto-transitions activity to Full when capacity is reached.
+    """
+    return update_request_status(db, activity_id, request_id, data.status, current_user)
+
+
+@router.get(
+    "/{request_id}/contact",
+    summary="View contact info after approval",
+)
+def view_contact(
+    activity_id: int,
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get contact info (phone) for both parties once a request is approved.
+
+    SRS Section 8: contact info only visible after approval.
+    Creator sees participant's phone, participant sees creator's phone.
+    """
+    return get_approved_contact(db, activity_id, request_id, current_user)

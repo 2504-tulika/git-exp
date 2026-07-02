@@ -137,3 +137,7 @@ async function apiUpdateRequestStatus(activityId, requestId, status) {
 async function apiGetMyActivities() {
   return request('GET', '/users/me/activities');
 }
+
+async function apiGetApprovedContact(activityId, requestId) {
+  return request('GET', `/activities/${activityId}/requests/${requestId}/contact`);
+}

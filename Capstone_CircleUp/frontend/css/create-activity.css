@@ -1,0 +1,56 @@
+/* ── Create Activity Card ───────────────────────────────────── */
+.create-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+  max-width: 720px;
+}
+
+.create-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Section labels spacing ─────────────────────────────────── */
+.create-card .section-label {
+  margin-bottom: 20px;
+  margin-top: 28px;
+}
+
+.create-card .section-label:first-of-type {
+  margin-top: 0;
+}
+
+/* ── Form groups spacing ────────────────────────────────────── */
+.create-card .form-group {
+  margin-bottom: 20px;
+}
+
+.create-card .form-row .form-group {
+  margin-bottom: 0;
+}
+
+.create-card .form-row {
+  margin-bottom: 20px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .create-card {
+    padding: 24px 20px;
+  }
+  .create-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .create-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
