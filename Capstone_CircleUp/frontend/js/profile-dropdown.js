@@ -48,13 +48,13 @@ function renderDropdown(p) {
 
   document.getElementById('pd-nav-avatar').textContent = initials;
   document.getElementById('pd-avatar').textContent     = initials;
-  document.getElementById('pd-name').textContent       = p.name           || '—';
-  document.getElementById('pd-email').textContent      = p.email          || '—';
-  document.getElementById('pd-city').textContent       = p.city           || '—';
-  document.getElementById('pd-phone').textContent      = p.phone          || '—';
-  document.getElementById('pd-gender').textContent     = p.gender         || '—';
-  document.getElementById('pd-social').textContent     = p.social_handle  || '—';
-  document.getElementById('pd-bio').textContent        = p.bio            || '—';
+  document.getElementById('pd-name').textContent       = p.name           || 'NA';
+  document.getElementById('pd-email').textContent      = p.email          || 'NA';
+  document.getElementById('pd-city').textContent       = p.city           || 'NA';
+  document.getElementById('pd-phone').textContent      = p.phone          || 'NA';
+  document.getElementById('pd-gender').textContent     = p.gender         || 'NA';
+  document.getElementById('pd-social').textContent     = p.social_handle  || 'NA';
+  document.getElementById('pd-bio').textContent        = p.bio            || 'NA';
 }
 
 // ── Toggle ─────────────────────────────────────────────────────

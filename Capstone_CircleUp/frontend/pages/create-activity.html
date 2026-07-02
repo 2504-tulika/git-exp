@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CircleUp — Activities</title>
+  <title>CircleUp — Create Activity</title>
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/profile.css" />
-  <link rel="stylesheet" href="../css/activities.css" />
+  <link rel="stylesheet" href="../css/create-activity.css" />
 </head>
 <body>
 
@@ -14,7 +14,7 @@
   <div class="container navbar-inner">
     <a href="../index.html" class="navbar-logo">CircleUp</a>
     <div class="navbar-links">
-      <a href="activities.html" class="navbar-link active">Activities</a>
+      <a href="activities.html" class="navbar-link">Activities</a>
     </div>
     <div class="navbar-user">
       <div id="profile-trigger-mount">
@@ -108,89 +108,121 @@
 
 <main class="container" style="padding-top: 40px; padding-bottom: 64px;">
 
-  <!-- Page header -->
-  <div class="page-header" style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
-  <div>
-    <h1 class="page-title">Activities</h1>
-    <p class="page-subtitle">Find something happening near you</p>
-  </div>
-  <a href="create-activity.html" class="btn btn-primary">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  <!-- Back link -->
+  <a href="activities.html" class="detail-back">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
     </svg>
-    Create Activity
+    Back to Activities
   </a>
-</div>
 
-  <!-- Filters -->
-  <div class="activities-filters">
-    <div class="filter-group">
-      <select class="form-select filter-select" id="filter-category">
-        <option value="">All categories</option>
-        <option value="sports">Sports</option>
-        <option value="study">Study</option>
-        <option value="food">Food</option>
-        <option value="travel">Travel</option>
-        <option value="social">Social</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <input class="form-input filter-input" type="text" id="filter-location"
-        placeholder="Filter by location" />
-    </div>
-    <div class="filter-group">
-      <input class="form-input filter-input" type="date" id="filter-date" />
-    </div>
-    <div class="filter-group">
-      <select class="form-select filter-select" id="filter-sort">
-        <option value="date_asc">Soonest first</option>
-        <option value="date_desc">Latest first</option>
-      </select>
-    </div>
-    <button class="btn btn-ghost btn-sm" id="clear-filters">Clear</button>
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Create an activity</h1>
+    <p class="page-subtitle">Fill in the details and let people find you</p>
   </div>
 
-  <!-- Loading skeletons -->
-  <div id="activities-loading" class="activities-grid">
-    <div class="activity-card skeleton-card">
-      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
-      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
-    </div>
-    <div class="activity-card skeleton-card">
-      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
-      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
-    </div>
-    <div class="activity-card skeleton-card">
-      <div class="skeleton" style="height:20px;width:60%;border-radius:6px;margin-bottom:12px;"></div>
-      <div class="skeleton" style="height:14px;width:40%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
-      <div class="skeleton" style="height:14px;width:50%;border-radius:6px;"></div>
-    </div>
-  </div>
+  <!-- Form card -->
+  <div class="create-card">
 
-  <!-- Activities grid -->
-  <div id="activities-grid" class="activities-grid" style="display:none;"></div>
-
-  <!-- Empty state -->
-  <div id="activities-empty" class="empty-state" style="display:none;">
-    <div class="empty-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
+    <!-- Alert -->
+    <div id="create-alert" class="alert alert-error" style="display:none; margin-bottom:24px;">
+      <span id="create-alert-msg"></span>
     </div>
-    <p class="empty-title">No activities found</p>
-    <p class="empty-desc">Try adjusting your filters or check back later.</p>
-    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear filters</button>
-  </div>
 
-  <!-- Load more -->
-  <div id="load-more-wrap" style="display:none; text-align:center; margin-top:32px;">
-    <button class="btn btn-secondary" id="load-more-btn" onclick="loadMore()">Load more</button>
+    <form id="create-form" novalidate>
+
+      <div class="section-label">Activity details</div>
+
+      <!-- Title -->
+      <div class="form-group">
+        <label class="form-label" for="ca-title">
+          Title <span class="required-mark">*</span>
+        </label>
+        <input class="form-input" type="text" id="ca-title"
+          placeholder="e.g. Sunday Cricket Match" maxlength="150" />
+        <span class="form-error" id="ca-title-error" style="display:none;"></span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="ca-description">Description</label>
+        <textarea class="form-input" id="ca-description" rows="3"
+          placeholder="Tell people what this activity is about, what to bring, skill level etc."
+          maxlength="1000"></textarea>
+        <span class="form-error" id="ca-description-error" style="display:none;"></span>
+      </div>
+
+      <!-- Category + Location -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="ca-category">
+            Category <span class="required-mark">*</span>
+          </label>
+          <select class="form-select" id="ca-category">
+            <option value="" disabled selected>Select a category</option>
+            <option value="sports">Sports</option>
+            <option value="study">Study</option>
+            <option value="food">Food</option>
+            <option value="travel">Travel</option>
+            <option value="social">Social</option>
+            <option value="other">Other</option>
+          </select>
+          <span class="form-error" id="ca-category-error" style="display:none;"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ca-location">
+            Location <span class="required-mark">*</span>
+          </label>
+          <input class="form-input" type="text" id="ca-location"
+            placeholder="e.g. Sector 4 Ground, Pune" maxlength="200" />
+          <span class="form-error" id="ca-location-error" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top: 4px;">When</div>
+
+      <!-- Date + Time -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="ca-date">
+            Date <span class="required-mark">*</span>
+          </label>
+          <input class="form-input" type="date" id="ca-date" />
+          <span class="form-error" id="ca-date-error" style="display:none;"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ca-time">
+            Time <span class="required-mark">*</span>
+          </label>
+          <input class="form-input" type="time" id="ca-time" />
+          <span class="form-error" id="ca-time-error" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top: 4px;">Capacity</div>
+
+      <!-- Max participants -->
+      <div class="form-group" style="max-width: 280px;">
+        <label class="form-label" for="ca-max">
+          Maximum participants <span class="required-mark">*</span>
+        </label>
+        <input class="form-input" type="number" id="ca-max"
+          placeholder="e.g. 10" min="1" max="500" />
+        <span class="form-hint">Must be at least 1.</span>
+        <span class="form-error" id="ca-max-error" style="display:none;"></span>
+      </div>
+
+      <!-- Submit -->
+      <div class="create-actions">
+        <button type="submit" class="btn btn-primary btn-lg" id="create-btn">
+          <span id="create-btn-text">Create activity</span>
+          <span id="create-spinner" class="spinner" style="display:none;"></span>
+        </button>
+        <a href="activities.html" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+
+    </form>
   </div>
 
 </main>
@@ -200,14 +232,14 @@
 <script src="../js/transitions.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/profile-dropdown.js"></script>
-<script src="../js/activities.js"></script>
+<script src="../js/create-activity.js"></script>
 <script>
   if (!isLoggedIn()) {
     window.location.href = 'auth.html#login';
   }
   window.addEventListener('DOMContentLoaded', () => {
     initProfileDropdown();
-    initActivities();
+    initCreateActivity();
   });
 </script>
 

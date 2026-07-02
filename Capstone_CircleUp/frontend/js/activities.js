@@ -95,7 +95,7 @@ async function fetchActivities(reset = false) {
   skip:     _currentSkip,
   limit:    PAGE_SIZE,
   });
-  
+
   document.getElementById('activities-loading').style.display = 'none';
 
   if (!ok) {
@@ -178,13 +178,10 @@ function _buildCard(a) {
     </div>
   `;
 
-  // Only open/full cards are clickable
-  if (a.status !== 'cancelled') {
-    card.addEventListener('click', () => {
-      // Activity detail page — coming soon
-      showActivitiesToast('Activity detail page coming soon.');
-    });
-  }
+  // All cards are clickable — navigate to detail page
+  card.addEventListener('click', () => {
+    window.location.href = `activity-detail.html?id=${a.id}`;
+  });
 
   return card;
 }

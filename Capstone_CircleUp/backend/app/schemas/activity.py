@@ -4,7 +4,6 @@ Pydantic schemas for activity-related request and response shapes.
 
 from datetime import date, datetime, time
 from pydantic import BaseModel, Field, field_validator
-import re
 
 
 # Request Schemas 
@@ -92,13 +91,14 @@ class ActivityUpdate(BaseModel):
 class ActivityResponse(BaseModel):
     id: int
     creator_id: int
+    creator_name: str | None = None
     title: str
     description: str | None
     category: str
     location: str
     activity_date: date
     activity_time: time
-    max_participants: int
+    max_participants: int | None
     status: str
     created_at: datetime
     updated_at: datetime
