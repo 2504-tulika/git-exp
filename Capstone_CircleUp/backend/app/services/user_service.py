@@ -11,6 +11,12 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.repositories import update_user
 from app.schemas.user import UserUpdate
+from app.models.activity import Activity, ActivityStatus
+from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.services.activity_service import _check_and_complete
+from app.models.activity import Activity, ActivityStatus
+from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.services.activity_service import _check_and_complete
 
 
 def get_profile(user: User) -> User:
@@ -39,4 +45,55 @@ def update_profile(db: Session, user: User, data: UserUpdate) -> User:
     for field, value in update_data.items():
         setattr(user, field, value)
 
-    return update_user(db, user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def get_user_activities(db: Session, current_user: User) -> dict:
+
+    """
+    Get all activities related to the current user (created, joined, pending, rejected)
+    along with dashboard statistics counts.
+    """
+
+    # Fetch created activities
+    created_raw = db.query(Activity).filter(Activity.creator_id == current_user.id).all()
+    created = [_check_and_complete(db, a) for a in created_raw]
+
+    # Fetch participation requests by the user
+    requests = db.query(ParticipationRequest).filter(
+        ParticipationRequest.user_id == current_user.id
+    ).all()
+    joined = []
+    pending = []
+    rejected = []
+    for r in requests:
+        act = _check_and_complete(db, r.activity)
+        if r.status == RequestStatus.APPROVED.value:
+            joined.append(act)
+        elif r.status == RequestStatus.PENDING.value:
+            pending.append(act)
+        elif r.status == RequestStatus.REJECTED.value:
+            rejected.append(act)
+
+    # Compute dashboard statistics
+    created_count = len(created)
+    joined_count = len(joined)
+    pending_count = len(pending)
+
+    completed_created = sum(1 for a in created if a.status == ActivityStatus.COMPLETED.value)
+    completed_joined = sum(1 for a in joined if a.status == ActivityStatus.COMPLETED.value)
+    completed_count = completed_created + completed_joined
+    
+    return {
+        "created": created,
+        "joined": joined,
+        "pending": pending,
+        "rejected": rejected,
+        "stats": {
+            "created": created_count,
+            "joined": joined_count,
+            "pending": pending_count,
+            "completed": completed_count
+        }
+    }
