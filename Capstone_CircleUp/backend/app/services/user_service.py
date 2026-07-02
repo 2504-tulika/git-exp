@@ -1,7 +1,7 @@
 """
 User service — business logic for profile view and update.
 
-Separating profile logic from auth logic keeps each service focused.
+Database operations delegated to repository layer.
 Auth service handles credentials; this service handles profile data.
 """
 
@@ -9,6 +9,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+from app.repositories import update_user
 from app.schemas.user import UserUpdate
 
 
@@ -38,6 +39,4 @@ def update_profile(db: Session, user: User, data: UserUpdate) -> User:
     for field, value in update_data.items():
         setattr(user, field, value)
 
-    db.commit()
-    db.refresh(user)
-    return user
+    return update_user(db, user)

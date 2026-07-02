@@ -1,27 +1,18 @@
 """
 Auth service — business logic for registration and login.
 
-This is the only place in the codebase that handles credential
-verification and user creation. Routers call these functions and
-never touch the database or security utilities directly.
+Database operations delegated to repository layer.
+This service only handles credential verification,
+password hashing, and token creation.
 """
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import User
+from app.repositories import get_user_by_email, create_user
 from app.schemas.user import UserRegister
-from fastapi import HTTPException, status
-
-
-def get_user_by_email(db: Session, email: str) -> User | None:
-    """Fetch a user by email. Returns None if not found."""
-    return db.query(User).filter(User.email == email).first()
-
-
-def get_user_by_id(db: Session, user_id: int) -> User | None:
-    """Fetch a user by id. Returns None if not found."""
-    return db.query(User).filter(User.id == user_id).first()
 
 
 def register_user(db: Session, data: UserRegister) -> User:
@@ -49,10 +40,7 @@ def register_user(db: Session, data: UserRegister) -> User:
         social_handle=data.social_handle,
     )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    return create_user(db, new_user)
 
 
 def login_user(db: Session, email: str, password: str) -> dict:
