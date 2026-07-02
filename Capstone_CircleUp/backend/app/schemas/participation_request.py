@@ -20,13 +20,13 @@ class ParticipationRequestUpdate(BaseModel):
     """Approve or reject a request. Only the creator sends this."""
     status: str  # "approved" or "rejected"
 
-
 # Response Schemas
 
 class ParticipationRequestResponse(BaseModel):
     id: int
     activity_id: int
     user_id: int
+    user_name: str | None = None
     status: str
     created_at: datetime
     updated_at: datetime

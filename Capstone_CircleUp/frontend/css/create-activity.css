@@ -1,3 +1,18 @@
+/* ── Create Layout ──────────────────────────────────────────── */
+.create-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+}
+.create-preview-section {
+  position: relative;
+}
+.preview-sticky {
+  position: sticky;
+  top: 96px; /* Offset below sticky navbar */
+}
+
 /* ── Create Activity Card ───────────────────────────────────── */
 .create-card {
   background: var(--surface);
@@ -41,14 +56,25 @@
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .create-layout {
+    grid-template-columns: 1fr;
+  }
+  .create-preview-section {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .create-card {
     padding: 24px 20px;
   }
+
   .create-actions {
     flex-direction: column;
     align-items: stretch;
   }
+
   .create-actions .btn {
     width: 100%;
     justify-content: center;
