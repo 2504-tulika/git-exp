@@ -5,12 +5,15 @@
   gap: 32px;
   align-items: start;
 }
+
 .create-preview-section {
   position: relative;
 }
+
 .preview-sticky {
   position: sticky;
-  top: 96px; /* Offset below sticky navbar */
+  top: 96px;
+  /* Offset below sticky navbar */
 }
 
 /* ── Create Activity Card ───────────────────────────────────── */
@@ -60,6 +63,7 @@
   .create-layout {
     grid-template-columns: 1fr;
   }
+
   .create-preview-section {
     display: none;
   }

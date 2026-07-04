@@ -25,6 +25,14 @@ async function initProfileDropdown() {
 
   const editForm = document.getElementById('pd-edit-form');
   if (editForm) editForm.addEventListener('submit', saveProfileEdit);
+
+  // Close dropdown when clicking outside of it
+  document.addEventListener('click', (e) => {
+  const trigger = document.getElementById('profile-trigger');
+  if (trigger && !trigger.contains(e.target)) {
+    closeDropdown();
+  }
+});
 }
 
 // ── Load & Render ──────────────────────────────────────────────
@@ -113,11 +121,14 @@ async function saveProfileEdit(e) {
   document.getElementById('pd-edit-form').classList.remove('visible');
   document.getElementById('pd-saving').classList.add('visible');
 
-  const payload = { name };
-  if (city)   payload.city          = city;
-  if (phone)  payload.phone         = phone;
-  if (social) payload.social_handle = social;
-  if (bio)    payload.bio           = bio;
+  // Always include all optional fields so clearing them sends null to backend
+  const payload = {
+    name,
+    city,
+    phone,
+    social_handle: social,
+    bio,
+  };
 
   const { data, ok } = await apiUpdateProfile(payload);
 
