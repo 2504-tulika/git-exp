@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.repositories import update_user
 from app.schemas.user import UserUpdate
-from app.models.activity import Activity, ActivityStatus
-from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.models.activity import Activity
+from app.models.participation_request import ParticipationRequest
+from app.constants import ActivityStatus, RequestStatus
 from app.services.activity_service import _check_and_complete
 from app.models.activity import Activity, ActivityStatus
 from app.models.participation_request import ParticipationRequest, RequestStatus

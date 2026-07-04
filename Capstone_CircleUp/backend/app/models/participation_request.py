@@ -1,27 +1,14 @@
 """
 ParticipationRequest model.
-The unique constraint on (activity_id, user_id) enforces the SRS rule
-"users cannot submit duplicate participation requests" at the database
-level — a second request for the same activity from the same user will
-raise an IntegrityError before application code even runs.
-Contact visibility rule: once status = 'approved', the service layer
-permits both parties to see each other's contact info. This model itself
-has no visibility logic — it only stores state.
 """
 
-import enum
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-
-
-class RequestStatus(str, enum.Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
+from app.constants import RequestStatus
 
 
 class ParticipationRequest(Base):
