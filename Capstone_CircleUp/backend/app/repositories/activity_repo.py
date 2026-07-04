@@ -35,11 +35,12 @@ def get_all(
     location: str | None = None,
     activity_date: date | None = None,
     search: str | None = None,
+    sort: str = "date_asc",
     skip: int = 0,
     limit: int = 20,
 ) -> list[Activity]:
     """
-    Browse activities with optional filters and search.
+    Browse activities with optional filters, search, and sorting.
 
     Excludes cancelled activities from results — users should
     only see open or full activities when browsing.
@@ -67,7 +68,14 @@ def get_all(
             )
         )
 
-    return query.order_by(Activity.activity_date.asc()).offset(skip).limit(limit).all()
+    if sort == "created_desc":
+        query = query.order_by(Activity.created_at.desc())
+    elif sort == "date_desc":
+        query = query.order_by(Activity.activity_date.desc(), Activity.activity_time.desc())
+    else:  # date_asc
+        query = query.order_by(Activity.activity_date.asc(), Activity.activity_time.asc())
+
+    return query.offset(skip).limit(limit).all()
 
 
 def get_by_creator(db: Session, creator_id: int) -> list[Activity]:

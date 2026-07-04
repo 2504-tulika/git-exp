@@ -48,14 +48,20 @@ def login_user(db: Session, email: str, password: str) -> dict:
     Verify credentials and return a JWT token + user object.
 
     Raises 401 if email not found or password is wrong.
-    Same error message for both cases — never reveal which one failed.
+    Differentiates between email and password failures for user-friendly validation errors.
     """
     user = get_user_by_email(db, email)
 
-    if not user or not verify_password(password, user.password_hash):
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
+            detail="Invalid email.",
+        )
+
+    if not verify_password(password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Password is invalid.",
         )
 
     access_token = create_access_token(subject=str(user.id))
