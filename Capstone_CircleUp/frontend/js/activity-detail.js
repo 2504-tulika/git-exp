@@ -7,15 +7,15 @@
  */
 
 // ── State ──────────────────────────────────────────────────────
-let _activity = null;
+let _activity    = null;
 let _currentUser = null;
-let _myRequest = null;
+let _myRequest   = null;
 
 // ── Init ───────────────────────────────────────────────────────
 
 async function initActivityDetail() {
   // Get activity ID from URL
-  const params = new URLSearchParams(window.location.search);
+  const params     = new URLSearchParams(window.location.search);
   const activityId = params.get('id');
 
   if (!activityId) {
@@ -55,24 +55,24 @@ async function initActivityDetail() {
 function _renderActivity(a) {
   // Category + title
   document.getElementById('detail-category').textContent = _capitalize(a.category);
-  document.getElementById('detail-title').textContent = a.title;
+  document.getElementById('detail-title').textContent    = a.title;
 
   // Status badge
   const badge = document.getElementById('detail-status-badge');
   badge.textContent = _statusLabel(a.status);
-  badge.className = `badge badge-${a.status}`;
+  badge.className   = `badge badge-${a.status}`;
 
   // Meta
   const dateStr = new Date(a.activity_date + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
   const [h, m] = a.activity_time.split(':');
-  const hour = parseInt(h);
+  const hour   = parseInt(h);
   const timeStr = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
 
-  document.getElementById('detail-location').textContent = a.location;
-  document.getElementById('detail-date').textContent = dateStr;
-  document.getElementById('detail-time').textContent = timeStr;
+  document.getElementById('detail-location').textContent     = a.location;
+  document.getElementById('detail-date').textContent         = dateStr;
+  document.getElementById('detail-time').textContent         = timeStr;
   document.getElementById('detail-participants').textContent = `${a.max_participants} spots max`;
 
   // Description
@@ -92,35 +92,13 @@ function _renderActivity(a) {
 async function _initParticipantSection(activityId) {
   document.getElementById('participant-section').style.display = 'block';
 
-  // Check if user already has a request
-  const { data: reqData, ok: reqOk } = await apiGetMyRequest(activityId);
-  if (reqOk && reqData) {
-    _myRequest = reqData;
-    const reqStatus = reqData.status;
-
-    if (reqStatus === 'pending') {
-      _showParticipantState('pending');
-      return;
-
-    } else if (reqStatus === 'approved') {
-      _showParticipantState('approved');
-      await _loadOrganizerContact(reqData.id);
-      return;
-
-    } else if (reqStatus === 'rejected') {
-      _showParticipantState('rejected');
-      return;
-
-    }
-  }
-
   const status = _activity.status;
 
   // If activity is not open — show unavailable
   if (status === 'cancelled') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity cancelled';
-    document.getElementById('unavailable-desc').textContent =
+    document.getElementById('unavailable-desc').textContent  =
       'This activity has been cancelled by the organiser.';
     return;
   }
@@ -128,7 +106,7 @@ async function _initParticipantSection(activityId) {
   if (status === 'completed') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity completed';
-    document.getElementById('unavailable-desc').textContent =
+    document.getElementById('unavailable-desc').textContent  =
       'This activity has already taken place.';
     return;
   }
@@ -136,43 +114,54 @@ async function _initParticipantSection(activityId) {
   if (status === 'full') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity full';
-    document.getElementById('unavailable-desc').textContent =
+    document.getElementById('unavailable-desc').textContent  =
       'This activity has reached maximum capacity.';
     return;
   }
 
-  // Check if user already has a request
-  // We can't directly fetch "my request" for an activity without a dedicated
-  // endpoint, so we'll try to request and handle the 409 gracefully on submit.
-  // For now, show the join button for open activities.
+  // Check if the user already has a request for this activity
+  const { data: myReq, ok: reqOk, status: reqStatus } = await apiGetMyRequest(activityId);
+
+  // 404 = no request exists yet — show the join button
+  if (reqStatus === 404) {
+    _showParticipantState('join');
+    return;
+  }
+
+  if (reqOk && myReq) {
+    _myRequest = myReq;
+    if (myReq.status === 'pending') {
+      _showParticipantState('pending');
+    } else if (myReq.status === 'approved') {
+      _showParticipantState('approved');
+      _loadOrganizerContact(activityId, myReq.id);
+    } else if (myReq.status === 'rejected') {
+      _showParticipantState('rejected');
+    }
+    return;
+  }
+
+  // Fallback — show join button
   _showParticipantState('join');
 }
 
 function _showParticipantState(state) {
   ['action-join', 'action-pending', 'action-approved',
-    'action-rejected', 'action-unavailable'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
+   'action-rejected', 'action-unavailable'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
   document.getElementById(`action-${state}`).style.display = 'block';
-}
-
-async function _loadOrganizerContact(requestId) {
-  const { data, ok } = await apiGetApprovedContact(_activity.id, requestId);
-  if (ok) {
-    document.getElementById('organizer-phone').textContent = data.creator_phone || '—';
-    document.getElementById('organizer-social').textContent = data.creator_social || '—';
-  }
 }
 
 // ── Request to Join ────────────────────────────────────────────
 
 async function requestToJoin() {
-  const btn = document.getElementById('join-btn');
+  const btn  = document.getElementById('join-btn');
   const text = document.getElementById('join-btn-text');
   const spin = document.getElementById('join-spinner');
 
-  btn.disabled = true;
-  text.textContent = 'Sending...';
+  btn.disabled       = true;
+  text.textContent   = 'Sending...';
   spin.style.display = 'inline-block';
 
   const { data, ok, status } = await apiRequestParticipation(_activity.id);
@@ -180,7 +169,7 @@ async function requestToJoin() {
   spin.style.display = 'none';
 
   if (!ok) {
-    btn.disabled = false;
+    btn.disabled     = false;
     text.textContent = 'Request to join';
 
     // 409 means already requested
@@ -231,21 +220,20 @@ function _buildRequestRow(req) {
 
   row.innerHTML = `
     <div class="request-user">
-      <div class="request-user-name">User #${req.user_id}</div>
-      <div class="request-user-name">${_escape(req.user_name || 'User #' + req.user_id)}</div>
+      <div class="request-user-name">${req.user_name || `User #${req.user_id}`}</div>
       ${req.status !== 'pending'
-      ? `<div class="request-user-contact">
+        ? `<div class="request-user-contact">
             ${req.status === 'approved'
-        ? `Phone: <strong id="contact-phone-${req.id}">loading...</strong>`
-        : '<span style="color:var(--rejected)">Rejected</span>'}
+              ? `Phone: <strong id="contact-phone-${req.id}">loading...</strong>`
+              : '<span style="color:var(--rejected)">Rejected</span>'}
            </div>`
-      : ''}
+        : ''}
     </div>
     <div class="request-actions">
       ${isPending
-      ? `<button class="btn btn-primary btn-sm" onclick="approveRequest(${req.id})">Approve</button>
+        ? `<button class="btn btn-primary btn-sm" onclick="approveRequest(${req.id})">Approve</button>
            <button class="btn btn-danger btn-sm" onclick="rejectRequest(${req.id})">Reject</button>`
-      : `<span class="badge badge-${req.status}">${_statusLabel(req.status)}</span>`}
+        : `<span class="badge badge-${req.status}">${_statusLabel(req.status)}</span>`}
     </div>
   `;
 
@@ -289,13 +277,29 @@ async function _updateRequest(requestId, newStatus) {
       _activity = updatedActivity;
       const badge = document.getElementById('detail-status-badge');
       badge.textContent = _statusLabel(updatedActivity.status);
-      badge.className = `badge badge-${updatedActivity.status}`;
+      badge.className   = `badge badge-${updatedActivity.status}`;
     }
   }
 
   showDetailToast(
     newStatus === 'approved' ? 'Request approved!' : 'Request rejected.'
   );
+}
+
+async function _loadOrganizerContact(activityId, requestId) {
+  const { data, ok } = await apiGetApprovedContact(activityId, requestId);
+  if (ok) {
+    if (data.creator_phone) {
+      document.getElementById('organizer-phone').textContent = data.creator_phone;
+    } else {
+      document.getElementById('organizer-phone-row').style.display = 'none';
+    }
+    if (data.creator_social) {
+      document.getElementById('organizer-social').textContent = data.creator_social;
+    } else {
+      document.getElementById('organizer-social-row').style.display = 'none';
+    }
+  }
 }
 
 async function _loadContactForRequest(requestId) {
@@ -310,13 +314,13 @@ async function _loadContactForRequest(requestId) {
 
 function _statusLabel(status) {
   const labels = {
-    open: 'Open',
-    full: 'Full',
+    open:      'Open',
+    full:      'Full',
     cancelled: 'Cancelled',
     completed: 'Completed',
-    pending: 'Pending',
-    approved: 'Approved',
-    rejected: 'Rejected',
+    pending:   'Pending',
+    approved:  'Approved',
+    rejected:  'Rejected',
   };
   return labels[status] || status;
 }
@@ -328,18 +332,9 @@ function _capitalize(str) {
 
 function showDetailToast(msg, type = 'success') {
   const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
+  const toast     = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3500);
-}
-
-function _escape(str) {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
