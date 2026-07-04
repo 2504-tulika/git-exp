@@ -10,8 +10,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.activity import Activity, ActivityStatus
-from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.models.activity import Activity
+from app.models.participation_request import ParticipationRequest
+from app.constants import ActivityStatus, RequestStatus
 from app.models.user import User
 from app.repositories import (
     get_activity_by_id,

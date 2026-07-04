@@ -7,7 +7,8 @@ needed for participation management and contact visibility logic.
 
 from sqlalchemy.orm import Session
 
-from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.models.participation_request import ParticipationRequest
+from app.constants import RequestStatus
 
 
 def get_by_id(db: Session, request_id: int) -> ParticipationRequest | None:

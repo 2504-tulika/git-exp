@@ -9,7 +9,8 @@ from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from app.models.activity import Activity, ActivityStatus
+from app.models.activity import Activity
+from app.constants import ActivityStatus
 
 
 def get_by_id(db: Session, activity_id: int) -> Activity | None:
