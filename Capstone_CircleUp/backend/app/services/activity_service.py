@@ -69,6 +69,7 @@ def list_all_activities(
     category: str | None = None,
     location: str | None = None,
     date: str | None = None,
+    search: str | None = None,
     sort: str = "date_asc",
     skip: int = 0,
     limit: int = 20,
@@ -90,15 +91,10 @@ def list_all_activities(
         category=category,
         location=location,
         activity_date=parsed_date,
+        search=search,
+        sort=sort,
         skip=skip,
         limit=min(limit, 50),
-    )
-
-    # Apply sort
-    reverse = sort == "date_desc"
-    activities.sort(
-        key=lambda a: (a.activity_date, a.activity_time),
-        reverse=reverse,
     )
 
     return activities

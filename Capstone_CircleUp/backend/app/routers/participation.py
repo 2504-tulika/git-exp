@@ -15,11 +15,11 @@ from app.schemas.participation_request import (
     ParticipationRequestUpdate,
 )
 from app.services.participation_service import (
-    create_request,
-    get_approved_contact,
+    request_to_join,
+    get_contact_info,
     get_user_request,
     list_requests,
-    update_request_status,
+    approve_or_reject,
 )
 
 router = APIRouter(
@@ -45,7 +45,7 @@ def join_activity(
     Cannot request own activity, duplicate requests, or
     join Full/Cancelled/Completed activities.
     """
-    return create_request(db, activity_id, current_user)
+    return request_to_join(db, activity_id, current_user)
 
 @router.get(
     "/me",
@@ -100,7 +100,7 @@ def update_status(
     Approval is concurrency-safe — won't exceed max_participants.
     Auto-transitions activity to Full when capacity is reached.
     """
-    return update_request_status(db, activity_id, request_id, data.status, current_user)
+    return approve_or_reject(db, activity_id, request_id, data.status, current_user)
 
 
 @router.get(
@@ -118,4 +118,4 @@ def view_contact(
 
     Creator sees participant's phone, participant sees creator's phone.
     """
-    return get_approved_contact(db, activity_id, request_id, current_user)
+    return get_contact_info(db, activity_id, request_id, current_user)

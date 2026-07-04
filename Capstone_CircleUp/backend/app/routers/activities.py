@@ -13,11 +13,11 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.activity import ActivityCreate, ActivityResponse, ActivityUpdate
 from app.services.activity_service import (
-    cancel_activity,
-    create_activity,
-    get_activity_by_id,
-    list_activities,
-    update_activity,
+    cancel_existing_activity,
+    create_new_activity,
+    get_activity,
+    list_all_activities,
+    update_existing_activity,
 )
 
 router = APIRouter(prefix="/activities", tags=["Activities"])
@@ -32,7 +32,8 @@ def list_all(
     category: str | None = Query(default=None, description="Filter by category (exact match)"),
     location: str | None = Query(default=None, description="Filter by location (partial match)"),
     date: str | None = Query(default=None, description="Filter by date (YYYY-MM-DD)"),
-    sort: str = Query(default="date_asc", description="Sort order: date_asc or date_desc"),
+    search: str | None = Query(default=None, description="Search by title or description"),
+    sort: str = Query(default="date_asc", description="Sort order: date_asc, date_desc, or created_desc"),
     skip: int = Query(default=0, ge=0, description="Pagination offset"),
     limit: int = Query(default=20, ge=1, le=50, description="Page size (max 50)"),
     db: Session = Depends(get_db),
@@ -45,7 +46,16 @@ def list_all(
     Completed activities are excluded from the discovery feed.
     All filters are optional and can be combined.
     """
-    return list_activities(db, category=category, location=location, date=date, sort=sort, skip=skip, limit=limit)
+    return list_all_activities(
+        db,
+        category=category,
+        location=location,
+        date=date,
+        search=search,
+        sort=sort,
+        skip=skip,
+        limit=limit,
+    )
 
 
 @router.post(
@@ -65,7 +75,7 @@ def create(
     The creator is automatically set from the JWT token.
     Activity starts with status Open.
     """
-    return create_activity(db, data, current_user)
+    return create_new_activity(db, data, current_user)
 
 
 @router.get(
@@ -83,7 +93,7 @@ def get_one(
 
     Automatically transitions to Completed if date has passed.
     """
-    return get_activity_by_id(db, activity_id)
+    return get_activity(db, activity_id)
 
 
 @router.put(
@@ -103,7 +113,7 @@ def update(
     Only the creator can update their own activity.
     Cannot update cancelled or completed activities.
     """
-    return update_activity(db, activity_id, data, current_user)
+    return update_existing_activity(db, activity_id, data, current_user)
 
 
 @router.delete(
@@ -122,4 +132,4 @@ def cancel(
     Only the creator can cancel their own activity.
     Sets status to Cancelled — does not delete from database.
     """
-    return cancel_activity(db, activity_id, current_user)
+    return cancel_existing_activity(db, activity_id, current_user)
