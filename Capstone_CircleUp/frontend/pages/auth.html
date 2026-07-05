@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CircleUp — Join or Sign In</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- Left: Brand Panel -->
+  <div class="auth-brand">
+    <div class="auth-circle auth-circle-1"></div>
+    <div class="auth-circle auth-circle-2"></div>
+    <div class="auth-circle auth-circle-3"></div>
+
+    <div class="auth-brand-logo">CircleUp</div>
+
+    <div class="auth-brand-content">
+      <h1 class="auth-brand-title">
+        Find your people.<br>Do things<br>together.
+      </h1>
+      <p class="auth-brand-subtitle">
+        Real activities. Real people. Sports, meetups, trips, study sessions —
+        one platform to find them all.
+      </p>
+      <div class="auth-brand-pills">
+        <span class="auth-brand-pill">Cricket Match</span>
+        <span class="auth-brand-pill">Café Meetup</span>
+        <span class="auth-brand-pill">Study Group</span>
+        <span class="auth-brand-pill">Weekend Trip</span>
+        <span class="auth-brand-pill">Badminton</span>
+      </div>
+    </div>
+
+    <div class="auth-brand-footer">
+      Bringing people together, one activity at a time.
+    </div>
+  </div>
+
+  <!-- Right: Form Panel  -->
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+
+      <a href="../index.html" class="auth-back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back
+      </a>
+
+      <!-- Tab toggle -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign in</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create account</button>
+      </div>
+
+      <!-- Shared alert -->
+      <div id="alert" class="alert alert-error" style="display:none; margin-bottom:20px;">
+        <span id="alert-msg"></span>
+      </div>
+
+      <!-- Login -->
+      <div class="auth-section visible" id="section-login">
+        <div class="auth-form-header">
+          <h2 class="auth-form-title">Welcome back</h2>
+          <p class="auth-form-subtitle">Sign in to continue to CircleUp</p>
+        </div>
+
+        <form class="auth-form" id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email address</label>
+            <input class="form-input" type="email" id="login-email"
+              placeholder="you@example.com" autocomplete="email" />
+            <span class="form-error" id="login-email-error" style="display:none;"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input class="form-input" type="password" id="login-password"
+              placeholder="Your password" autocomplete="current-password" />
+            <span class="form-error" id="login-password-error" style="display:none;"></span>
+          </div>
+          <div class="auth-submit">
+            <button type="submit" class="btn btn-primary btn-lg btn-full" id="login-btn">
+              <span id="login-btn-text">Sign in</span>
+              <span id="login-spinner" class="spinner" style="display:none;"></span>
+            </button>
+          </div>
+        </form>
+
+        <p class="auth-switch">
+          Don't have an account?
+          <button onclick="switchTab('register')">Create one</button>
+        </p>
+      </div>
+
+      <!-- Register -->
+      <div class="auth-section" id="section-register">
+        <div class="auth-form-header">
+          <h2 class="auth-form-title">Create your account</h2>
+          <p class="auth-form-subtitle">Join CircleUp and start connecting</p>
+        </div>
+
+        <form class="auth-form" id="register-form" novalidate>
+
+          <div class="section-label">Account details</div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full name <span class="required-mark">*</span></label>
+            <input class="form-input" type="text" id="reg-name"
+              placeholder="Your full name" autocomplete="name" />
+            <span class="form-error" id="reg-name-error" style="display:none;"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email address <span class="required-mark">*</span></label>
+            <input class="form-input" type="email" id="reg-email"
+              placeholder="you@gmail.com" autocomplete="email" />
+            <span class="form-error" id="reg-email-error" style="display:none;"></span>
+            <span class="form-hint">Only Gmail addresses are accepted.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password <span class="required-mark">*</span></label>
+            <input class="form-input" type="password" id="reg-password"
+              placeholder="Min 8 chars, uppercase, number, special"
+              autocomplete="new-password" />
+            <span class="form-error" id="reg-password-error" style="display:none;"></span>
+            <span class="form-hint">Must include uppercase, lowercase, number, and special character.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="reg-phone">Phone <span class="required-mark">*</span></label>
+              <input class="form-input" type="tel" id="reg-phone"
+                placeholder="10-digit number" autocomplete="tel"
+                maxlength="10" inputmode="numeric"
+                oninput="this.value=this.value.replace(/\D/g,'')" />
+              <span class="form-error" id="reg-phone-error" style="display:none;"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-gender">Gender <span class="required-mark">*</span></label>
+              <select class="form-select" id="reg-gender">
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <span class="form-error" id="reg-gender-error" style="display:none;"></span>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top:4px;">
+            More about you <span class="optional-tag">— optional</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-city">City</label>
+            <input class="form-input" type="text" id="reg-city" placeholder="Your city" />
+            <span class="form-error" id="reg-city-error" style="display:none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-bio">Bio</label>
+            <input class="form-input" type="text" id="reg-bio"
+              placeholder="Tell others a bit about yourself" />
+            <span class="form-error" id="reg-bio-error" style="display:none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-social">
+              Social handle <span class="optional-tag">e.g. @username</span>
+            </label>
+            <input class="form-input" type="text" id="reg-social" placeholder="@yourhandle" />
+            <span class="form-error" id="reg-social-error" style="display:none;"></span>
+          </div>
+
+          <div class="auth-submit">
+            <button type="submit" class="btn btn-primary btn-lg btn-full" id="register-btn">
+              <span id="register-btn-text">Create account</span>
+              <span id="register-spinner" class="spinner" style="display:none;"></span>
+            </button>
+          </div>
+
+        </form>
+
+        <p class="auth-switch">
+          Already have an account?
+          <button onclick="switchTab('login')">Sign in</button>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="../js/transitions.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+
+</body>
+</html>
