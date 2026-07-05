@@ -22,3 +22,102 @@ rules:
     details: >
       Flag any print() calls in non-test files.
       Replace with the project logger at the appropriate log level.
+
+  
+  - id: no_nested_loops
+    enabled: true
+    severity: OPTIMIZATION
+    title: Avoid nested loops
+    details: >
+      Flag nested loops (loop within a loop) on added lines. Prefer a set/dict
+      lookup, list comprehension, itertools, or restructuring the data access
+      pattern to avoid O(n^2)+ complexity. Suggest a concrete alternative
+      with a fix snippet, not just a warning.
+
+  - id: extract_large_service_logic_to_utils
+    enabled: true
+    severity: CODE_QUALITY
+    title: Extract large service logic into utils
+    details: >
+      If a service function is growing large or doing multiple distinct
+      operations, flag it and recommend extracting the reusable logic into
+      a util module, then importing and calling that util from the service
+      function. Do not recommend bulk/inline operations directly in the
+      service layer.
+
+  - id: single_return_statement
+    enabled: true
+    severity: CODE_QUALITY
+    title: Single return statement per function
+    details: >
+      Functions must have exactly one return statement, using a named
+      variable. The function must return a response schema (Pydantic model)
+      or a well-defined variable — never a raw string or raw dict.
+
+  - id: router_path_convention
+    enabled: true
+    severity: CODE_QUALITY
+    title: Router endpoint path convention
+    details: >
+      Router endpoint paths must follow the entity/entity_id convention
+      (e.g. /model/{model_name}, /user/{user_id}). Flag endpoints that
+      deviate from this pattern, such as verb-based or inconsistent paths.
+
+  - id: thin_router_pattern
+    enabled: true
+    severity: CODE_QUALITY
+    title: Router should only call the service layer
+    details: >
+      Router/endpoint functions must contain only a single call to the
+      corresponding service function (plus dependency injection). Flag
+      any business logic, validation, data transformation, or direct
+      DB/client calls written directly inside a router function — that
+      logic belongs in the service layer.
+
+  - id: request_schema_validation
+    enabled: true
+    severity: CODE_QUALITY
+    title: Request validation via validators and decorators
+    details: >
+      Request schemas must be validated using Pydantic validators or
+      dedicated validation decorators, not ad-hoc if-checks inline in the
+      route or service body. Flag inline validation logic and recommend
+      moving it into a validator/decorator on the schema.
+
+  - id: no_raw_strings_use_constants
+    enabled: true
+    severity: CODE_QUALITY
+    title: No raw strings — use constants
+    details: >
+      Every user-facing message, log message, or repeated string literal
+      must be defined in a constants file/module and referenced by name.
+      Flag raw string literals used for messages, error details, or status
+      text directly in code.
+
+  - id: no_inline_comments_docstrings_only
+    enabled: true
+    severity: CODE_QUALITY
+    title: No inline comments — docstrings only
+    details: >
+      Flag inline "#" comments on added lines. Functions, classes, and
+      modules should be documented with docstrings instead; inline
+      comments explaining "what" the code does should be removed or
+      converted into a docstring if the explanation is genuinely needed.
+
+  - id: async_io_operations
+    enabled: true
+    severity: PERFORMANCE
+    title: Avoid blocking operations in async endpoints
+    details: >
+      Detect synchronous database, network, or file operations inside async
+      endpoints. Use async libraries or move blocking work to background
+      tasks.
+
+  - id: get_with_multiple_params_as_post
+    enabled: true
+    severity: CODE_QUALITY
+    title: Convert multi-param GET endpoints to POST with body
+    details: >
+      If a GET endpoint accepts multiple query parameters, flag it and
+      recommend converting it to a POST endpoint that accepts a request
+      body schema instead of stacking query params.
