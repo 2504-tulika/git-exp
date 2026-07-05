@@ -93,7 +93,7 @@ async function _initParticipantSection(activityId) {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity completed';
     document.getElementById('unavailable-desc').textContent  =
-      'This activity has already taken place.';
+      'This activity is completed.';
     return;
   }
 
