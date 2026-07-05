@@ -194,6 +194,40 @@ def approve_or_reject(
     result = update_request(db, participation_request)
     return result
 
+def cancel_request(
+    db: Session,
+    activity_id: int,
+    request_id: int,
+    current_user: User,
+) -> ParticipationRequest:
+    """
+    Cancel a pending participation request.
+    Only the requester can cancel their own request.
+    Only pending requests can be cancelled.
+    """
+    req = get_request_by_id(db, request_id)
+
+    if not req or req.activity_id != activity_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Participation request not found.",
+        )
+
+    if req.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only cancel your own requests.",
+        )
+
+    if req.status != RequestStatus.PENDING.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot cancel a request that is already {req.status}.",
+        )
+
+    db.delete(req)
+    db.commit()
+    return req
 
 def get_contact_info(
     db: Session,

@@ -4,11 +4,27 @@
  * Handles the create activity form — validation, submission,
  * and redirect to the new activity's detail page on success.
  */
-function initCreateActivity() {
+async function initCreateActivity() {
   // Set minimum date to today so users can't pick past dates
   const dateInput = document.getElementById('ca-date');
   const today = new Date().toISOString().split('T')[0];
   dateInput.min = today;
+  // Check if we're in edit mode
+const urlParams = new URLSearchParams(window.location.search);
+const editId = urlParams.get('edit');
+
+if (editId) {
+  // Update page title and button
+  document.querySelector('.page-title').textContent = 'Edit activity';
+  document.querySelector('.page-subtitle').textContent = 'Update your activity details';
+  document.getElementById('create-btn-text').textContent = 'Save changes';
+  
+  // Store edit ID for submit
+  window._editActivityId = editId;
+  
+  // Pre-fill form
+  await _prefillForm(editId);
+}
   document.getElementById('create-form').addEventListener('submit', handleCreateSubmit);
   // Bind live preview events
   _bindPreviewEvents();
@@ -67,6 +83,23 @@ function _updatePreview() {
     document.getElementById('prev-capacity').textContent = '— spots max';
   }
 }
+
+async function _prefillForm(activityId) {
+  const { data, ok } = await apiGetActivity(activityId);
+  if (!ok) return;
+
+  document.getElementById('ca-title').value       = data.title       || '';
+  document.getElementById('ca-description').value = data.description || '';
+  document.getElementById('ca-category').value    = data.category    || '';
+  document.getElementById('ca-location').value    = data.location    || '';
+  document.getElementById('ca-date').value        = data.activity_date || '';
+  document.getElementById('ca-time').value        = data.activity_time.slice(0, 5) || '';
+  document.getElementById('ca-max').value         = data.max_participants || '';
+
+  // Trigger preview update
+  _updatePreview();
+}
+
 async function handleCreateSubmit(e) {
   e.preventDefault();
   clearCreateErrors();
@@ -116,7 +149,9 @@ async function handleCreateSubmit(e) {
     max_participants: parseInt(max),
   };
   if (description) payload.description = description;
-  const { data, ok } = await apiCreateActivity(payload);
+  const { data, ok } = window._editActivityId
+  ? await apiUpdateActivity(window._editActivityId, payload)
+  : await apiCreateActivity(payload);
   if (!ok) {
     setCreateLoading(false);
     // Map field-level validation errors from FastAPI
@@ -143,10 +178,10 @@ async function handleCreateSubmit(e) {
     return;
   }
   // Success — navigate to the new activity's detail page
-  showCreateToast('Activity created!');
-  setTimeout(() => {
-    window.location.href = `activity-detail.html?id=${data.id}`;
-  }, 800);
+  showCreateToast(window._editActivityId ? 'Activity updated!' : 'Activity created!');
+setTimeout(() => {
+  window.location.href = `activity-detail.html?id=${data.id}`;
+}, 800);
 }
 // ── Helpers ────────────────────────────────────────────────────
 function setCreateLoading(loading) {

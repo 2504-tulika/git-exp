@@ -153,10 +153,11 @@ function _buildDashboardCard(a) {
       <div class="card-actions-wrapper" style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-secondary btn-sm" onclick="navigateToDetail(${a.id})">View Details</button>
         ${_currentTab === 'created' && a.status !== 'cancelled' && a.status !== 'completed'
-            ? `<button class="btn btn-danger btn-sm" onclick="cancelDashboardActivity(${a.id})">Cancel</button>`
+            ? `<a href="create-activity.html?edit=${a.id}" class="btn btn-secondary btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" onclick="cancelDashboardActivity(${a.id})">Cancel</button>`
             : ''
         }
-      </div>
+        </div>
     </div>
   `;
     return card;
