@@ -162,7 +162,6 @@ function _buildCard(a) {
   const [h, m] = a.activity_time.split(':');
   const hour = parseInt(h);
   const timeStr = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
-
   card.innerHTML = `
     <div class="activity-card-top">
       <span class="activity-card-category">${_capitalize(a.category)}</span>
@@ -182,11 +181,6 @@ function _buildCard(a) {
         </svg>
         ${dateStr} · ${timeStr}
       </div>
-    </div>
-    <div class="activity-card-footer">
-      <span class="activity-card-participants">
-        ${a.max_participants} spots max
-      </span>
     </div>
   `;
 

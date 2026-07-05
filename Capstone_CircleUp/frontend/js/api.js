@@ -146,3 +146,7 @@ async function apiGetMyActivities() {
 async function apiGetApprovedContact(activityId, requestId) {
   return request('GET', `/activities/${activityId}/requests/${requestId}/contact`);
 }
+
+async function apiCancelRequest(activityId, requestId) {
+  return request('DELETE', `/activities/${activityId}/requests/${requestId}`);
+}
