@@ -10,10 +10,10 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 # Request Schemas 
 
 class ActivityCreate(BaseModel):
-    title: str = Field(..., min_length=3, max_length=150)
+    title: str = Field(..., min_length=1, max_length=150)
     description: str | None = Field(default=None, max_length=1000)
     category: str = Field(..., min_length=2, max_length=50)
-    location: str = Field(..., min_length=2, max_length=200)
+    location: str = Field(..., min_length=5, max_length=200)
     activity_date: date
     activity_time: time
     max_participants: int = Field(..., gt=0)
@@ -65,10 +65,10 @@ class ActivityCreate(BaseModel):
 
 
 class ActivityUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=3, max_length=150)
+    title: str | None = Field(default=None, min_length=1, max_length=150)
     description: str | None = Field(default=None, max_length=1000)
     category: str | None = Field(default=None, min_length=2, max_length=50)
-    location: str | None = Field(default=None, min_length=2, max_length=200)
+    location: str | None = Field(default=None, min_length=5, max_length=200)
     activity_date: date | None = None
     activity_time: time | None = None
     max_participants: int | None = Field(default=None, gt=0)

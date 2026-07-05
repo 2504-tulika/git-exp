@@ -36,6 +36,16 @@ function _bindPreviewEvents() {
     document.getElementById(id).addEventListener('change', _updatePreview);
   });
 }
+
+// Clear field errors as user types
+['ca-title', 'ca-category', 'ca-location', 'ca-date', 'ca-time', 'ca-max', 'ca-description'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => clearSingleError(id));
+    el.addEventListener('change', () => clearSingleError(id));
+  }
+});
+
 function _updatePreview() {
   const title = document.getElementById('ca-title').value.trim();
   const category = document.getElementById('ca-category').value;
@@ -216,4 +226,10 @@ function showCreateToast(msg, type = 'success') {
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3500);
+}
+function clearSingleError(id) {
+  const errEl   = document.getElementById(`${id}-error`);
+  const inputEl = document.getElementById(id);
+  if (errEl)   errEl.style.display = 'none';
+  if (inputEl) inputEl.classList.remove('error');
 }

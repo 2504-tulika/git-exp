@@ -215,7 +215,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     showFieldError('reg-email', 'Enter a valid email address.');
     valid = false;
   } else if (!isGmailEmail(email)) {
-    showFieldError('reg-email', 'Only Gmail addresses (@gmail.com) are accepted.');
+    showFieldError('reg-email', 'Only Gmail addresses are accepted.');
     valid = false;
   }
 
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isValidEmail(val)) {
       showFieldError('reg-email', 'Enter a valid email address.');
     } else if (!isGmailEmail(val)) {
-      showFieldError('reg-email', 'Only Gmail addresses (@gmail.com) are accepted.');
+      showFieldError('reg-email', 'Only Gmail addresses are accepted.');
     }
   });
 
