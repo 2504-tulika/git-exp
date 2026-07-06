@@ -1,0 +1,235 @@
+/* Avatar Button */
+.profile-trigger {
+  position: relative;
+}
+
+.navbar-avatar {
+  cursor: pointer;
+  transition: all var(--fast) var(--ease);
+  user-select: none;
+}
+
+.navbar-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+}
+
+/* Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  overflow: hidden;
+
+  /* hidden by default */
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.profile-dropdown.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* Dropdown Header */
+.pd-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pd-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--grad-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.pd-identity { flex: 1; min-width: 0; }
+
+.pd-name {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-email {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Dropdown Fields */
+.pd-fields {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pd-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pd-field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.pd-field-value {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Edit Form (inside dropdown) */
+.pd-edit-form {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  display: none;
+}
+
+.pd-edit-form.visible { display: flex; }
+
+.pd-edit-form .form-input {
+  padding: 9px 12px;
+  font-size: 0.875rem;
+}
+
+.pd-edit-form .form-label {
+  font-size: 0.7rem;
+}
+
+.pd-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pd-edit-actions .btn {
+  flex: 1;
+  font-size: 0.8125rem;
+  padding: 8px 12px;
+}
+
+/* Dropdown Footer */
+.pd-footer {
+  padding: 8px;
+}
+
+.pd-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--fast) var(--ease);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+}
+
+.pd-action:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.pd-action.danger { color: var(--error); }
+.pd-action.danger:hover { background: var(--error-bg); }
+
+.pd-action svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* Overlay (close on outside click) */
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  display: none;
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn 200ms var(--ease);
+}
+.profile-overlay.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Save loading state */
+.pd-saving {
+  display: none;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.pd-saving.visible { display: flex; }
+
+/* Responsive Dropdown for Mobile Views */
+@media (max-width: 576px) {
+  .profile-dropdown {
+    position: fixed;
+    top: 74px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
