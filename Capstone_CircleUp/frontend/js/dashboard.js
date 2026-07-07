@@ -123,6 +123,18 @@ function _buildDashboardCard(a) {
       <span class="badge badge-${a.status}">${_statusLabel(a.status)}</span>
     </div>
     <div class="activity-card-title" style="margin-top: 12px; margin-bottom: 8px;">${_escape(a.title)}</div>
+<<<<<<< HEAD
+=======
+    ${_currentTab === 'created' && a.pending_requests_count > 0
+        ? `<div style="margin-bottom:8px;">
+             <span style="display:inline-flex;align-items:center;gap:5px;background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;border-radius:999px;padding:3px 10px;font-size:0.75rem;font-weight:600;">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+               ${a.pending_requests_count} pending request${a.pending_requests_count > 1 ? 's' : ''}
+             </span>
+           </div>`
+        : ''
+    }
+>>>>>>> feature/backend-refactor
     <div class="activity-card-meta">
       <div class="activity-card-meta-row">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -144,10 +156,18 @@ function _buildDashboardCard(a) {
       <div class="card-actions-wrapper" style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn btn-secondary btn-sm" onclick="navigateToDetail(${a.id})">View Details</button>
         ${_currentTab === 'created' && a.status !== 'cancelled' && a.status !== 'completed'
+<<<<<<< HEAD
             ? `<button class="btn btn-danger btn-sm" onclick="cancelDashboardActivity(${a.id})">Cancel</button>`
             : ''
         }
       </div>
+=======
+            ? `<a href="create-activity.html?edit=${a.id}" class="btn btn-secondary btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" onclick="cancelDashboardActivity(${a.id})">Cancel</button>`
+            : ''
+        }
+        </div>
+>>>>>>> feature/backend-refactor
     </div>
   `;
     return card;

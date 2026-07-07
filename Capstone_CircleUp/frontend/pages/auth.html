@@ -76,7 +76,7 @@
           <form class="auth-form" id="login-form" novalidate>
             <div class="form-group">
               <label class="form-label" for="login-email">Email address</label>
-              <input class="form-input" type="email" id="login-email" placeholder="you@example.com"
+              <input class="form-input" type="email" id="login-email" placeholder="you@gmail.com"
                 autocomplete="email" />
               <span class="form-error" id="login-email-error" style="display:none;"></span>
             </div>
@@ -153,11 +153,40 @@
               More about you <span class="optional-tag">— optional</span>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="reg-city">City</label>
-              <input class="form-input" type="text" id="reg-city" placeholder="Your city" />
-              <span class="form-error" id="reg-city-error" style="display:none;"></span>
-            </div>
+           <div class="form-group">
+            <label class="form-label" for="reg-city">City</label>
+            <input
+              class="form-input"
+              type="text"
+              id="reg-city"
+              placeholder="Enter your city"
+              list="city-options"
+              autocomplete="off"
+            />
+            <datalist id="city-options">
+              <option value="Mumbai">
+              <option value="Delhi">
+              <option value="Bangalore">
+              <option value="Hyderabad">
+              <option value="Chennai">
+              <option value="Kolkata">
+              <option value="Pune">
+              <option value="Ahmedabad">
+              <option value="Jaipur">
+              <option value="Raipur">
+              <option value="Bhilai">
+              <option value="Indore">
+              <option value="Bhopal">
+              <option value="Nagpur">
+              <option value="Surat">
+              <option value="Lucknow">
+              <option value="Chandigarh">
+              <option value="Patna">
+              <option value="Bhubaneswar">
+              <option value="Kochi">
+            </datalist>
+            <span class="form-error" id="reg-city-error" style="display:none;"></span>
+          </div>
 
             <div class="form-group">
               <label class="form-label" for="reg-bio">Bio</label>

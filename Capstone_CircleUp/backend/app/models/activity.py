@@ -7,23 +7,12 @@ migration every time a new status is added.
 `max_participants` is nullable (SRS marks it "Good to Have"). When null,
 the activity has no capacity limit and will never auto-transition to Full.
 """
-import enum
 from datetime import date, datetime, time, timezone
 from sqlalchemy import DATE, TIME, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
-class ActivityStatus(str, enum.Enum):
-    OPEN = "open"
-    FULL = "full"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-class ActivityCategory(str, enum.Enum):
-    SPORTS = "sports"
-    SOCIAL = "social"
-    STUDY = "study"
-    TRAVEL = "travel"
-    FOOD = "food"
-    OTHER = "other"
+from app.constants import ActivityStatus, ActivityCategory
+
 class Activity(Base):
     __tablename__ = "activities"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -47,6 +36,7 @@ class Activity(Base):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -54,6 +44,7 @@ class Activity(Base):
         nullable=False,
     )
     # Relationships
+
     creator: Mapped["User"] = relationship("User", back_populates="activities")
     participation_requests: Mapped[list["ParticipationRequest"]] = relationship(
         "ParticipationRequest", back_populates="activity", cascade="all, delete-orphan"

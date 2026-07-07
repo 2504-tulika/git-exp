@@ -102,7 +102,29 @@ function navigateTo(url) {
   setTimeout(() => { window.location.href = url; }, 340);
 }
 
-// Login Form
+// ── Validation Helpers ─────────────────────────────────────────
+
+function isValidEmail(email) {
+  // Must have text @ text . text — basic format check
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+function isGmailEmail(email) {
+  return email.toLowerCase().endsWith('@gmail.com');
+}
+
+function getPasswordErrors(password) {
+  const errors = [];
+  if (password.length < 8)              errors.push('at least 8 characters');
+  if (!/[A-Z]/.test(password))          errors.push('one uppercase letter');
+  if (!/[a-z]/.test(password))          errors.push('one lowercase letter');
+  if (!/[0-9]/.test(password))          errors.push('one number');
+  if (!/[^A-Za-z0-9]/.test(password))   errors.push('one special character');
+  return errors;
+}
+
+// ── Login Form ─────────────────────────────────────────────────
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   clearAlert();
@@ -112,8 +134,25 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('login-password').value;
 
   let valid = true;
-  if (!email)    { showFieldError('login-email',    'Email is required.');    valid = false; }
-  if (!password) { showFieldError('login-password', 'Password is required.'); valid = false; }
+
+  // Email validations
+  if (!email) {
+    showFieldError('login-email', 'Email address is required.');
+    valid = false;
+  } else if (!isValidEmail(email)) {
+    showFieldError('login-email', 'Enter a valid email address');
+    valid = false;
+  }
+
+  // Password validations
+  if (!password) {
+    showFieldError('login-password', 'Password is required.');
+    valid = false;
+  } else if (password.length < 8) {
+    showFieldError('login-password', 'Password must be at least 8 characters.');
+    valid = false;
+  }
+
   if (!valid) return;
 
   setLoginLoading(true);
@@ -124,7 +163,17 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const msg = typeof data.detail === 'string'
       ? data.detail
       : 'Invalid email or password.';
-    showAlert(msg);
+
+    // Route server error to the right field if possible
+    const lower = msg.toLowerCase();
+    if (lower.includes('email') || lower.includes('not found') || lower.includes('user')) {
+      showFieldError('login-email', msg);
+    } else if (lower.includes('password') || lower.includes('incorrect') || lower.includes('wrong')) {
+      showFieldError('login-password', msg);
+    } else {
+      // Generic — show under password as that's the last field
+      showFieldError('login-password', 'Incorrect email or password. Please try again.');
+    }
     setLoginLoading(false);
     return;
   }
@@ -136,7 +185,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   setTimeout(() => navigateTo('activities.html'), 800);
 });
 
-// Register Form
+// ── Register Form ──────────────────────────────────────────────
+
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   clearAlert();
@@ -152,11 +202,47 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const social   = document.getElementById('reg-social').value.trim() || null;
 
   let valid = true;
-  if (!name)     { showFieldError('reg-name',     'Name is required.');     valid = false; }
-  if (!email)    { showFieldError('reg-email',    'Email is required.');    valid = false; }
-  if (!password) { showFieldError('reg-password', 'Password is required.'); valid = false; }
-  if (!phone)    { showFieldError('reg-phone',    'Phone is required.');    valid = false; }
-  if (!gender)   { showFieldError('reg-gender',   'Gender is required.');   valid = false; }
+
+  if (!name || name.length < 2) {
+    showFieldError('reg-name', !name ? 'Full name is required.' : 'Name must be at least 2 characters.');
+    valid = false;
+  }
+
+  if (!email) {
+    showFieldError('reg-email', 'Email address is required.');
+    valid = false;
+  } else if (!isValidEmail(email)) {
+    showFieldError('reg-email', 'Enter a valid email address.');
+    valid = false;
+  } else if (!isGmailEmail(email)) {
+    showFieldError('reg-email', 'Only Gmail addresses are accepted.');
+    valid = false;
+  }
+
+  if (!password) {
+    showFieldError('reg-password', 'Password is required.');
+    valid = false;
+  } else {
+    const pwErrors = getPasswordErrors(password);
+    if (pwErrors.length > 0) {
+      showFieldError('reg-password', `Password must have ${pwErrors.join(', ')}.`);
+      valid = false;
+    }
+  }
+
+  if (!phone) {
+    showFieldError('reg-phone', 'Phone number is required.');
+    valid = false;
+  } else if (!/^\d{10}$/.test(phone)) {
+    showFieldError('reg-phone', 'Enter a valid 10-digit phone number.');
+    valid = false;
+  }
+
+  if (!gender) {
+    showFieldError('reg-gender', 'Please select your gender.');
+    valid = false;
+  }
+
   if (!valid) return;
 
   setRegisterLoading(true);
@@ -207,4 +293,94 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   } else {
     setTimeout(() => navigateTo('auth.html#login'), 1000);
   }
+});
+
+// ── Real-time Validation (on blur + input) ─────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Clear on input (existing behaviour)
+  ['reg-name','reg-email','reg-password','reg-phone',
+   'reg-gender','reg-city','reg-bio','reg-social'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => clearFieldError(id));
+    if (el) el.addEventListener('change', () => clearFieldError(id));
+  });
+
+  ['login-email','login-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => clearFieldError(id));
+  });
+
+  // ── Login: validate on blur (when user leaves the field) ──────
+
+  document.getElementById('login-email').addEventListener('blur', () => {
+    const val = document.getElementById('login-email').value.trim();
+    if (!val) return; // don't nag on empty until submit
+    if (!isValidEmail(val)) {
+      showFieldError('login-email', 'Enter a valid email address');
+    }
+  });
+
+  document.getElementById('login-password').addEventListener('blur', () => {
+    const val = document.getElementById('login-password').value;
+    if (!val) return;
+    if (val.length < 8) {
+      showFieldError('login-password', 'Password must be at least 8 characters.');
+    }
+  });
+
+  // ── Register: validate on blur ────────────────────────────────
+
+  document.getElementById('reg-name').addEventListener('blur', () => {
+    const val = document.getElementById('reg-name').value.trim();
+    if (!val) return;
+    if (val.length < 2) showFieldError('reg-name', 'Name must be at least 2 characters.');
+  });
+
+  document.getElementById('reg-email').addEventListener('blur', () => {
+    const val = document.getElementById('reg-email').value.trim();
+    if (!val) return;
+    if (!isValidEmail(val)) {
+      showFieldError('reg-email', 'Enter a valid email address.');
+    } else if (!isGmailEmail(val)) {
+      showFieldError('reg-email', 'Only Gmail addresses are accepted.');
+    }
+  });
+
+  document.getElementById('reg-password').addEventListener('blur', () => {
+    const val = document.getElementById('reg-password').value;
+    if (!val) return;
+    const errors = getPasswordErrors(val);
+    if (errors.length > 0) {
+      showFieldError('reg-password', `Password must have ${errors.join(', ')}.`);
+    }
+  });
+
+  // Live password strength as user types
+  document.getElementById('reg-password').addEventListener('input', () => {
+    const val = document.getElementById('reg-password').value;
+    if (!val) { clearFieldError('reg-password'); return; }
+    const errors = getPasswordErrors(val);
+    if (errors.length === 0) {
+      clearFieldError('reg-password');
+      // Show a subtle success hint
+      const errEl = document.getElementById('reg-password-error');
+      errEl.textContent = '✓ Strong password';
+      errEl.style.display = 'flex';
+      errEl.style.color = 'var(--success)';
+    } else if (val.length >= 4) {
+      // Only show errors after they've typed a bit
+      showFieldError('reg-password', `Still needs: ${errors.join(', ')}.`);
+      document.getElementById('reg-password-error').style.color = 'var(--error)';
+    }
+  });
+
+  document.getElementById('reg-phone').addEventListener('blur', () => {
+    const val = document.getElementById('reg-phone').value.trim();
+    if (!val) return;
+    if (!/^\d{10}$/.test(val)) {
+      showFieldError('reg-phone', 'Enter a valid 10-digit phone number.');
+    }
+  });
 });

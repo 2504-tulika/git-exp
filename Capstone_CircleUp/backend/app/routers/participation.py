@@ -15,11 +15,12 @@ from app.schemas.participation_request import (
     ParticipationRequestUpdate,
 )
 from app.services.participation_service import (
-    create_request,
-    get_approved_contact,
+    approve_or_reject,
+    cancel_request,
+    get_contact_info,
     get_user_request,
     list_requests,
-    update_request_status,
+    request_to_join,
 )
 
 router = APIRouter(
@@ -41,11 +42,27 @@ def join_activity(
 ):
     """
     Submit a participation request for an activity.
-
     Cannot request own activity, duplicate requests, or
     join Full/Cancelled/Completed activities.
     """
-    return create_request(db, activity_id, current_user)
+    return request_to_join(db, activity_id, current_user)
+
+
+@router.get(
+    "/me",
+    response_model=ParticipationRequestResponse,
+    summary="Get my request for this activity",
+)
+def get_my_request(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the current user's participation request for a specific activity.
+    Returns 404 if no request exists.
+    """
+    return get_user_request(db, activity_id, current_user)
 
 @router.get(
     "/me",
@@ -95,12 +112,29 @@ def update_status(
 ):
     """
     Approve or reject a participation request.
-
     Only the activity creator can approve or reject.
     Approval is concurrency-safe — won't exceed max_participants.
     Auto-transitions activity to Full when capacity is reached.
     """
-    return update_request_status(db, activity_id, request_id, data.status, current_user)
+    return approve_or_reject(db, activity_id, request_id, data.status, current_user)
+
+
+@router.delete(
+    "/{request_id}",
+    response_model=ParticipationRequestResponse,
+    summary="Cancel my participation request",
+)
+def cancel_my_request(
+    activity_id: int,
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Cancel a pending participation request.
+    Only the user who made the request can cancel it.
+    """
+    return cancel_request(db, activity_id, request_id, current_user)
 
 
 @router.get(
@@ -114,8 +148,7 @@ def view_contact(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get contact info (phone) for both parties once a request is approved.
-
+    Get contact info for both parties once a request is approved.
     Creator sees participant's phone, participant sees creator's phone.
     """
-    return get_approved_contact(db, activity_id, request_id, current_user)
+    return get_contact_info(db, activity_id, request_id, current_user)

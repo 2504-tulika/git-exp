@@ -97,6 +97,10 @@ async function apiGetActivities(filters = {}) {
   if (filters.category) params.append('category', filters.category);
   if (filters.location) params.append('location', filters.location);
   if (filters.date) params.append('date', filters.date);
+<<<<<<< HEAD
+=======
+  if (filters.search) params.append('search', filters.search);
+>>>>>>> feature/backend-refactor
   if (filters.sort) params.append('sort', filters.sort);
   if (filters.skip !== undefined) params.append('skip', filters.skip);
   if (filters.limit !== undefined) params.append('limit', filters.limit);
@@ -144,4 +148,8 @@ async function apiGetMyActivities() {
 
 async function apiGetApprovedContact(activityId, requestId) {
   return request('GET', `/activities/${activityId}/requests/${requestId}/contact`);
+}
+
+async function apiCancelRequest(activityId, requestId) {
+  return request('DELETE', `/activities/${activityId}/requests/${requestId}`);
 }

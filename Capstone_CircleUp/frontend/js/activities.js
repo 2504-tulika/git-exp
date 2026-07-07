@@ -8,6 +8,7 @@ let _currentSkip  = 0;
 const PAGE_SIZE   = 12;
 let _hasMore      = false;
 let _currentFilters = {
+  search: '',
   category: '',
   location: '',
   date: '',
@@ -24,6 +25,13 @@ function initActivities() {
 // Filter Events
 
 function _bindFilterEvents() {
+  // Debounce search input
+  let _searchTimer = null;
+  document.getElementById('filter-search').addEventListener('input', () => {
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(_applyFilters, 400);
+  });
+
   // Fetch on category or sort change immediately
   document.getElementById('filter-category').addEventListener('change', () => {
     _applyFilters();
@@ -51,6 +59,7 @@ function _bindFilterEvents() {
 
 function _applyFilters() {
   _currentFilters = {
+    search:   document.getElementById('filter-search').value.trim(),
     category: document.getElementById('filter-category').value,
     location: document.getElementById('filter-location').value.trim(),
     date:     document.getElementById('filter-date').value,
@@ -60,11 +69,12 @@ function _applyFilters() {
 }
 
 function clearFilters() {
+  document.getElementById('filter-search').value   = '';
   document.getElementById('filter-category').value = '';
   document.getElementById('filter-location').value = '';
   document.getElementById('filter-date').value     = '';
   document.getElementById('filter-sort').value     = 'date_asc';
-  _currentFilters = { category: '', location: '', date: '', sort: 'date_asc' };
+  _currentFilters = { search: '', category: '', location: '', date: '', sort: 'date_asc' };
   fetchActivities(true);
 }
 
@@ -80,6 +90,7 @@ async function fetchActivities(reset = false) {
   }
 
   const params = new URLSearchParams();
+  if (_currentFilters.search)   params.set('search',   _currentFilters.search);
   if (_currentFilters.category) params.set('category', _currentFilters.category);
   if (_currentFilters.location) params.set('location', _currentFilters.location);
   if (_currentFilters.date)     params.set('date',     _currentFilters.date);
@@ -88,12 +99,13 @@ async function fetchActivities(reset = false) {
   params.set('limit', PAGE_SIZE);
 
   const { data, ok } = await apiGetActivities({
-  category: _currentFilters.category,
-  location: _currentFilters.location,
-  date:     _currentFilters.date,
-  sort:     _currentFilters.sort,
-  skip:     _currentSkip,
-  limit:    PAGE_SIZE,
+    search:   _currentFilters.search,
+    category: _currentFilters.category,
+    location: _currentFilters.location,
+    date:     _currentFilters.date,
+    sort:     _currentFilters.sort,
+    skip:     _currentSkip,
+    limit:    PAGE_SIZE,
   });
 
   document.getElementById('activities-loading').style.display = 'none';
@@ -150,7 +162,6 @@ function _buildCard(a) {
   const [h, m] = a.activity_time.split(':');
   const hour = parseInt(h);
   const timeStr = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
-
   card.innerHTML = `
     <div class="activity-card-top">
       <span class="activity-card-category">${_capitalize(a.category)}</span>
@@ -170,11 +181,6 @@ function _buildCard(a) {
         </svg>
         ${dateStr} · ${timeStr}
       </div>
-    </div>
-    <div class="activity-card-footer">
-      <span class="activity-card-participants">
-        ${a.max_participants} spots max
-      </span>
     </div>
   `;
 

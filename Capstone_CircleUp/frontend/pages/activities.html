@@ -132,6 +132,9 @@
     <!-- Filters -->
     <div class="activities-filters">
       <div class="filter-group">
+        <input class="form-input filter-input" type="text" id="filter-search" placeholder="Search activities..." />
+      </div>
+      <div class="filter-group">
         <select class="form-select filter-select" id="filter-category">
           <option value="">All categories</option>
           <option value="sports">Sports</option>
@@ -150,8 +153,9 @@
       </div>
       <div class="filter-group">
         <select class="form-select filter-select" id="filter-sort">
-          <option value="date_asc">Soonest first</option>
-          <option value="date_desc">Latest first</option>
+          <option value="date_asc">Date_Asc</option>
+          <option value="created_desc">Recently added</option>
+          <option value="date_desc">Date_Desc</option>
         </select>
       </div>
       <button class="btn btn-ghost btn-sm" id="clear-filters">Clear</button>

@@ -1,6 +1,7 @@
 """
 Participation service — business logic for participation requests.
 
+Database operations delegated to repository layer.
 All SRS rules for requesting, approving, and rejecting live here.
 Routers call these functions and never touch the database directly.
 """
@@ -9,44 +10,65 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.activity import Activity, ActivityStatus
-from app.models.participation_request import ParticipationRequest, RequestStatus
+from app.models.activity import Activity
+from app.models.participation_request import ParticipationRequest
+from app.constants import ActivityStatus, RequestStatus
 from app.models.user import User
+from app.repositories import (
+    get_activity_by_id,
+    get_by_activity_and_user,
+    get_requests_by_activity,
+    create_request,
+    update_request,
+    get_request_by_id,
+    count_approved_participants,
+)
 
 
-def create_request(
+def request_to_join(
     db: Session, activity_id: int, current_user: User
 ) -> ParticipationRequest:
     """
     Submit a participation request for an activity.
 
-    Rules enforced (SRS Section 6):
+    Rules enforced (SRS):
     - Cannot request own activity
     - Cannot request on Full, Cancelled, or Completed activities
-    - Cannot submit a duplicate request (DB constraint + pre-check)
+    - Cannot submit a duplicate request
     """
-    activity = _get_activity_or_404(db, activity_id)
+    activity = get_activity_by_id(db, activity_id)
 
-    # Cannot request own activity
+    if not activity:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Activity not found.",
+        )
+
     if activity.creator_id == current_user.id:
-        _bad_request("You cannot request to join your own activity.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot request to join your own activity.",
+        )
 
-    # Only open activities accept new requests
     if activity.status == ActivityStatus.CANCELLED.value:
-        _bad_request("Cannot request to join a cancelled activity.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot request to join a cancelled activity.",
+        )
 
     if activity.status == ActivityStatus.COMPLETED.value:
-        _bad_request("Cannot request to join a completed activity.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot request to join a completed activity.",
+        )
 
     if activity.status == ActivityStatus.FULL.value:
-        _bad_request("This activity is full and not accepting new requests.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This activity is full and not accepting new requests.",
+        )
 
-    # Check for duplicate request
-    existing = db.query(ParticipationRequest).filter(
-        ParticipationRequest.activity_id == activity_id,
-        ParticipationRequest.user_id == current_user.id,
-    ).first()
-
+    existing = get_by_activity_and_user(db, activity_id, current_user.id)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -59,10 +81,23 @@ def create_request(
         status=RequestStatus.PENDING.value,
     )
 
-    db.add(new_request)
-    _commit(db)
-    db.refresh(new_request)
-    return new_request
+    return create_request(db, new_request)
+
+
+def get_user_request(
+    db: Session, activity_id: int, current_user: User
+) -> ParticipationRequest:
+    """
+    Get the current user's participation request for a specific activity.
+    Raises 404 if no request exists (so frontend can distinguish no-request from error).
+    """
+    req = get_by_activity_and_user(db, activity_id, current_user.id)
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No request found.",
+        )
+    return req
 
 
 def list_requests(
@@ -71,14 +106,20 @@ def list_requests(
     """
     List all participation requests for an activity.
 
-    Only the activity creator can view requests (SRS Section 6).
+    Only the activity creator can view requests (SRS).
     """
-    activity = _get_activity_or_404(db, activity_id)
+    activity = get_activity_by_id(db, activity_id)
+
+    if not activity:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Activity not found.",
+        )
+
     _check_ownership(activity, current_user)
 
-    return db.query(ParticipationRequest).filter(
-        ParticipationRequest.activity_id == activity_id,
-    ).all()
+    requests = get_requests_by_activity(db, activity_id)
+    return requests
 
 def get_user_request(
     db: Session, activity_id: int, current_user: User
@@ -98,7 +139,7 @@ def get_user_request(
         )
     return req
 
-def update_request_status(
+def approve_or_reject(
     db: Session,
     activity_id: int,
     request_id: int,
@@ -108,17 +149,18 @@ def update_request_status(
     """
     Approve or reject a participation request.
 
-    Only the activity creator can do this (SRS Section 6).
-
+    Only the activity creator can do this (SRS).
     Approval is concurrency-safe — uses SELECT FOR UPDATE to lock the
     activity row before checking capacity, preventing two simultaneous
-    approvals from exceeding max_participants (SRS Section 7).
+    approvals from exceeding max_participants.
     """
-    # Validate status value
     if new_status not in (RequestStatus.APPROVED.value, RequestStatus.REJECTED.value):
-        _bad_request("Status must be 'approved' or 'rejected'.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Status must be 'approved' or 'rejected'.",
+        )
 
-    # Lock activity row for concurrency safety on approval
+    # Lock activity row for concurrency safety
     activity = db.execute(
         select(Activity)
         .where(Activity.id == activity_id)
@@ -126,35 +168,34 @@ def update_request_status(
     ).scalar_one_or_none()
 
     if not activity:
-        _not_found("Activity not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Activity not found.",
+        )
 
     _check_ownership(activity, current_user)
 
-    # Fetch the request
-    participation_request = db.query(ParticipationRequest).filter(
-        ParticipationRequest.id == request_id,
-        ParticipationRequest.activity_id == activity_id,
-    ).first()
+    participation_request = get_request_by_id(db, request_id)
 
-    if not participation_request:
-        _not_found("Participation request not found.")
-
-    # Cannot change an already-decided request
-    if participation_request.status != RequestStatus.PENDING.value:
-        _bad_request(
-            f"This request has already been {participation_request.status}."
+    if not participation_request or participation_request.activity_id != activity_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Participation request not found.",
         )
 
-    # Capacity check before approving
+    if participation_request.status != RequestStatus.PENDING.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"This request has already been {participation_request.status}.",
+        )
+
     if new_status == RequestStatus.APPROVED.value:
-        approved_count = db.query(ParticipationRequest).filter(
-            ParticipationRequest.activity_id == activity_id,
-            ParticipationRequest.status == RequestStatus.APPROVED.value,
-        ).count()
+        approved_count = count_approved_participants(db, activity_id)
 
         if approved_count >= activity.max_participants:
-            _bad_request(
-                "Cannot approve — activity has reached maximum capacity."
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot approve — activity has reached maximum capacity.",
             )
 
         participation_request.status = RequestStatus.APPROVED.value
@@ -162,37 +203,76 @@ def update_request_status(
         # Auto-transition to Full if capacity is now reached
         if approved_count + 1 >= activity.max_participants:
             activity.status = ActivityStatus.FULL.value
+            db.flush()
 
     else:
         participation_request.status = RequestStatus.REJECTED.value
 
-    _commit(db)
-    db.refresh(participation_request)
-    return participation_request
+    result = update_request(db, participation_request)
+    return result
 
+def cancel_request(
+    db: Session,
+    activity_id: int,
+    request_id: int,
+    current_user: User,
+) -> ParticipationRequest:
+    """
+    Cancel a pending participation request.
+    Only the requester can cancel their own request.
+    Only pending requests can be cancelled.
+    """
+    req = get_request_by_id(db, request_id)
 
-def get_approved_contact(
+    if not req or req.activity_id != activity_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Participation request not found.",
+        )
+
+    if req.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only cancel your own requests.",
+        )
+
+    if req.status != RequestStatus.PENDING.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot cancel a request that is already {req.status}.",
+        )
+
+    db.delete(req)
+    db.commit()
+    return req
+
+def get_contact_info(
     db: Session,
     activity_id: int,
     request_id: int,
     current_user: User,
 ) -> dict:
     """
-    Return contact info (phone) for both parties once a request is approved.
+    Return contact info for both parties once a request is approved.
 
-    SRS Section 8: contact info is only visible after approval.
-    - Creator can see the approved participant's phone
-    - Approved participant can see the creator's phone
+    SRS: contact info only visible after approval.
+    Creator sees participant's phone, participant sees creator's phone.
     """
-    activity = _get_activity_or_404(db, activity_id)
+    activity = get_activity_by_id(db, activity_id)
 
-    participation_request = db.query(ParticipationRequest).filter(
-        ParticipationRequest.id == request_id,
-        ParticipationRequest.activity_id == activity_id,
-    ).first()
+    if not activity:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Activity not found.",
+        )
 
-    if not participation_request:
-        _not_found("Participation request not found.")
+    participation_request = get_request_by_id(db, request_id)
+
+    if not participation_request or participation_request.activity_id != activity_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Participation request not found.",
+        )
 
     if participation_request.status != RequestStatus.APPROVED.value:
         raise HTTPException(
@@ -200,7 +280,6 @@ def get_approved_contact(
             detail="Contact info is only visible after a request is approved.",
         )
 
-    # Only the creator or the approved participant can see contact info
     is_creator     = activity.creator_id == current_user.id
     is_participant = participation_request.user_id == current_user.id
 
@@ -210,28 +289,20 @@ def get_approved_contact(
             detail="You do not have permission to view this contact info.",
         )
 
-    # Fetch both users
     creator     = db.query(User).filter(User.id == activity.creator_id).first()
     participant = db.query(User).filter(
         User.id == participation_request.user_id
     ).first()
 
     return {
-    "creator_phone":          creator.phone          if is_participant else None,
-    "creator_social":         creator.social_handle  if is_participant else None,
-    "participant_phone":      participant.phone       if is_creator    else None,
-    "participant_social":     participant.social_handle if is_creator  else None,
+        "creator_phone":       creator.phone          if is_participant else None,
+        "creator_social":      creator.social_handle  if is_participant else None,
+        "participant_phone":   participant.phone       if is_creator    else None,
+        "participant_social":  participant.social_handle if is_creator  else None,
     }
 
 
-# Private Helpers
-
-def _get_activity_or_404(db: Session, activity_id: int) -> Activity:
-    activity = db.query(Activity).filter(Activity.id == activity_id).first()
-    if not activity:
-        _not_found("Activity not found.")
-    return activity
-
+# ── Private Helpers ───────────────────────────────────────────────────────────
 
 def _check_ownership(activity: Activity, current_user: User) -> None:
     if activity.creator_id != current_user.id:
@@ -239,23 +310,3 @@ def _check_ownership(activity: Activity, current_user: User) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to manage this activity's requests.",
         )
-
-
-def _commit(db: Session) -> None:
-    try:
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-
-def _bad_request(detail: str) -> None:
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail=detail
-    )
-
-
-def _not_found(detail: str) -> None:
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=detail
-    )

@@ -1,7 +1,7 @@
 """
 User service — business logic for profile view and update.
 
-Separating profile logic from auth logic keeps each service focused.
+Database operations delegated to repository layer.
 Auth service handles credentials; this service handles profile data.
 """
 
@@ -9,7 +9,12 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+from app.repositories import update_user
 from app.schemas.user import UserUpdate
+from app.models.activity import Activity
+from app.models.participation_request import ParticipationRequest
+from app.constants import ActivityStatus, RequestStatus
+from app.services.activity_service import _check_and_complete
 from app.models.activity import Activity, ActivityStatus
 from app.models.participation_request import ParticipationRequest, RequestStatus
 from app.services.activity_service import _check_and_complete
@@ -45,7 +50,6 @@ def update_profile(db: Session, user: User, data: UserUpdate) -> User:
     db.refresh(user)
     return user
 
-
 def get_user_activities(db: Session, current_user: User) -> dict:
 
     """
@@ -72,14 +76,15 @@ def get_user_activities(db: Session, current_user: User) -> dict:
             pending.append(act)
         elif r.status == RequestStatus.REJECTED.value:
             rejected.append(act)
-            
     # Compute dashboard statistics
     created_count = len(created)
     joined_count = len(joined)
     pending_count = len(pending)
+
     completed_created = sum(1 for a in created if a.status == ActivityStatus.COMPLETED.value)
     completed_joined = sum(1 for a in joined if a.status == ActivityStatus.COMPLETED.value)
     completed_count = completed_created + completed_joined
+    
     return {
         "created": created,
         "joined": joined,

@@ -80,7 +80,6 @@ class UserRegister(BaseModel):
         if v is None:
             return v
         v = v.strip()
-        # must start with @, followed by letters/numbers/underscores/dots
         if not re.match(r"^@[\w.]{1,99}$", v):
             raise ValueError("Social handle must start with @ (e.g. @username).")
         return v
@@ -91,8 +90,10 @@ class UserRegister(BaseModel):
         if v is None:
             return v
         v = v.strip()
-        if len(v) < 10:
-            raise ValueError("Bio must be at least 10 characters if provided.")
+        if not v:               
+            return None
+        if len(v) > 100:
+            raise ValueError("Bio cannot exceed 100 characters.")
         return v
 
     @field_validator("city")
@@ -154,8 +155,10 @@ class UserUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
-        if len(v) < 10:
-            raise ValueError("Bio must be at least 10 characters if provided.")
+        if not v:               
+            return None
+        if len(v) > 100:
+            raise ValueError("Bio cannot exceed 100 characters.")
         return v
 
     @field_validator("city")

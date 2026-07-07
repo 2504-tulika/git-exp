@@ -14,8 +14,12 @@ let _myRequest = null;
 // ── Init ───────────────────────────────────────────────────────
 
 async function initActivityDetail() {
+<<<<<<< HEAD
   // Get activity ID from URL
   const params = new URLSearchParams(window.location.search);
+=======
+  const params     = new URLSearchParams(window.location.search);
+>>>>>>> feature/backend-refactor
   const activityId = params.get('id');
 
   if (!activityId) {
@@ -23,10 +27,8 @@ async function initActivityDetail() {
     return;
   }
 
-  // Load current user from cache
   _currentUser = getUser();
 
-  // Fetch activity
   const { data, ok } = await apiGetActivity(activityId);
 
   document.getElementById('detail-loading').style.display = 'none';
@@ -40,7 +42,6 @@ async function initActivityDetail() {
   _renderActivity(data);
   document.getElementById('detail-content').style.display = 'block';
 
-  // Decide which section to show: creator or participant
   const isCreator = _currentUser && _activity.creator_id === _currentUser.id;
 
   if (isCreator) {
@@ -53,16 +54,13 @@ async function initActivityDetail() {
 // ── Render Activity ────────────────────────────────────────────
 
 function _renderActivity(a) {
-  // Category + title
   document.getElementById('detail-category').textContent = _capitalize(a.category);
   document.getElementById('detail-title').textContent = a.title;
 
-  // Status badge
   const badge = document.getElementById('detail-status-badge');
   badge.textContent = _statusLabel(a.status);
   badge.className = `badge badge-${a.status}`;
 
-  // Meta
   const dateStr = new Date(a.activity_date + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
@@ -74,16 +72,10 @@ function _renderActivity(a) {
   document.getElementById('detail-date').textContent = dateStr;
   document.getElementById('detail-time').textContent = timeStr;
   document.getElementById('detail-participants').textContent = `${a.max_participants} spots max`;
-
-  // Description
-  document.getElementById('detail-description').textContent = a.description;
-
-  // Organizer name — fetch from profile if needed
-  // For now show ID; creator name will be loaded separately
+  document.getElementById('detail-description').textContent  = a.description;
   document.getElementById('detail-organizer-name').textContent =
     a.creator_name || `User #${a.creator_id}`;
 
-  // Update page title
   document.title = `${a.title} — CircleUp`;
 }
 
@@ -116,7 +108,6 @@ async function _initParticipantSection(activityId) {
 
   const status = _activity.status;
 
-  // If activity is not open — show unavailable
   if (status === 'cancelled') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity cancelled';
@@ -128,8 +119,13 @@ async function _initParticipantSection(activityId) {
   if (status === 'completed') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity completed';
+<<<<<<< HEAD
     document.getElementById('unavailable-desc').textContent =
       'This activity has already taken place.';
+=======
+    document.getElementById('unavailable-desc').textContent  =
+      'This activity is completed.';
+>>>>>>> feature/backend-refactor
     return;
   }
 
@@ -141,10 +137,32 @@ async function _initParticipantSection(activityId) {
     return;
   }
 
-  // Check if user already has a request
-  // We can't directly fetch "my request" for an activity without a dedicated
-  // endpoint, so we'll try to request and handle the 409 gracefully on submit.
-  // For now, show the join button for open activities.
+  // Check if user already has a request for this activity
+  const myReqResult = await apiGetMyRequest(activityId);
+  if (!myReqResult) return;
+
+  const { data: myReq, ok: reqOk, status: reqStatus } = myReqResult;
+
+  // 404 = no request exists yet
+  if (reqStatus === 404) {
+    _showParticipantState('join');
+    return;
+  }
+
+  if (reqOk && myReq) {
+    _myRequest = myReq;
+    if (myReq.status === 'pending') {
+      _showParticipantState('pending');
+    } else if (myReq.status === 'approved') {
+      _showParticipantState('approved');
+      _loadOrganizerContact(activityId, myReq.id);
+    } else if (myReq.status === 'rejected') {
+      _showParticipantState('rejected');
+    }
+    return;
+  }
+
+  // Fallback
   _showParticipantState('join');
 }
 
@@ -183,7 +201,6 @@ async function requestToJoin() {
     btn.disabled = false;
     text.textContent = 'Request to join';
 
-    // 409 means already requested
     if (status === 409) {
       _showParticipantState('pending');
       return;
@@ -196,6 +213,29 @@ async function requestToJoin() {
   _myRequest = data;
   _showParticipantState('pending');
   showDetailToast('Request sent! Waiting for the organiser to respond.');
+}
+
+// ── Cancel Request ─────────────────────────────────────────────
+
+async function cancelMyRequest() {
+  if (!_myRequest) return;
+
+  const btn = document.getElementById('cancel-request-btn');
+  btn.textContent = 'Cancelling...';
+  btn.disabled    = true;
+
+  const { data, ok } = await apiCancelRequest(_activity.id, _myRequest.id);
+
+  if (!ok) {
+    btn.textContent = 'Cancel request';
+    btn.disabled    = false;
+    showDetailToast(data.detail || 'Failed to cancel request.', 'error');
+    return;
+  }
+
+  _myRequest = null;
+  _showParticipantState('join');
+  showDetailToast('Request cancelled.');
 }
 
 // ── Creator Section ────────────────────────────────────────────
@@ -225,14 +265,18 @@ async function _initCreatorSection(activityId) {
 function _buildRequestRow(req) {
   const row = document.createElement('div');
   row.className = 'request-row';
-  row.id = `request-row-${req.id}`;
+  row.id        = `request-row-${req.id}`;
 
   const isPending = req.status === 'pending';
 
   row.innerHTML = `
     <div class="request-user">
+<<<<<<< HEAD
       <div class="request-user-name">User #${req.user_id}</div>
       <div class="request-user-name">${_escape(req.user_name || 'User #' + req.user_id)}</div>
+=======
+      <div class="request-user-name">${req.user_name || `User #${req.user_id}`}</div>
+>>>>>>> feature/backend-refactor
       ${req.status !== 'pending'
       ? `<div class="request-user-contact">
             ${req.status === 'approved'
@@ -249,7 +293,6 @@ function _buildRequestRow(req) {
     </div>
   `;
 
-  // If already approved, load contact info
   if (req.status === 'approved') {
     _loadContactForRequest(req.id);
   }
@@ -275,15 +318,13 @@ async function _updateRequest(requestId, newStatus) {
     return;
   }
 
-  // Rebuild just that row
   const row = document.getElementById(`request-row-${requestId}`);
   if (row) {
     const newRow = _buildRequestRow(data);
     row.replaceWith(newRow);
   }
 
-  // If activity became full, update the badge
-  if (data.status === 'approved') {
+  if (newStatus === 'approved') {
     const { data: updatedActivity } = await apiGetActivity(_activity.id);
     if (updatedActivity) {
       _activity = updatedActivity;
@@ -296,6 +337,22 @@ async function _updateRequest(requestId, newStatus) {
   showDetailToast(
     newStatus === 'approved' ? 'Request approved!' : 'Request rejected.'
   );
+}
+
+async function _loadOrganizerContact(activityId, requestId) {
+  const { data, ok } = await apiGetApprovedContact(activityId, requestId);
+  if (ok) {
+    if (data.creator_phone) {
+      document.getElementById('organizer-phone').textContent = data.creator_phone;
+    } else {
+      document.getElementById('organizer-phone-row').style.display = 'none';
+    }
+    if (data.creator_social) {
+      document.getElementById('organizer-social').textContent = data.creator_social;
+    } else {
+      document.getElementById('organizer-social-row').style.display = 'none';
+    }
+  }
 }
 
 async function _loadContactForRequest(requestId) {
