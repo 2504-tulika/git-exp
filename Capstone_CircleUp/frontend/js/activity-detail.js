@@ -7,19 +7,14 @@
  */
 
 // ── State ──────────────────────────────────────────────────────
-let _activity = null;
+let _activity    = null;
 let _currentUser = null;
-let _myRequest = null;
+let _myRequest   = null;
 
 // ── Init ───────────────────────────────────────────────────────
 
 async function initActivityDetail() {
-<<<<<<< HEAD
-  // Get activity ID from URL
-  const params = new URLSearchParams(window.location.search);
-=======
   const params     = new URLSearchParams(window.location.search);
->>>>>>> feature/backend-refactor
   const activityId = params.get('id');
 
   if (!activityId) {
@@ -55,22 +50,22 @@ async function initActivityDetail() {
 
 function _renderActivity(a) {
   document.getElementById('detail-category').textContent = _capitalize(a.category);
-  document.getElementById('detail-title').textContent = a.title;
+  document.getElementById('detail-title').textContent    = a.title;
 
   const badge = document.getElementById('detail-status-badge');
   badge.textContent = _statusLabel(a.status);
-  badge.className = `badge badge-${a.status}`;
+  badge.className   = `badge badge-${a.status}`;
 
   const dateStr = new Date(a.activity_date + 'T00:00:00').toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
   const [h, m] = a.activity_time.split(':');
-  const hour = parseInt(h);
+  const hour   = parseInt(h);
   const timeStr = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
 
-  document.getElementById('detail-location').textContent = a.location;
-  document.getElementById('detail-date').textContent = dateStr;
-  document.getElementById('detail-time').textContent = timeStr;
+  document.getElementById('detail-location').textContent     = a.location;
+  document.getElementById('detail-date').textContent         = dateStr;
+  document.getElementById('detail-time').textContent         = timeStr;
   document.getElementById('detail-participants').textContent = `${a.max_participants} spots max`;
   document.getElementById('detail-description').textContent  = a.description;
   document.getElementById('detail-organizer-name').textContent =
@@ -84,34 +79,12 @@ function _renderActivity(a) {
 async function _initParticipantSection(activityId) {
   document.getElementById('participant-section').style.display = 'block';
 
-  // Check if user already has a request
-  const { data: reqData, ok: reqOk } = await apiGetMyRequest(activityId);
-  if (reqOk && reqData) {
-    _myRequest = reqData;
-    const reqStatus = reqData.status;
-
-    if (reqStatus === 'pending') {
-      _showParticipantState('pending');
-      return;
-
-    } else if (reqStatus === 'approved') {
-      _showParticipantState('approved');
-      await _loadOrganizerContact(reqData.id);
-      return;
-
-    } else if (reqStatus === 'rejected') {
-      _showParticipantState('rejected');
-      return;
-
-    }
-  }
-
   const status = _activity.status;
 
   if (status === 'cancelled') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity cancelled';
-    document.getElementById('unavailable-desc').textContent =
+    document.getElementById('unavailable-desc').textContent  =
       'This activity has been cancelled by the organiser.';
     return;
   }
@@ -119,20 +92,15 @@ async function _initParticipantSection(activityId) {
   if (status === 'completed') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity completed';
-<<<<<<< HEAD
-    document.getElementById('unavailable-desc').textContent =
-      'This activity has already taken place.';
-=======
     document.getElementById('unavailable-desc').textContent  =
       'This activity is completed.';
->>>>>>> feature/backend-refactor
     return;
   }
 
   if (status === 'full') {
     _showParticipantState('unavailable');
     document.getElementById('unavailable-title').textContent = 'Activity full';
-    document.getElementById('unavailable-desc').textContent =
+    document.getElementById('unavailable-desc').textContent  =
       'This activity has reached maximum capacity.';
     return;
   }
@@ -168,29 +136,21 @@ async function _initParticipantSection(activityId) {
 
 function _showParticipantState(state) {
   ['action-join', 'action-pending', 'action-approved',
-    'action-rejected', 'action-unavailable'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
+   'action-rejected', 'action-unavailable'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
   document.getElementById(`action-${state}`).style.display = 'block';
-}
-
-async function _loadOrganizerContact(requestId) {
-  const { data, ok } = await apiGetApprovedContact(_activity.id, requestId);
-  if (ok) {
-    document.getElementById('organizer-phone').textContent = data.creator_phone || '—';
-    document.getElementById('organizer-social').textContent = data.creator_social || '—';
-  }
 }
 
 // ── Request to Join ────────────────────────────────────────────
 
 async function requestToJoin() {
-  const btn = document.getElementById('join-btn');
+  const btn  = document.getElementById('join-btn');
   const text = document.getElementById('join-btn-text');
   const spin = document.getElementById('join-spinner');
 
-  btn.disabled = true;
-  text.textContent = 'Sending...';
+  btn.disabled       = true;
+  text.textContent   = 'Sending...';
   spin.style.display = 'inline-block';
 
   const { data, ok, status } = await apiRequestParticipation(_activity.id);
@@ -198,7 +158,7 @@ async function requestToJoin() {
   spin.style.display = 'none';
 
   if (!ok) {
-    btn.disabled = false;
+    btn.disabled     = false;
     text.textContent = 'Request to join';
 
     if (status === 409) {
@@ -271,25 +231,20 @@ function _buildRequestRow(req) {
 
   row.innerHTML = `
     <div class="request-user">
-<<<<<<< HEAD
-      <div class="request-user-name">User #${req.user_id}</div>
-      <div class="request-user-name">${_escape(req.user_name || 'User #' + req.user_id)}</div>
-=======
       <div class="request-user-name">${req.user_name || `User #${req.user_id}`}</div>
->>>>>>> feature/backend-refactor
       ${req.status !== 'pending'
-      ? `<div class="request-user-contact">
+        ? `<div class="request-user-contact">
             ${req.status === 'approved'
-        ? `Phone: <strong id="contact-phone-${req.id}">loading...</strong>`
-        : '<span style="color:var(--rejected)">Rejected</span>'}
+              ? `Phone: <strong id="contact-phone-${req.id}">loading...</strong>`
+              : '<span style="color:var(--rejected)">Rejected</span>'}
            </div>`
-      : ''}
+        : ''}
     </div>
     <div class="request-actions">
       ${isPending
-      ? `<button class="btn btn-primary btn-sm" onclick="approveRequest(${req.id})">Approve</button>
+        ? `<button class="btn btn-primary btn-sm" onclick="approveRequest(${req.id})">Approve</button>
            <button class="btn btn-danger btn-sm" onclick="rejectRequest(${req.id})">Reject</button>`
-      : `<span class="badge badge-${req.status}">${_statusLabel(req.status)}</span>`}
+        : `<span class="badge badge-${req.status}">${_statusLabel(req.status)}</span>`}
     </div>
   `;
 
@@ -330,7 +285,7 @@ async function _updateRequest(requestId, newStatus) {
       _activity = updatedActivity;
       const badge = document.getElementById('detail-status-badge');
       badge.textContent = _statusLabel(updatedActivity.status);
-      badge.className = `badge badge-${updatedActivity.status}`;
+      badge.className   = `badge badge-${updatedActivity.status}`;
     }
   }
 
@@ -367,13 +322,13 @@ async function _loadContactForRequest(requestId) {
 
 function _statusLabel(status) {
   const labels = {
-    open: 'Open',
-    full: 'Full',
+    open:      'Open',
+    full:      'Full',
     cancelled: 'Cancelled',
     completed: 'Completed',
-    pending: 'Pending',
-    approved: 'Approved',
-    rejected: 'Rejected',
+    pending:   'Pending',
+    approved:  'Approved',
+    rejected:  'Rejected',
   };
   return labels[status] || status;
 }
@@ -385,18 +340,9 @@ function _capitalize(str) {
 
 function showDetailToast(msg, type = 'success') {
   const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
+  const toast     = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3500);
-}
-
-function _escape(str) {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }

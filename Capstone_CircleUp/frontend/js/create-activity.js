@@ -26,17 +26,9 @@ if (editId) {
   await _prefillForm(editId);
 }
   document.getElementById('create-form').addEventListener('submit', handleCreateSubmit);
-<<<<<<< HEAD
-
   // Bind live preview events
   _bindPreviewEvents();
 }
-
-=======
-  // Bind live preview events
-  _bindPreviewEvents();
-}
->>>>>>> feature/backend-refactor
 function _bindPreviewEvents() {
   const fields = ['ca-title', 'ca-category', 'ca-location', 'ca-date', 'ca-time', 'ca-max'];
   fields.forEach(id => {
@@ -44,8 +36,6 @@ function _bindPreviewEvents() {
     document.getElementById(id).addEventListener('change', _updatePreview);
   });
 }
-<<<<<<< HEAD
-=======
 
 // Clear field errors as user types
 ['ca-title', 'ca-category', 'ca-location', 'ca-date', 'ca-time', 'ca-max', 'ca-description'].forEach(id => {
@@ -56,7 +46,6 @@ function _bindPreviewEvents() {
   }
 });
 
->>>>>>> feature/backend-refactor
 function _updatePreview() {
   const title = document.getElementById('ca-title').value.trim();
   const category = document.getElementById('ca-category').value;
@@ -103,8 +92,6 @@ function _updatePreview() {
   } else {
     document.getElementById('prev-capacity').textContent = '— spots max';
   }
-<<<<<<< HEAD
-=======
 }
 
 async function _prefillForm(activityId) {
@@ -121,7 +108,6 @@ async function _prefillForm(activityId) {
 
   // Trigger preview update
   _updatePreview();
->>>>>>> feature/backend-refactor
 }
 
 async function handleCreateSubmit(e) {
@@ -129,22 +115,13 @@ async function handleCreateSubmit(e) {
   clearCreateErrors();
   document.getElementById('create-alert').style.display = 'none';
   // Read values
-  const title = document.getElementById('ca-title').value.trim();
+  const title       = document.getElementById('ca-title').value.trim();
   const description = document.getElementById('ca-description').value.trim() || null;
-<<<<<<< HEAD
-  const category = document.getElementById('ca-category').value;
-  const location = document.getElementById('ca-location').value.trim();
-  const date = document.getElementById('ca-date').value;
-  const time = document.getElementById('ca-time').value;
-  const max = document.getElementById('ca-max').value;
-
-=======
   const category    = document.getElementById('ca-category').value;
   const location    = document.getElementById('ca-location').value.trim();
   const date        = document.getElementById('ca-date').value;
   const time        = document.getElementById('ca-time').value;
   const max         = document.getElementById('ca-max').value;
->>>>>>> feature/backend-refactor
   // Client-side validation
   let valid = true;
   if (!title) {
@@ -192,12 +169,12 @@ async function handleCreateSubmit(e) {
       data.detail.forEach(err => {
         const field = err.loc[err.loc.length - 1];
         const fieldMap = {
-          title: 'ca-title',
-          description: 'ca-description',
-          category: 'ca-category',
-          location: 'ca-location',
-          activity_date: 'ca-date',
-          activity_time: 'ca-time',
+          title:            'ca-title',
+          description:      'ca-description',
+          category:         'ca-category',
+          location:         'ca-location',
+          activity_date:    'ca-date',
+          activity_time:    'ca-time',
           max_participants: 'ca-max',
         };
         const mappedId = fieldMap[field];
@@ -218,33 +195,33 @@ setTimeout(() => {
 }
 // ── Helpers ────────────────────────────────────────────────────
 function setCreateLoading(loading) {
-  const btn = document.getElementById('create-btn');
+  const btn  = document.getElementById('create-btn');
   const text = document.getElementById('create-btn-text');
   const spin = document.getElementById('create-spinner');
-  btn.disabled = loading;
-  text.textContent = loading ? 'Creating...' : 'Create activity';
+  btn.disabled       = loading;
+  text.textContent   = loading ? 'Creating...' : 'Create activity';
   spin.style.display = loading ? 'inline-block' : 'none';
 }
 function showCreateError(id, msg) {
-  const errEl = document.getElementById(`${id}-error`);
+  const errEl   = document.getElementById(`${id}-error`);
   const inputEl = document.getElementById(id);
   if (!errEl || !inputEl) return;
-  errEl.textContent = msg;
-  errEl.style.display = 'flex';
+  errEl.textContent    = msg;
+  errEl.style.display  = 'flex';
   inputEl.classList.add('error');
 }
 function clearCreateErrors() {
   ['ca-title', 'ca-description', 'ca-category', 'ca-location',
-    'ca-date', 'ca-time', 'ca-max'].forEach(id => {
-      const errEl = document.getElementById(`${id}-error`);
-      const inputEl = document.getElementById(id);
-      if (errEl) errEl.style.display = 'none';
-      if (inputEl) inputEl.classList.remove('error');
-    });
+   'ca-date', 'ca-time', 'ca-max'].forEach(id => {
+    const errEl   = document.getElementById(`${id}-error`);
+    const inputEl = document.getElementById(id);
+    if (errEl)   errEl.style.display = 'none';
+    if (inputEl) inputEl.classList.remove('error');
+  });
 }
 function showCreateToast(msg, type = 'success') {
   const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
+  const toast     = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = msg;
   container.appendChild(toast);
