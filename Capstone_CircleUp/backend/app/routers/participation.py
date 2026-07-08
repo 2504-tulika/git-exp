@@ -65,22 +65,6 @@ def get_my_request(
     return get_user_request(db, activity_id, current_user)
 
 @router.get(
-    "/me",
-    response_model=ParticipationRequestResponse,
-    summary="Get logged-in user's request status for this activity",
-)
-def get_my_request(
-    activity_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Get the current user's participation request for the activity.
-    Returns 404 if no request exists.
-    """
-    return get_user_request(db, activity_id, current_user)
-
-@router.get(
     "",
     response_model=list[ParticipationRequestResponse],
     summary="List participation requests (creator only)",
