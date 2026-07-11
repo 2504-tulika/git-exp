@@ -136,6 +136,24 @@ def update_existing_activity(
             detail="No fields provided to update.",
         )
 
+    if 'max_participants' in update_data:
+        new_max = update_data['max_participants']
+        approved_count = count_approved_participants(db, activity_id)
+
+        # Rule 1 — cannot reduce below approved count
+        if new_max < approved_count:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot reduce max participants to {new_max} — "
+                    f"{approved_count} participants are already approved."
+                ),
+            )
+
+        # Rule 2 — if Full but new max creates open spots, revert to Open
+        if activity.status == ActivityStatus.FULL.value and new_max > approved_count:
+            update_data['status'] = ActivityStatus.OPEN.value
+        
     logger.info(
         "Updating activity | id=%s | user_id=%s | fields=%s",
         activity_id, current_user.id, list(update_data.keys())

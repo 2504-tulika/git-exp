@@ -105,10 +105,6 @@ such as cricket matches, café meetups, study groups, and weekend trips.
 - **Contact Visibility** — Contact info is revealed only after a request is approved
 - **Dashboard** — Track activities you created, joined, and requested
 
-### Authentication
-All endpoints except `/auth/register` and `/auth/login` require a Bearer token.
-
-Use the **Authorize** button (🔒) at the top right to enter your token:
 ```
 Bearer <your_access_token>
 ```
