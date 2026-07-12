@@ -148,6 +148,13 @@ async function handleCreateSubmit(e) {
     showCreateError('ca-max', 'Enter a valid number of participants (at least 1).');
     valid = false;
   }
+if (date && time) {
+    const activityDateTime = new Date(`${date}T${time}`);
+    if (activityDateTime <= new Date()) {
+        showCreateError('ca-time', 'Time must be in the future.');
+        valid = false;
+    }
+}
   if (!valid) return;
   setCreateLoading(true);
   const payload = {
@@ -166,25 +173,37 @@ async function handleCreateSubmit(e) {
     setCreateLoading(false);
     // Map field-level validation errors from FastAPI
     if (Array.isArray(data.detail)) {
-      data.detail.forEach(err => {
+    data.detail.forEach(err => {
         const field = err.loc[err.loc.length - 1];
+        const msg = err.msg.replace('Value error, ', '');
         const fieldMap = {
-          title:            'ca-title',
-          description:      'ca-description',
-          category:         'ca-category',
-          location:         'ca-location',
-          activity_date:    'ca-date',
-          activity_time:    'ca-time',
-          max_participants: 'ca-max',
+            title:            'ca-title',
+            description:      'ca-description',
+            category:         'ca-category',
+            location:         'ca-location',
+            activity_date:    'ca-date',
+            activity_time:    'ca-time',
+            max_participants: 'ca-max',
         };
         const mappedId = fieldMap[field];
-        if (mappedId) showCreateError(mappedId, err.msg.replace('Value error, ', ''));
-      });
-    } else {
-      document.getElementById('create-alert-msg').textContent =
+
+        if (mappedId) {
+            showCreateError(mappedId, msg);
+        } else if (msg.toLowerCase().includes('time') || 
+                   msg.toLowerCase().includes('future')) {
+            // Cross-field date+time error — show under the time field
+            showCreateError('ca-time', msg);
+        } else {
+            // Truly unknown error — show in the top alert banner
+            document.getElementById('create-alert-msg').textContent = msg;
+            document.getElementById('create-alert').style.display = 'flex';
+        }
+    });
+} else {
+    document.getElementById('create-alert-msg').textContent =
         data.detail || 'Failed to create activity. Please try again.';
-      document.getElementById('create-alert').style.display = 'flex';
-    }
+    document.getElementById('create-alert').style.display = 'flex';
+}
     return;
   }
   // Success — navigate to the new activity's detail page
@@ -199,8 +218,10 @@ function setCreateLoading(loading) {
   const text = document.getElementById('create-btn-text');
   const spin = document.getElementById('create-spinner');
   btn.disabled       = loading;
-  text.textContent   = loading ? 'Creating...' : 'Create activity';
-  spin.style.display = loading ? 'inline-block' : 'none';
+  text.textContent   = loading
+        ? (window._editActivityId ? 'Saving...'   : 'Creating...')
+        : (window._editActivityId ? 'Save changes' : 'Create activity');
+    spin.style.display = loading ? 'inline-block' : 'none';
 }
 function showCreateError(id, msg) {
   const errEl   = document.getElementById(`${id}-error`);
