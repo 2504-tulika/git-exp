@@ -2,10 +2,6 @@
 
 Apache Airflow pipeline that automates a survivor camp's dawn/dusk routine — scan the perimeter, decide fight or hide, ration supplies, and radio in a report — twice a day, on its own.
 
-![Airflow](https://img.shields.io/badge/Airflow-2.9-017CEE?logo=apacheairflow&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
-![Status](https://img.shields.io/badge/status-tested-brightgreen)
-
 ---
 
 ## Pipeline
