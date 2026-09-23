@@ -1,0 +1,16 @@
+policy_id,policy_type,sub_type,status,start_date,end_date,premium,policy_document
+MSI-MOT-1001,Motor,Comprehensive Motor Policy,Active,02-Jan-2026,01-Jan-2027,"Rs. 13,200 per annum",policies/policy_MSI-MOT-1001.pdf
+MSI-MOT-1002,Motor,Third-Party Only Motor Policy,Active,14-Feb-2026,13-Feb-2027,"Rs. 4,850 per annum",policies/policy_MSI-MOT-1002.pdf
+MSI-MOT-1003,Motor,Standalone Own-Damage Motor Policy,Lapsed,19-May-2025,18-May-2026,"Rs. 2,150 per annum",policies/policy_MSI-MOT-1003.pdf
+MSI-MOT-1004,Motor,Comprehensive Motor Policy,Active,27-Aug-2026,26-Aug-2027,"Rs. 18,400 per annum",policies/policy_MSI-MOT-1004.pdf
+MSI-MOT-1005,Motor,Third-Party Only Motor Policy,Active,11-Nov-2025,10-Nov-2026,"Rs. 9,600 per annum",policies/policy_MSI-MOT-1005.pdf
+MSI-MED-2001,Medical,Group Health Policy,Active,05-Mar-2026,04-Mar-2027,"Rs. 8,400 per annum (per insured person)",policies/policy_MSI-MED-2001.pdf
+MSI-MED-2002,Medical,Group Health Policy,Active,22-Apr-2026,21-Apr-2027,"Rs. 5,600 per annum (per insured person)",policies/policy_MSI-MED-2002.pdf
+MSI-MED-2003,Medical,Individual Health Policy,Active,09-Jun-2026,08-Jun-2027,"Rs. 14,900 per annum",policies/policy_MSI-MED-2003.pdf
+MSI-MED-2004,Medical,Critical Illness Policy,Active,16-Jul-2026,15-Jul-2027,"Rs. 6,200 per annum (per insured person)",policies/policy_MSI-MED-2004.pdf
+MSI-MED-2005,Medical,Senior Citizen Health Policy,Active,30-Sep-2025,29-Sep-2026,"Rs. 21,500 per annum (per insured person)",policies/policy_MSI-MED-2005.pdf
+MSI-LIF-3001,Life,Term Life Policy,Active,03-Jan-2025,02-Jan-2045,"Rs. 11,800 per annum",policies/policy_MSI-LIF-3001.pdf
+MSI-LIF-3002,Life,Whole Life Policy,Active,14-Feb-2025,13-Feb-2074,"Rs. 42,000 per annum",policies/policy_MSI-LIF-3002.pdf
+MSI-LIF-3003,Life,Money-Back Policy,Active,21-May-2025,20-May-2045,"Rs. 55,000 per annum",policies/policy_MSI-LIF-3003.pdf
+MSI-LIF-3004,Life,Term Life Policy,Active,08-Aug-2025,07-Aug-2050,"Rs. 16,400 per annum",policies/policy_MSI-LIF-3004.pdf
+MSI-LIF-3005,Life,Endowment Policy,Active,17-Dec-2025,16-Dec-2040,"Rs. 38,500 per annum",policies/policy_MSI-LIF-3005.pdf
