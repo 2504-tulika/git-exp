@@ -1,4 +1,9 @@
-from sqlalchemy import Column, String, Date, Text, Boolean, ForeignKey, Integer, ForeignKeyConstraint
+import enum
+
+from sqlalchemy import (
+    Column, String, Date, DateTime, Text, Boolean, ForeignKey,
+    Integer, ForeignKeyConstraint, Enum, Index, func,
+)
 from sqlalchemy.orm import relationship
 
 from src.config.database import Base
@@ -13,7 +18,6 @@ class Customer(Base):
     gender = Column(String(10))
     contact_number = Column(String(20))
 
-    # One customer can be linked to many policies (via policy_customers).
     policies = relationship("PolicyCustomer", back_populates="customer")
 
 
@@ -22,12 +26,12 @@ class Policy(Base):
 
     policy_id = Column(String(20), primary_key=True)
     policy_type = Column(String(20), nullable=False)      # Motor / Medical / Life
-    sub_type = Column(String(100), nullable=False)         # e.g. "Comprehensive Motor Policy"
+    sub_type = Column(String(100), nullable=False)         
     status = Column(String(20), nullable=False)             # Active / Lapsed
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
-    premium = Column(String(50))            # kept as text, e.g. "Rs. 13,200 per annum"
-    policy_document = Column(String(200))    # relative path to the policy PDF
+    premium = Column(String(50))            
+    policy_document = Column(String(200))    
 
     # One policy can be linked to many customers (via policy_customers).
     customers = relationship("PolicyCustomer", back_populates="policy")
@@ -53,7 +57,6 @@ class ClaimsHistory(Base):
     __tablename__ = "claims_history"
 
     claim_id = Column(String(20), primary_key=True)
-    
     policy_id = Column(String(20), nullable=False)
     customer_id = Column(String(20), nullable=False)
     claim_type = Column(String(100), nullable=False)
@@ -64,10 +67,7 @@ class ClaimsHistory(Base):
     status = Column(String(20), nullable=False)   # Approved / Denied / Under Review / Pending
     fraud_flag = Column(Boolean, default=False)
 
-    """A claim always belongs to exactly one specific (policy_id, customer_id)
-    pair -- and that pair must actually exist in policy_customers. This
-    stops a claim ever being recorded against a customer who doesn't
-    actually hold that policy"""
+    # A claim always belongs to exactly one specific (policy_id, customer_id) pair
     __table_args__ = (
         ForeignKeyConstraint(
             ["policy_id", "customer_id"],
@@ -75,13 +75,42 @@ class ClaimsHistory(Base):
         ),
     )
 
-
 class User(Base):
-    """Login accounts for claims handlers and supervisors (Day 6 role-based access)."""
+    """
+    Login accounts. Each account belongs to exactly one customer -- there's
+    no separate staff/handler account type, so a logged-in user can only
+    ever see their own policies, claims, and chat history.
+    """
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
-    role = Column(String(20), nullable=False, default="claims_handler")  # or "supervisor"
+    customer_id = Column(String(20), ForeignKey("customers.customer_id"), nullable=False, unique=True)
+
+    customer = relationship("Customer")
+
+
+class ChatRole(str, enum.Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    claim_id = Column(String(20), ForeignKey("claims_history.claim_id"), nullable=False)
+
+    customer_id = Column(String(20), ForeignKey("customers.customer_id"), nullable=False)
+
+    role = Column(Enum(ChatRole), nullable=False)
+    message_text = Column(Text, nullable=False)
+
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        Index("ix_chat_messages_claim_id_created_at", "claim_id", "created_at"),
+    )
 
