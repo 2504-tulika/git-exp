@@ -1,28 +1,3 @@
-"""
-RAG ingestion: read the 15 policy PDFs, split each into fine-grained
-chunks, embed them, and upsert into the ChromaDB collection.
-
-*** OPTIONAL / NOT YET ADOPTED ***
-This is a chunking-granularity revision of the version currently in use.
-The original chunks one whole section (all Exclusions bullets joined into
-one blob) per chunk. This version chunks one *bullet point* at a time,
-so a single buried clause (e.g. the maternity exclusion) doesn't get
-diluted by four unrelated bullets sitting next to it in the same section.
-Sections with no bullets (Policy Information, Document Intro) are left as
-a single chunk each, since splitting a plain paragraph doesn't help.
-
-Everything else -- boilerplate stripping, section headers, the CSV-driven
-run() loop, the "always full rebuild" behavior -- is unchanged from the
-version you're running now. Only split_into_sections() and
-chunk_policy_pdf() changed; safe to diff against your current file before
-deciding whether to swap it in.
-
-Run standalone:
-    python -m src.rag.ingestion
-Re-run any time a policy PDF changes -- it always wipes and rebuilds the
-whole collection, so it's safe to re-run any time.
-"""
-
 import csv
 import re
 from pathlib import Path
