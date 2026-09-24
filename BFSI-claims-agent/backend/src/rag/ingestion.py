@@ -1,23 +1,3 @@
-"""
-RAG ingestion: read the 15 policy PDFs, split each into section-based
-chunks, embed them, and upsert into the ChromaDB collection.
-
-This replaces chunk_policies.py's standalone JSON-file step -- instead of
-writing policy_chunks.json for a second script to read, chunking and
-vector-store writing now happen in one pipeline, backed by vector_store.py.
-
-Why chunk by section instead of by fixed word count?
-Our PDFs already have clear, consistent section headers (Coverage Details,
-Inclusions, Exclusions, etc.), so splitting on those headers gives us
-chunks that are naturally "about one thing" -- exactly what we want for
-retrieval. A fixed-size chunk could cut a clause in half.
-
-Run standalone:
-    python -m src.rag.ingestion
-Re-run any time a policy PDF changes -- it always wipes and rebuilds the
-whole collection, so it's safe to re-run any time.
-"""
-
 import csv
 import re
 from pathlib import Path
@@ -29,10 +9,6 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Anchor every path to the project root so this runs the same whether it's
-# invoked from backend/, from rag/, or by main.py on server startup.
-# .../backend/src/rag/ingestion.py -> parents[3] is the project root
-# (the folder containing backend/, frontend/ and data/).
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 POLICIES_CSV = DATA_DIR / "policies.csv"
