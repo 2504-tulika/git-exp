@@ -1,13 +1,4 @@
-"""
-Vector store lifecycle: owns the one ChromaDB collection our RAG pipeline
-reads from and writes to.
-
-ingestion.py calls get_collection() (via reset_collection()) to upsert
-policy chunks; retriever.py calls get_collection() to query them. Neither
-of those files talks to ChromaDB directly -- this is the only file that
-does, so if we ever swap ChromaDB for FAISS or another store, this is the
-only file that changes.
-"""
+from pathlib import Path
 
 import chromadb
 from chromadb.utils import embedding_functions
@@ -19,6 +10,9 @@ logger = get_logger(__name__)
 
 COLLECTION_NAME = "policy_clauses"
 
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+VECTOR_STORE_PATH = str(PROJECT_ROOT / settings.vector_store_dir.lstrip("./"))
+
 _client = None
 _collection = None
 
@@ -27,8 +21,8 @@ def get_client():
     """Return a singleton persistent ChromaDB client, creating it on first use."""
     global _client
     if _client is None:
-        logger.info(f"Opening ChromaDB persistent client at {settings.vector_store_dir}")
-        _client = chromadb.PersistentClient(path=settings.vector_store_dir)
+        logger.info(f"Opening ChromaDB persistent client at {VECTOR_STORE_PATH}")
+        _client = chromadb.PersistentClient(path=VECTOR_STORE_PATH)
     return _client
 
 

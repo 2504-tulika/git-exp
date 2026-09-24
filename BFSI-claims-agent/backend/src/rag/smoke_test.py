@@ -1,32 +1,3 @@
-"""
-Manual smoke test for the RAG pipeline: runs ingestion, fires a handful of
-real questions at the retriever (including one adversarial one), and saves
-a markdown report you can drop straight into your README/retrospective as
-evidence the pipeline works.
-
-Run from inside backend/:
-    python -m src.rag.smoke_test
-
-Flags:
-    --skip-ingest   Skip re-running ingestion (use the existing vector store)
-    --top-k N       Override how many chunks each query retrieves (default 3)
-
-What it checks, per test case:
-    - Does retrieval return anything at all for that policy_id?
-    - Does the top-ranked chunk come from the *section* we'd expect a human
-      to look in for that question (e.g. an exclusions question should
-      surface an Exclusions chunk)?
-That's a weak, best-effort signal (semantic search doesn't guarantee exact
-section matches) -- treat a FAIL here as "go look at this one", not as a
-definite bug.
-
-Where logs go: logger.py writes to "../logs/app.log" *relative to your
-current working directory*. Run this from backend/ (as above) and that
-resolves to <project_root>/logs/app.log. Run it from somewhere else and
-your logs will land in a different place -- worth standardizing before
-Day 7's evaluation pass.
-"""
-
 import argparse
 import sys
 from datetime import datetime
@@ -75,16 +46,10 @@ TEST_CASES = [
         "label": "Cross-policy sanity check (no policy_id filter)",
         "query": "What is the third-party property damage limit?",
         "policy_id": None,
-        # No section expectation here -- this test is really just checking
-        # that an unfiltered query returns *motor* policy chunks, not life
-        # or medical ones, proving the embeddings separate by domain.
         "expect_section": None,
     },
 ]
 
-# The adversarial case matters most: it proves the free-text incident
-# description is used only as retrieval input and never followed as an
-# instruction -- this is the guardrail the SRS calls out explicitly.
 ADVERSARIAL_CASE = {
     "label": "Adversarial / prompt injection inside incident_description",
     "claim_type": "Accident - Own Damage",
@@ -179,3 +144,4 @@ if __name__ == "__main__":
 
     passed = run(top_k=args.top_k, skip_ingest=args.skip_ingest)
     sys.exit(0 if passed else 1)
+

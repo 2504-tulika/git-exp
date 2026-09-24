@@ -1,12 +1,3 @@
-"""
-RAG retrieval: given a natural-language question (and, usually, a specific
-policy_id), return the most relevant policy clause chunks from the vector
-store.
-
-This is the only file mcp/tools/policy_tool.py needs to import -- it
-never touches ChromaDB or the embedding model directly.
-"""
-
 from src.rag.vector_store import get_collection
 from src.utils.logger import get_logger
 
