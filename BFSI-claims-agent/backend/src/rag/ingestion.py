@@ -1,3 +1,28 @@
+"""
+RAG ingestion: read the 15 policy PDFs, split each into fine-grained
+chunks, embed them, and upsert into the ChromaDB collection.
+
+*** OPTIONAL / NOT YET ADOPTED ***
+This is a chunking-granularity revision of the version currently in use.
+The original chunks one whole section (all Exclusions bullets joined into
+one blob) per chunk. This version chunks one *bullet point* at a time,
+so a single buried clause (e.g. the maternity exclusion) doesn't get
+diluted by four unrelated bullets sitting next to it in the same section.
+Sections with no bullets (Policy Information, Document Intro) are left as
+a single chunk each, since splitting a plain paragraph doesn't help.
+
+Everything else -- boilerplate stripping, section headers, the CSV-driven
+run() loop, the "always full rebuild" behavior -- is unchanged from the
+version you're running now. Only split_into_sections() and
+chunk_policy_pdf() changed; safe to diff against your current file before
+deciding whether to swap it in.
+
+Run standalone:
+    python -m src.rag.ingestion
+Re-run any time a policy PDF changes -- it always wipes and rebuilds the
+whole collection, so it's safe to re-run any time.
+"""
+
 import csv
 import re
 from pathlib import Path
@@ -9,6 +34,10 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Anchor every path to the project root so this runs the same whether it's
+# invoked from backend/, from rag/, or by main.py on server startup.
+# .../backend/src/rag/ingestion.py -> parents[3] is the project root
+# (the folder containing backend/, frontend/ and data/).
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 POLICIES_CSV = DATA_DIR / "policies.csv"
@@ -58,54 +87,89 @@ def extract_clean_lines(pdf_path):
     return lines
 
 
+def _group_lines_into_items(lines):
+    """
+    Group a section's lines into "items": a line starting with "- " begins
+    a new item, and any following non-bullet lines are wrap-around
+    continuations of that same bullet (pdfplumber sometimes splits one
+    long bullet across two lines). A section with no bullet lines at all
+    (e.g. Policy Information's key/value table) comes back as one single
+    item, unchanged from how it worked before.
+    """
+    items = []
+    current = []
+
+    for line in lines:
+        if line.startswith("- "):
+            if current:
+                items.append(" ".join(current))
+            current = [line]
+        else:
+            if current:
+                current.append(line)
+            else:
+                # No bullet seen yet in this section -- not a bulleted
+                # section (e.g. Policy Information); keep accumulating
+                # into one running item.
+                current.append(line)
+
+    if current:
+        items.append(" ".join(current))
+
+    return items if items else [""]
+
+
 def split_into_sections(lines):
     """
-    Group lines into (section_name, section_text) tuples using
-    SECTION_HEADERS as split points. Anything before the first recognized
-    header (the title + "Policy Type: ..." line) is folded into the first
-    real section instead of kept as its own tiny chunk.
+    Group lines into (section_name, [item_text, ...]) tuples using
+    SECTION_HEADERS as split points, then group each section's lines into
+    bullet-level items via _group_lines_into_items(). Anything before the
+    first recognized header (the title + "Policy Type: ..." line) is
+    folded into the first real section instead of kept as its own tiny
+    chunk.
     """
-    sections = []
+    raw_sections = []
     current_header = "Document Intro"
     current_lines = []
 
     for line in lines:
         if line in SECTION_HEADERS:
             if current_lines:
-                sections.append((current_header, " ".join(current_lines)))
+                raw_sections.append((current_header, current_lines))
             current_header = line
             current_lines = []
         else:
             current_lines.append(line)
 
     if current_lines:
-        sections.append((current_header, " ".join(current_lines)))
+        raw_sections.append((current_header, current_lines))
 
-    if sections and sections[0][0] == "Document Intro":
-        intro_text = sections[0][1]
-        next_header, next_text = sections[1]
-        sections = [(next_header, intro_text + " " + next_text)] + sections[2:]
+    if raw_sections and raw_sections[0][0] == "Document Intro":
+        intro_lines = raw_sections[0][1]
+        next_header, next_lines = raw_sections[1]
+        raw_sections = [(next_header, intro_lines + next_lines)] + raw_sections[2:]
 
-    return sections
+    return [(header, _group_lines_into_items(lines)) for header, lines in raw_sections]
 
 
 def chunk_policy_pdf(pdf_path, policy_meta):
-    """Build the list of chunk dicts for one policy PDF."""
+    """Build the list of chunk dicts for one policy PDF -- one chunk per bullet item."""
     lines = extract_clean_lines(pdf_path)
     sections = split_into_sections(lines)
 
     chunks = []
-    for i, (section_name, section_text) in enumerate(sections):
-        chunks.append({
-            # Deterministic id -> re-running ingestion upserts in place
-            # instead of accumulating duplicate chunks per policy.
-            "id": f'{policy_meta["policy_id"]}::{i:02d}',
-            "policy_id": policy_meta["policy_id"],
-            "policy_type": policy_meta["policy_type"],
-            "sub_type": policy_meta["sub_type"],
-            "section": section_name,
-            "text": section_text,
-        })
+    for section_idx, (section_name, items) in enumerate(sections):
+        for item_idx, item_text in enumerate(items):
+            chunks.append({
+                # Deterministic id -> re-running ingestion upserts in place
+                # instead of accumulating duplicate chunks per policy.
+                "id": f'{policy_meta["policy_id"]}::{section_idx:02d}::{item_idx:02d}',
+                "policy_id": policy_meta["policy_id"],
+                "policy_type": policy_meta["policy_type"],
+                "sub_type": policy_meta["sub_type"],
+                "section": section_name,
+                "text": item_text,
+            })
     return chunks
 
 
