@@ -3,7 +3,7 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_TOP_K = 4
+DEFAULT_TOP_K = 5
 
 
 def retrieve_policy_clauses(query, policy_id=None, top_k=DEFAULT_TOP_K):
