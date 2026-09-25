@@ -67,7 +67,9 @@ class ClaimsHistory(Base):
     status = Column(String(20), nullable=False)   # Approved / Denied / Under Review / Pending
     fraud_flag = Column(Boolean, default=False)
 
-    # A claim always belongs to exactly one specific (policy_id, customer_id) pair
+    ai_recommendation = Column(String(20), nullable=True)   # approve / deny / needs_more_info
+    ai_rationale = Column(Text, nullable=True)
+
     __table_args__ = (
         ForeignKeyConstraint(
             ["policy_id", "customer_id"],
@@ -113,4 +115,3 @@ class ChatMessage(Base):
     __table_args__ = (
         Index("ix_chat_messages_claim_id_created_at", "claim_id", "created_at"),
     )
-
