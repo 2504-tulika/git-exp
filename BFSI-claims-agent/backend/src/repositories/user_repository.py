@@ -20,10 +20,18 @@ class UserRepository(BaseRepository):
     def username_exists(self, username):
         return self.get_by_username(username) is not None
 
+    def get_by_customer_id(self, customer_id):
+        """Look up a login account by the customer_id it's linked to, if one exists."""
+        return self.db.query(User).filter(User.customer_id == customer_id).first()
+
+    def customer_already_registered(self, customer_id):
+        """
+        Check if the customer already has a login account.
+        """
+        return self.get_by_customer_id(customer_id) is not None
+
     def create_user(self, username, password_hash, customer_id):
         """
         Create a new login account, linked to an existing customer_id.
-        auth_service.py hashes the password before calling this -- this
-        repository never sees a plain-text password.
         """
         return self.create(username=username, password_hash=password_hash, customer_id=customer_id)
