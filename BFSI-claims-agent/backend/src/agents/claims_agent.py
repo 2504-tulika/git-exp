@@ -163,8 +163,7 @@ def _extract_tool_calls(messages):
     """
     Walks the agent's full message history and pairs each tool's actual
     output (a ToolMessage) with the specific arguments the model used to
-    call it -- this is what claim_service.py's audit trail and any
-    "explain this recommendation" view will read from.
+    call it.
     """
     call_info_by_id = {}
     for message in messages:
@@ -188,13 +187,7 @@ async def process_claim_async(claim):
     """
     Run one claim through the agent end-to-end: a deterministic
     guardrail check first (missing fields, injection scan), then -- if it
-    passes -- invoke the already-warm agent and parse its final
-    recommendation. Requires warm_up() to have already run; raises
-    AgentToolError if called before that.
-
-    claim is a plain dict; incident_date/intimation_date, if present,
-    should already be ISO date strings (claim_service.py's job to format
-    them that way before calling this).
+    passes.
     """
     if _agent is None:
         raise AgentToolError(
