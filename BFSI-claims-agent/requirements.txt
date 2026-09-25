@@ -1,12 +1,11 @@
-# PDF generation (mock policy documents)
 reportlab==4.4.10
-# RAG pipeline: reading PDFs, chunking, embedding, vector store
+
 pdfplumber==0.11.9
 chromadb==1.5.9
-sentence-transformers  
-# data handling
+sentence-transformers==5.2.3   
+
 pandas==2.2.3
-# backend (FastAPI + MySQL + auth)
+
 fastapi==0.115.6
 uvicorn==0.34.0
 pydantic-settings==2.7.1
@@ -14,3 +13,8 @@ pymysql==1.1.1
 dbutils==3.1.0
 passlib[bcrypt]==1.7.4
 pyjwt==2.10.1
+
+mcp
+langchain
+langchain-groq
+langchain-mcp-adapters
