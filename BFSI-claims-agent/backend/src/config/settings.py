@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str
     
-    llm_model_name: str = "opeai/gpt-oss-120b"
+    llm_model_name: str = "openai/gpt-oss-120b"
 
     
     embedding_model_name: str = "all-mpnet-base-v2"

@@ -15,6 +15,11 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 pyjwt==2.10.1
 
+streamlit
+python-dotenv
+iron setup
+requests
+
 httpx
 
 mcp
