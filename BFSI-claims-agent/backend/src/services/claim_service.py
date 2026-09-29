@@ -2,7 +2,12 @@ import uuid
 from datetime import date
 
 from src.agents.claims_agent import process_claim_async
-from src.exceptions.exceptions import ClaimNotFoundError, UnauthorizedPolicyAccessError
+from src.config import constants
+from src.exceptions.exceptions import (
+    ClaimLimitExceededError,
+    ClaimNotFoundError,
+    UnauthorizedPolicyAccessError,
+)
 from src.mcp.tools.fraud_risk_tool import assess_fraud_risk
 from src.repositories.claims_repository import ClaimsRepository
 from src.repositories.policy_repository import PolicyRepository
@@ -32,6 +37,11 @@ def _format_claim_amount(claim_amount):
 async def submit_claim(db, current_user, request):
     """
     Submit a new claim for the logged-in customer.
+
+    Order of checks (cheap and strict first, expensive last):
+      1. the customer must hold the policy
+      2. the yearly claim limit must not be reached
+      3. fraud-risk check, then the agent's recommendation
     """
     policy_repo = PolicyRepository(db)
     claims_repo = ClaimsRepository(db)
@@ -45,6 +55,23 @@ async def submit_claim(db, current_user, request):
             f"Customer {current_user.customer_id} does not hold policy {request.policy_id}"
         )
 
+    incident_year = request.incident_date.year
+    claims_this_year = claims_repo.count_claims_for_customer_on_policy_in_year(
+        current_user.customer_id, request.policy_id, incident_year
+    )
+    if claims_this_year >= constants.MAX_CLAIMS_PER_POLICY_PER_YEAR:
+        logger.warning(
+            f"Blocked claim submission: customer {current_user.customer_id} already has "
+            f"{claims_this_year} claim(s) on policy {request.policy_id} for {incident_year}"
+        )
+        raise ClaimLimitExceededError(
+            constants.CLAIM_LIMIT_REACHED.format(
+                limit=constants.MAX_CLAIMS_PER_POLICY_PER_YEAR,
+                policy_id=request.policy_id,
+                year=incident_year,
+            )
+        )
+
     intimation_date = date.today()
     formatted_amount = _format_claim_amount(request.claim_amount)
 
@@ -55,7 +82,7 @@ async def submit_claim(db, current_user, request):
         intimation_date=intimation_date,
         claim_amount=formatted_amount,
     )
-    fraud_flag = len(fraud_result["risk_signals"]) > 0
+    fraud_flag = len(fraud_result["claim_signals"]) > 0
 
     agent_claim = {
         "policy_id": request.policy_id,
@@ -131,5 +158,3 @@ def get_claim_detail(db, current_user, claim_id):
         )
 
     return claim
-
-

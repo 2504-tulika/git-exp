@@ -137,3 +137,8 @@ def get_claim(claim_id):
     claim = _request("GET", f"/claims/{claim_id}")
     return claim
 
+def send_chat_message(claim_id, message):
+    """Ask a follow-up question about one claim; returns the assistant's reply text."""
+    body = {"message": message}
+    response = _request("POST", f"/claims/{claim_id}/chat", json_body=body)
+    return response["reply"]

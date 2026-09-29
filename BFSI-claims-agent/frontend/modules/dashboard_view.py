@@ -2,7 +2,7 @@ from datetime import date
 
 import streamlit as st
 
-from modules.api_client import ApiError, list_my_claims, list_my_policies, submit_claim
+from modules.api_client import ApiError, list_my_claims, list_my_policies, send_chat_message, submit_claim
 from modules.theme import INK_NAVY, SLATE, STATUS_COLORS, accent_bar, recommendation_block
 
 def _render_policies_tab(policies):
@@ -68,6 +68,44 @@ def _render_submit_claim_tab(policies):
         st.markdown(recommendation_block(last_claim["ai_recommendation"], last_claim["ai_rationale"]), unsafe_allow_html=True)
 
 
+def _render_claim_chat(claim):
+    history_key = f"chat_history_{claim['claim_id']}"
+    if history_key not in st.session_state:
+        st.session_state[history_key] = []
+
+    with st.expander("Ask about this claim"):
+        for turn in st.session_state[history_key]:
+            avatar = "🧑" if turn["role"] == "user" else "🛡️"
+            with st.chat_message(turn["role"], avatar=avatar):
+                st.write(turn["content"])
+
+        if not st.session_state[history_key]:
+            st.caption("Ask why this claim got its recommendation, or what it means for you.")
+
+        with st.form(f"chat_form_{claim['claim_id']}", clear_on_submit=True, border=False):
+            left, right = st.columns([5, 1])
+            with left:
+                question = st.text_input(
+                    "Your question",
+                    label_visibility="collapsed",
+                    placeholder="e.g. Why was this claim flagged?",
+                )
+            with right:
+                asked = st.form_submit_button("Send", use_container_width=True)
+
+        if asked and question.strip():
+            st.session_state[history_key].append({"role": "user", "content": question})
+            try:
+                with st.spinner("Thinking..."):
+                    reply = send_chat_message(claim["claim_id"], question)
+                st.session_state[history_key].append({"role": "assistant", "content": reply})
+            except ApiError as exc:
+                st.session_state[history_key].append(
+                    {"role": "assistant", "content": f"Sorry, I couldn't answer that: {exc.detail}"}
+                )
+            st.rerun()
+
+
 def _render_claim_history_tab(claims):
     if not claims:
         st.info("You haven't filed any claims yet.")
@@ -96,6 +134,9 @@ def _render_claim_history_tab(claims):
                     st.write(f"**Claimed amount:** {claim['claim_amount']}")
             with verdict_col:
                 st.markdown(recommendation_block(claim["ai_recommendation"], claim["ai_rationale"]), unsafe_allow_html=True)
+
+            if claim["ai_recommendation"] is not None:
+                _render_claim_chat(claim)
 
 
 def _render_status_strip(policies, claims):
@@ -138,6 +179,50 @@ def _render_account_bar():
             st.rerun()
 
 
+def _count_text(count, singular, plural):
+    """Small helper so the sidebar says "1 policy" but "2 policies"."""
+    word = singular if count == 1 else plural
+    return f"**{count}** {word}"
+
+
+def _render_sidebar(policies, claims):
+    """
+    Left sidebar: the brand, a short summary of this customer's account,
+    how the claim process works, and a few tips for filing a good claim.
+    """
+    awaiting = sum(1 for c in claims if c["status"] in ("Under Review", "Pending"))
+
+    with st.sidebar:
+        st.markdown(
+            "<div style='font-family:Fraunces,serif;font-size:1.3rem;'>Meridian Shield</div>",
+            unsafe_allow_html=True,
+        )
+        st.caption("Customer claims portal")
+        st.divider()
+
+        st.caption("Your account")
+        st.markdown(_count_text(len(policies), "policy", "policies"))
+        st.markdown(_count_text(len(claims), "claim filed", "claims filed"))
+        st.markdown(f"**{awaiting}** awaiting a decision")
+        st.divider()
+
+        st.caption("How it works")
+        st.markdown(
+            "1. Choose a policy and tell us what happened\n"
+            "2. Our AI assistant checks your cover, your claim history and the details you give\n"
+            "3. It recommends approve, deny or needs more info\n"
+            "4. Our claims team reviews it and makes the final decision"
+        )
+        st.divider()
+
+        st.caption("Tips for a smooth claim")
+        st.markdown(
+            "- Describe the incident in detail: what, where and when\n"
+            "- Report it as soon as you can -- late reports need extra checks\n"
+            "- Add the claimed amount if you know it"
+        )
+
+
 def render_dashboard_view():
     _render_account_bar()
     st.title("Claims Processing Agent")
@@ -149,23 +234,7 @@ def render_dashboard_view():
         st.error(exc.detail)
         return
 
-    with st.sidebar:
-        st.markdown("<div style='font-family:Fraunces,serif;font-size:1.1rem;'>Meridian Shield</div>", unsafe_allow_html=True)
-        st.caption("Claims handler workspace")
-        st.divider()
-
-        needs_review = sum(1 for c in claims if c["ai_recommendation"] == "needs_more_info")
-        st.markdown(f"**{len(claims)}** claim(s) on file")
-        st.markdown(f"**{needs_review}** awaiting review")
-
-        st.divider()
-        st.caption("How this works")
-        st.markdown(
-            "1. Submit a claim\n"
-            "2. The AI checks coverage, history, and fraud risk\n"
-            "3. It recommends approve / deny / needs more info\n"
-            "4. A human handler makes the final call"
-        )
+    _render_sidebar(policies, claims)
 
     _render_status_strip(policies, claims)
     st.divider()
@@ -177,4 +246,3 @@ def render_dashboard_view():
         _render_submit_claim_tab(policies)
     with history_tab:
         _render_claim_history_tab(claims)
-

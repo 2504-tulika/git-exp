@@ -1,6 +1,11 @@
 from src.config.database import SessionLocal
-from src.exceptions.exceptions import UnauthorizedPolicyAccessError
+from src.exceptions.exceptions import (
+    CustomerNotFoundError,
+    PolicyNotFoundError,
+    UnauthorizedPolicyAccessError,
+)
 from src.repositories.claims_repository import ClaimsRepository
+from src.repositories.customer_repository import CustomerRepository
 from src.repositories.policy_repository import PolicyRepository
 from src.utils.logger import get_logger
 
@@ -26,27 +31,38 @@ def serialize_claim(claim):
 def get_claim_history(customer_id, policy_id=None):
     """
     Return this customer's claim history: every past claim across all their policies, plus a flag for whether any of those claims were
-    fraud-flagged. If policy_id is given, also return claims scoped to just that policy -- but only after independently re-verifying the
-    customer actually holds it.
+    fraud-flagged. If policy_id is given, also return this customer's claims on just that policy.
 
-    Raises UnauthorizedPolicyAccessError if policy_id is given and this customer doesn't hold it.
+    All checks happen BEFORE any claim data is read:
+      - the customer must exist (CustomerNotFoundError)
+      - if policy_id is given, the policy must exist (PolicyNotFoundError) and this customer must actually hold it (UnauthorizedPolicyAccessError)
+
     """
     db = SessionLocal()
     try:
+        customer_repo = CustomerRepository(db)
+        policy_repo = PolicyRepository(db)
         claims_repo = ClaimsRepository(db)
+
+        if customer_repo.get_by_id(customer_id) is None:
+            raise CustomerNotFoundError(f"Customer {customer_id} not found")
+
+        if policy_id is not None:
+            if policy_repo.get_by_id(policy_id) is None:
+                raise PolicyNotFoundError(f"Policy {policy_id} not found")
+            if not policy_repo.customer_owns_policy(customer_id, policy_id):
+                raise UnauthorizedPolicyAccessError(
+                    f"Customer {customer_id} does not hold policy {policy_id}"
+                )
 
         all_claims = claims_repo.get_claims_for_customer(customer_id)
         serialized_all = [serialize_claim(c) for c in all_claims]
 
         serialized_for_policy = None
         if policy_id is not None:
-            policy_repo = PolicyRepository(db)
-            if not policy_repo.customer_owns_policy(customer_id, policy_id):
-                raise UnauthorizedPolicyAccessError(
-                    f"Customer {customer_id} does not hold policy {policy_id}"
-                )
             policy_claims = claims_repo.get_claims_for_policy(policy_id)
-            serialized_for_policy = [serialize_claim(c) for c in policy_claims]
+            own_policy_claims = [c for c in policy_claims if c.customer_id == customer_id]
+            serialized_for_policy = [serialize_claim(c) for c in own_policy_claims]
 
         result = {
             "customer_id": customer_id,
@@ -64,3 +80,4 @@ def get_claim_history(customer_id, policy_id=None):
         return result
     finally:
         db.close()
+

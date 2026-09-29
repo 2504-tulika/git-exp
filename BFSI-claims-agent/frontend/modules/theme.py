@@ -3,8 +3,8 @@ PAPER = "#FAFAF8"
 SLATE = "#5B6B85"
 SEAL_GREEN = "#2F6D5C"      # approve
 SIGNAL_AMBER = "#B8863B"    # needs_more_info
-SIGNAL_RUST = "#A13D2E"     # deny
-
+SIGNAL_RUST = "#A13D2E"  
+   # deny
 STATUS_COLORS = {
     "approve": SEAL_GREEN,
     "deny": SIGNAL_RUST,
@@ -13,8 +13,8 @@ STATUS_COLORS = {
 
 GLOBAL_CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 html, body, [class*="css"] {{
     font-family: 'IBM Plex Sans', sans-serif;
 }}
@@ -70,6 +70,19 @@ h1, h2, h3 {{
     padding: 1.5rem;
     background: white;
 }}
+/* Chat -- ask about a claim */
+[data-testid="stChatMessage"] {{
+    border: 1px solid {INK_NAVY}14;
+    border-radius: 10px;
+    background: white;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.4rem;
+}}
+[data-testid="stExpander"] summary {{
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    color: {INK_NAVY};
+}}
 </style>
 """
 
@@ -113,5 +126,5 @@ def recommendation_block(recommendation, rationale):
         {rationale_html}
     </div>
     """
-    return html
 
+    return html

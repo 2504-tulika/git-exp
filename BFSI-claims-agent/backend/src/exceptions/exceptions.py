@@ -62,6 +62,22 @@ class AgentToolError(ClaimsAgentError):
     audit trail.
     """
 
+class ClaimLimitExceededError(ClaimsAgentError):
+    """
+    Raised when a customer has already filed the maximum number of claims
+    allowed on one policy for the year (see MAX_CLAIMS_PER_POLICY_PER_YEAR
+    in constants.py). The claim is rejected before the agent ever runs.
+    """
+
+
+class ChatNotAvailableError(ClaimsAgentError):
+    """
+    Raised when a customer tries to chat about a claim that has no AI
+    recommendation yet (a seeded historical claim, or one still being
+    processed) -- there is nothing for the chat to discuss.
+    """
+
+
 _STATUS_CODES = {
     CustomerNotFoundError: 404,
     PolicyNotFoundError: 404,
@@ -72,6 +88,8 @@ _STATUS_CODES = {
     TokenExpiredError: 401,
     InvalidTokenError: 401,
     UnauthorizedPolicyAccessError: 403,
+    ClaimLimitExceededError: 422,
+    ChatNotAvailableError: 409,
     AgentToolError: 502,
 }
 
@@ -85,5 +103,3 @@ def _make_handler(status_code):
 def register_exception_handlers(app):
     for exc_class, status_code in _STATUS_CODES.items():
         app.add_exception_handler(exc_class, _make_handler(status_code))
-
-

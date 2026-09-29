@@ -4,7 +4,7 @@ Claims history queries -- used by both the "claim history" MCP tool
 flags, patterns).
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from src.repositories.base_repository import BaseRepository
 from src.repositories.models import ClaimsHistory
@@ -44,6 +44,20 @@ class ClaimsRepository(BaseRepository):
         return (
             self.db.query(ClaimsHistory)
             .filter(ClaimsHistory.customer_id == customer_id)
+            .count()
+        )
+
+    def count_claims_for_customer_on_policy_in_year(self, customer_id, policy_id, year):
+        first_day = date(year, 1, 1)
+        last_day = date(year, 12, 31)
+        return (
+            self.db.query(ClaimsHistory)
+            .filter(
+                ClaimsHistory.customer_id == customer_id,
+                ClaimsHistory.policy_id == policy_id,
+                ClaimsHistory.incident_date >= first_day,
+                ClaimsHistory.incident_date <= last_day,
+            )
             .count()
         )
 
@@ -89,3 +103,4 @@ class ClaimsRepository(BaseRepository):
     def create_claim(self, **fields):
         """Insert a new claim record (e.g. when a customer submits one through the app)."""
         return self.create(**fields)
+

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.agents import claims_agent
 from src.config.settings import settings
 from src.exceptions.exceptions import register_exception_handlers
-from src.routers import auth_router, claims_router, health_router
+from src.routers import auth_router, chat_router, claims_router, health_router
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -38,11 +38,10 @@ app.add_middleware(
 
 app.include_router(auth_router.router)
 app.include_router(claims_router.router)
+app.include_router(chat_router.router)
 app.include_router(health_router.router)
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-

@@ -2,8 +2,15 @@ import re
 from datetime import timedelta
 
 from src.config.database import SessionLocal
+from src.exceptions.exceptions import (
+    CustomerNotFoundError,
+    PolicyNotFoundError,
+    UnauthorizedPolicyAccessError,
+)
 from src.mcp.tools.claim_history_tool import serialize_claim
 from src.repositories.claims_repository import ClaimsRepository
+from src.repositories.customer_repository import CustomerRepository
+from src.repositories.policy_repository import PolicyRepository
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -32,12 +39,33 @@ def _parse_amount(amount_text):
 
 def assess_fraud_risk(customer_id, policy_id, incident_date, intimation_date, claim_amount=None, exclude_claim_id=None):
     """
-    Return every fraud-risk signal we can check for this claim. Always
-    succeeds (no exceptions raised for "risky" data -- risk signals are
-    the whole point of this tool's output, not a reason to fail).
+    The signals come in two groups:
+      - claim_signals: about THIS claim's own behaviour (claims clustered in
+        time, late intimation, amount far above average). Only these should
+        ever set a claim's fraud_flag.
+      - history_signals: about the customer's past (a prior fraud flag,
+        frequent claims). Useful context for the agent, but NOT proof
+        against this claim -- if they also set the flag, every future claim
+        would be flagged because of the last one's flag (a feedback loop).
+    risk_signals is both groups together.
+
+    Privacy: a policy can have several unrelated customers. Their claims
+    can count towards a risk signal, but their claim ids, amounts and dates
+    are never put in the result -- only how many there were.
     """
     db = SessionLocal()
     try:
+        if CustomerRepository(db).get_by_id(customer_id) is None:
+            raise CustomerNotFoundError(f"Customer {customer_id} not found")
+
+        policy_repo = PolicyRepository(db)
+        if policy_repo.get_by_id(policy_id) is None:
+            raise PolicyNotFoundError(f"Policy {policy_id} not found")
+        if not policy_repo.customer_owns_policy(customer_id, policy_id):
+            raise UnauthorizedPolicyAccessError(
+                f"Customer {customer_id} does not hold policy {policy_id}"
+            )
+
         repo = ClaimsRepository(db)
 
         prior_fraud_flag = repo.has_prior_fraud_flag(customer_id)
@@ -48,7 +76,10 @@ def assess_fraud_risk(customer_id, policy_id, incident_date, intimation_date, cl
         nearby_claims = repo.get_claims_within_days_for_policy(
             policy_id, incident_date, CLUSTER_WINDOW_DAYS, exclude_claim_id=exclude_claim_id
         )
-        clustered_claims = [serialize_claim(c) for c in nearby_claims]
+
+        own_nearby_claims = [c for c in nearby_claims if c.customer_id == customer_id]
+        clustered_claims = [serialize_claim(c) for c in own_nearby_claims]
+        other_customers_clustered_count = len(nearby_claims) - len(own_nearby_claims)
 
         days_late = (intimation_date - incident_date).days
         late_intimation = days_late >= LATE_INTIMATION_THRESHOLD_DAYS
@@ -66,26 +97,32 @@ def assess_fraud_risk(customer_id, policy_id, incident_date, intimation_date, cl
                 if customer_average_amount > 0:
                     amount_outlier = (this_claim_amount / customer_average_amount) >= AMOUNT_OUTLIER_RATIO
 
-        risk_signals = []
+        # Signals about the customer's past -- context only, never set the flag
+        history_signals = []
         if prior_fraud_flag:
-            risk_signals.append("Customer has a prior claim flagged as fraud risk.")
+            history_signals.append("Customer has a prior claim flagged as fraud risk.")
         if frequent_claimant:
-            risk_signals.append(f"Customer has filed {total_claims} claims in total (frequent claimant).")
-        if len(clustered_claims) > 0:
-            risk_signals.append(
-                f"{len(clustered_claims)} other claim(s) on this same policy within "
+            history_signals.append(f"Customer has filed {total_claims} claims in total (frequent claimant).")
+
+        # Signals about this claim itself -- these are what set the flag
+        claim_signals = []
+        if len(nearby_claims) > 0:
+            claim_signals.append(
+                f"{len(nearby_claims)} other claim(s) on this same policy within "
                 f"{CLUSTER_WINDOW_DAYS} days of this incident."
             )
         if late_intimation:
-            risk_signals.append(
+            claim_signals.append(
                 f"Claim intimated {days_late} days after the incident "
                 f"(policy treats {LATE_INTIMATION_THRESHOLD_DAYS}+ days as a fraud-risk indicator)."
             )
         if amount_outlier:
-            risk_signals.append(
+            claim_signals.append(
                 f"Claim amount is {this_claim_amount / customer_average_amount:.1f}x this "
                 f"customer's historical average claim amount."
             )
+
+        risk_signals = history_signals + claim_signals
 
         result = {
             "customer_id": customer_id,
@@ -94,12 +131,15 @@ def assess_fraud_risk(customer_id, policy_id, incident_date, intimation_date, cl
             "total_claims_by_customer": total_claims,
             "frequent_claimant": frequent_claimant,
             "clustered_claims": clustered_claims,
+            "other_customers_clustered_count": other_customers_clustered_count,
             "days_late": days_late,
             "late_intimation": late_intimation,
             "this_claim_amount": this_claim_amount,
             "customer_average_amount": customer_average_amount,
             "amount_outlier": amount_outlier,
             "risk_signals": risk_signals,
+            "claim_signals": claim_signals,
+            "history_signals": history_signals,
         }
         logger.info(
             f"fraud_risk_tool: customer={customer_id} policy={policy_id} -- "
@@ -108,3 +148,4 @@ def assess_fraud_risk(customer_id, policy_id, incident_date, intimation_date, cl
         return result
     finally:
         db.close()
+
