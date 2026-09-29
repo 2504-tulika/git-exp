@@ -66,7 +66,7 @@ def reset_collection():
     try:
         client.delete_collection(COLLECTION_NAME)
         logger.info(f"Deleted existing collection '{COLLECTION_NAME}'")
-    except Exception:
-        pass  # collection didn't exist yet -- nothing to delete
+    except Exception as e:
+        logger.warning(f"Could not delete collection '{COLLECTION_NAME}': {e}")
     _collection = None
     return get_collection()

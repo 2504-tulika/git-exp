@@ -33,7 +33,7 @@ BOILERPLATE_PATTERNS = [
     r"^Authorized Signatory$",
     r"^Company Seal$",
     r"^_+\s+_+$",
-    r"^M$",  # the single "M" letter drawn inside the logo shield
+    r"^M$",  
 ]
 
 
@@ -125,8 +125,6 @@ def chunk_policy_pdf(pdf_path, policy_meta):
     for section_idx, (section_name, items) in enumerate(sections):
         for item_idx, item_text in enumerate(items):
             chunks.append({
-                # Deterministic id -> re-running ingestion upserts in place
-                # instead of accumulating duplicate chunks per policy.
                 "id": f'{policy_meta["policy_id"]}::{section_idx:02d}::{item_idx:02d}',
                 "policy_id": policy_meta["policy_id"],
                 "policy_type": policy_meta["policy_type"],

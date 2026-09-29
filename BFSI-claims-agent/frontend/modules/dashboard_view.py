@@ -48,13 +48,13 @@ def _render_submit_claim_tab(policies):
         left, right = st.columns(2)
         with left:
             policy_label = st.selectbox("Policy", options=list(policy_options.keys()))
-            claim_type = st.text_input("Claim type", max_chars=100, placeholder="e.g. Accident - Own Damage")
+            claim_type = st.text_input("Claim type", max_chars=50, placeholder="e.g. Accident - Own Damage")
             incident_date = st.date_input("Incident date", max_value=date.today())
         with right:
             incident_description = st.text_area(
                 "What happened?",
                 height=140,
-                max_chars=2000,
+                max_chars=3000,
                 placeholder="Describe the incident in detail -- a very short description can't be assessed.",
             )
             claim_amount = st.number_input("Claimed amount (optional)", min_value=0.0, step=1000.0, value=0.0)
