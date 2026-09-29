@@ -1,20 +1,3 @@
-"""
-Deterministic, pre-LLM guardrail checks for an incoming claim.
-
-Two separate concerns, kept deliberately separate:
-  - missing_field_issues / should_block: hard checks that run BEFORE any
-    Groq call is made. If a claim is missing something a tool genuinely
-    needs, there's no reason to spend an LLM call finding that out. This
-    is the actual, enforced guardrail.
-  - injection_flags: pattern-matching over free-text fields, logged for
-    audit visibility but NEVER used to block a claim by itself. A
-    legitimate customer's claim can coincidentally contain phrasing that
-    matches a pattern; the real defense against prompt injection is the
-    agent's own system prompt instruction (see claims_agent.py) to treat
-    claim content strictly as data, never as instructions. This is an
-    observability signal, not a security boundary.
-"""
-
 import re
 
 from src.utils.logger import get_logger
@@ -25,15 +8,34 @@ REQUIRED_FIELDS = ["policy_id", "customer_id", "claim_type", "incident_date"]
 
 _INJECTION_PATTERNS = [
     re.compile(pattern, re.IGNORECASE) for pattern in [
-        r"ignore (all )?previous instructions",
-        r"disregard (all )?(the )?(previous|above) instructions",
+        r"ignore (all |any )?(the )?(previous|prior|above|earlier|your) (instructions|rules|prompts?)",
+        r"disregard (all |any )?(the )?(previous|prior|above|earlier|your) (instructions|rules|prompts?)",
+        r"forget (all |any )?(the )?(previous|prior|above|earlier|your) (instructions|rules|prompts?)",
         r"you are now in \w+ mode",
         r"new instructions?:",
+        r"(reveal|show|print|repeat|tell me) (me )?(your|the) (system )?(prompt|instructions|rules)",
         r"system prompt",
-        r"act as (an? )?admin",
-        r"approve (this|the) claim automatically",
+        r"(developer|debug|admin|god) mode",
+        r"jailbreak",
+        r"pretend (to be|you are|you're)",
+        r"act as (an? )?(admin|administrator|claims (handler|manager)|the claims team)",
+        r"approve (this|the|my) claim (automatically|immediately|now)",
+        r"(mark|set) (this|the|my) claim (as )?approved",
+        r"override (the )?(recommendation|decision|rules)",
     ]
 ]
+
+
+def find_injection_patterns(text):
+    """
+    Return the list of injection patterns that match `text` (empty if
+    none). Used to scan claim fields (logged, never blocking on its own)
+    and chat messages (a match gets a polite canned reply instead of an
+    AI call).
+    """
+    if not text:
+        return []
+    return [pattern.pattern for pattern in _INJECTION_PATTERNS if pattern.search(text)]
 
 
 def pre_agent_check(claim):
@@ -52,10 +54,10 @@ def pre_agent_check(claim):
             missing_field_issues.append(f"Missing required field: {field}")
 
     injection_flags = []
-    incident_description = claim.get("incident_description") or ""
-    for pattern in _INJECTION_PATTERNS:
-        if pattern.search(incident_description):
-            injection_flags.append(pattern.pattern)
+    for field in ("incident_description", "claim_type"):
+        for flagged in find_injection_patterns(claim.get(field) or ""):
+            if flagged not in injection_flags:
+                injection_flags.append(flagged)
 
     should_block = len(missing_field_issues) > 0
 

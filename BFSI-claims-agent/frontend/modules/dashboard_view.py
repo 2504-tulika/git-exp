@@ -2,7 +2,16 @@ from datetime import date
 
 import streamlit as st
 
-from modules.api_client import ApiError, list_my_claims, list_my_policies, send_chat_message, submit_claim
+from modules.api_client import (
+    ApiError,
+    get_chat_history,
+    get_policies_chat_history,
+    list_my_claims,
+    list_my_policies,
+    send_chat_message,
+    send_policies_chat_message,
+    submit_claim,
+)
 from modules.theme import INK_NAVY, SLATE, STATUS_COLORS, accent_bar, recommendation_block
 
 def _render_policies_tab(policies):
@@ -10,16 +19,22 @@ def _render_policies_tab(policies):
         st.info("No policies found for your account.")
         return
 
-    columns = st.columns(2)
-    for i, policy in enumerate(policies):
-        with columns[i % 2]:
-            with st.container(border=True):
-                st.markdown(accent_bar(INK_NAVY), unsafe_allow_html=True)
-                st.markdown(f"**{policy['policy_id']}**")
-                st.caption(policy["sub_type"])
-                st.write(f"{policy['policy_type']} · {policy['status']}")
-                st.write(f"Coverage: {policy['start_date']} to {policy['end_date']}")
-                st.write(f"Premium: {policy['premium']}")
+    cards_area, chat_area = st.columns([3, 2], gap="large")
+
+    with cards_area:
+        columns = st.columns(2)
+        for i, policy in enumerate(policies):
+            with columns[i % 2]:
+                with st.container(border=True):
+                    st.markdown(accent_bar(INK_NAVY), unsafe_allow_html=True)
+                    st.markdown(f"**{policy['policy_id']}**")
+                    st.caption(policy["sub_type"])
+                    st.write(f"{policy['policy_type']} · {policy['status']}")
+                    st.write(f"Coverage: {policy['start_date']} to {policy['end_date']}")
+                    st.write(f"Premium: {policy['premium']}")
+
+    with chat_area:
+        _render_policies_chat()
 
 
 def _render_submit_claim_tab(policies):
@@ -33,12 +48,13 @@ def _render_submit_claim_tab(policies):
         left, right = st.columns(2)
         with left:
             policy_label = st.selectbox("Policy", options=list(policy_options.keys()))
-            claim_type = st.text_input("Claim type", placeholder="e.g. Accident - Own Damage")
+            claim_type = st.text_input("Claim type", max_chars=100, placeholder="e.g. Accident - Own Damage")
             incident_date = st.date_input("Incident date", max_value=date.today())
         with right:
             incident_description = st.text_area(
                 "What happened?",
                 height=140,
+                max_chars=2000,
                 placeholder="Describe the incident in detail -- a very short description can't be assessed.",
             )
             claim_amount = st.number_input("Claimed amount (optional)", min_value=0.0, step=1000.0, value=0.0)
@@ -65,45 +81,101 @@ def _render_submit_claim_tab(policies):
     last_claim = st.session_state.get("last_submitted_claim")
     if last_claim:
         st.success(f"Claim {last_claim['claim_id']} submitted -- status: {last_claim['status']}")
+        if last_claim.get("privacy_notice"):
+            st.info(last_claim["privacy_notice"])
         st.markdown(recommendation_block(last_claim["ai_recommendation"], last_claim["ai_rationale"]), unsafe_allow_html=True)
 
 
-def _render_claim_chat(claim):
-    history_key = f"chat_history_{claim['claim_id']}"
+def _render_chat_box(key, send_fn, load_fn, empty_hint, placeholder, expander_title=None, height=None):
+    """
+    The one chat box both chats use. The question stays visible while the
+    answer loads, because the user's turn is saved and shown first and the
+    reply is fetched on the next rerun.
+
+    key: unique per chat (used for session state and the form).
+    send_fn: takes the question text, returns the reply text.
+    load_fn: returns earlier messages from the backend, so the conversation
+        reappears after logging out and back in.
+    expander_title: wrap the box in an expander with this title; None = plain box.
+    height: fixed height in pixels for a scrollable message area; None = grows with the conversation.
+    """
+    history_key = f"chat_history_{key}"
     if history_key not in st.session_state:
-        st.session_state[history_key] = []
+        try:
+            st.session_state[history_key] = load_fn()
+        except ApiError:
+            st.session_state[history_key] = []
 
-    with st.expander("Ask about this claim"):
-        for turn in st.session_state[history_key]:
-            avatar = "🧑" if turn["role"] == "user" else "🛡️"
-            with st.chat_message(turn["role"], avatar=avatar):
-                st.write(turn["content"])
+    container = st.expander(expander_title) if expander_title else st.container()
+    with container:
+        history = st.session_state[history_key]
+        # A fixed-height scroll box only once there is a conversation; before that, nothing takes up space.
+        messages_area = st.container(height=height) if (height and history) else st.container()
 
-        if not st.session_state[history_key]:
-            st.caption("Ask why this claim got its recommendation, or what it means for you.")
+        with messages_area:
+            for turn in history:
+                avatar = "🧑" if turn["role"] == "user" else "🛡️"
+                with st.chat_message(turn["role"], avatar=avatar):
+                    st.write(turn["content"])
 
-        with st.form(f"chat_form_{claim['claim_id']}", clear_on_submit=True, border=False):
-            left, right = st.columns([5, 1])
+            if not history and empty_hint:
+                st.caption(empty_hint)
+
+            if history and history[-1]["role"] == "user":
+                with st.chat_message("assistant", avatar="🛡️"):
+                    with st.spinner("Thinking..."):
+                        try:
+                            reply = send_fn(history[-1]["content"])
+                        except ApiError as exc:
+                            reply = f"Sorry, I couldn't answer that: {exc.detail}"
+                        except Exception as exc:
+                            reply = f"Sorry, something went wrong: {exc}"
+                    st.write(reply)
+                st.session_state[history_key].append({"role": "assistant", "content": reply})
+
+        # Hide Streamlit's "Press Enter to submit form" hint, which overlaps the placeholder in small boxes.
+        st.markdown(
+            "<style>[data-testid='InputInstructions'] { display: none; }</style>",
+            unsafe_allow_html=True,
+        )
+        with st.form(f"chat_form_{key}", clear_on_submit=True, border=False):
+            left, right = st.columns([3, 1])
             with left:
                 question = st.text_input(
-                    "Your question",
-                    label_visibility="collapsed",
-                    placeholder="e.g. Why was this claim flagged?",
+                    "Your question", label_visibility="collapsed", placeholder=placeholder, max_chars=1000
                 )
             with right:
                 asked = st.form_submit_button("Send", use_container_width=True)
 
         if asked and question.strip():
             st.session_state[history_key].append({"role": "user", "content": question})
-            try:
-                with st.spinner("Thinking..."):
-                    reply = send_chat_message(claim["claim_id"], question)
-                st.session_state[history_key].append({"role": "assistant", "content": reply})
-            except ApiError as exc:
-                st.session_state[history_key].append(
-                    {"role": "assistant", "content": f"Sorry, I couldn't answer that: {exc.detail}"}
-                )
             st.rerun()
+
+
+def _render_claim_chat(claim):
+    _render_chat_box(
+        key=claim["claim_id"],
+        send_fn=lambda question: send_chat_message(claim["claim_id"], question),
+        load_fn=lambda: get_chat_history(claim["claim_id"]),
+        empty_hint="Ask why this claim got its recommendation, or what it means for you.",
+        placeholder="e.g. Why was this claim flagged?",
+        expander_title="Ask about this claim",
+    )
+
+
+def _render_policies_chat():
+    with st.container(border=True):
+        st.markdown(accent_bar(INK_NAVY), unsafe_allow_html=True)
+        st.markdown("**💬 Ask about your policies**")
+        st.caption("Ask what's covered, exclusions, waiting periods, dates or premium -- for any of your policies.")
+        _render_chat_box(
+            key="policies",
+            send_fn=send_policies_chat_message,
+            load_fn=get_policies_chat_history,
+            empty_hint=None,
+            placeholder="Ask anything...",
+            height=350,
+        )
 
 
 def _render_claim_history_tab(claims):
@@ -176,6 +248,8 @@ def _render_account_bar():
             st.session_state.pop("access_token", None)
             st.session_state.pop("username", None)
             st.session_state.pop("last_submitted_claim", None)
+            for key in [k for k in st.session_state if k.startswith("chat_history_")]:
+                del st.session_state[key]
             st.rerun()
 
 
@@ -219,7 +293,8 @@ def _render_sidebar(policies, claims):
         st.markdown(
             "- Describe the incident in detail: what, where and when\n"
             "- Report it as soon as you can -- late reports need extra checks\n"
-            "- Add the claimed amount if you know it"
+            "- Add the claimed amount if you know it\n"
+            "- Never type ID, card, bank or password details -- we hide them anyway"
         )
 
 

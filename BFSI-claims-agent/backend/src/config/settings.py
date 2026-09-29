@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     retrieval_top_k: int = 5
 
-    max_chat_history_turns: int = 10
+    max_chat_history_turns: int = 30
 
     cors_allowed_origins: str = "http://localhost:8501"
 

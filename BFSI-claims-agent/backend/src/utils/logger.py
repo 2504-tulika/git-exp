@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from src.config.settings import settings
+from src.utils.pii import PiiLogFilter
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LOG_DIR = PROJECT_ROOT / "logs"
@@ -32,11 +33,13 @@ def get_logger(name):
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
+    console_handler.addFilter(PiiLogFilter())
     logger.addHandler(console_handler)
 
     LOG_DIR.mkdir(exist_ok=True)
     file_handler = logging.FileHandler(LOG_DIR / "app.log", encoding="utf-8")
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(PiiLogFilter())
     logger.addHandler(file_handler)
 
     return logger

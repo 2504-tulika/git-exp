@@ -142,3 +142,20 @@ def send_chat_message(claim_id, message):
     body = {"message": message}
     response = _request("POST", f"/claims/{claim_id}/chat", json_body=body)
     return response["reply"]
+
+
+def get_chat_history(claim_id):
+    """Earlier messages for one claim's chat, as [{"role", "content"}, ...]."""
+    return _request("GET", f"/claims/{claim_id}/chat")
+
+
+def get_policies_chat_history():
+    """Earlier messages in the Policies-tab chat."""
+    return _request("GET", "/policies/chat")
+
+
+def send_policies_chat_message(message):
+    """Ask about any of the customer's policies; returns the assistant's reply text."""
+    body = {"message": message}
+    response = _request("POST", "/policies/chat", json_body=body)
+    return response["reply"]

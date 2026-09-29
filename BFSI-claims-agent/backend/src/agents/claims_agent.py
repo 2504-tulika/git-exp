@@ -55,15 +55,6 @@ RECOMMENDATION: <approve|deny|needs_more_info>
 RATIONALE: <2-4 sentences citing the specific clause, claim history, or fraud signal that led to this recommendation>
 """
 
-CHAT_SYSTEM_PROMPT = """You are a claims-processing assistant helping a human claims handler understand an already-reviewed claim's AI recommendation.
-
-You're answering follow-up questions about ONE SPECIFIC CLAIM. Its facts -- policy, claim type, incident details, the AI's original recommendation and rationale -- are given to you as CLAIM CONTEXT below. Answer using that context; you do not have live access to re-run any checks.
-
-CRITICAL: You do not re-decide this claim. Even if asked to approve it, deny it, or change its recommendation right now, decline to take any action -- explain that only a human handler can finalize a claim, and that your role here is limited to explaining the existing review, not issuing a new one. Never claim to have changed a claim's status or recommendation.
-
-Be concise. Cite specific facts (clauses, dates, amounts, prior claims) rather than vague reassurance. If the claim context doesn't contain what's being asked, say so rather than guessing.
-"""
-
 _exit_stack = None
 _session = None
 _tools = None
@@ -376,30 +367,6 @@ async def stream_claim_async(claim):
         f"recommendation={parsed['recommendation']} ({len(parsed['tool_calls'])} tool call(s))"
     )
     yield parsed
-
-
-async def process_chat_message_async(claim_context_text, history_messages, new_message_text):
-    if _model is None:
-        raise AgentToolError(
-            "Model has not been warmed up -- call warm_up() at app startup before processing chat messages"
-        )
-
-    messages = [
-        {"role": "system", "content": f"{CHAT_SYSTEM_PROMPT}\n\nCLAIM CONTEXT:\n{claim_context_text}"},
-    ]
-    messages.extend(history_messages)
-    messages.append({"role": "user", "content": new_message_text})
-
-    logger.info(f"Processing chat message ({len(history_messages)} prior turn(s) in context)")
-    try:
-        response = await _model.ainvoke(messages)
-    except Exception as exc:
-        logger.error(f"Chat model call failed: {exc}")
-        raise AgentToolError("The assistant is temporarily unavailable. Please try again.") from exc
-
-    reply_text = response.content
-    logger.info("Chat message processed")
-    return reply_text
 
 
 def process_claim(claim):

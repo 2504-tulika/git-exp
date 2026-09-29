@@ -9,16 +9,10 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Anchor every path to the project root so this runs the same whether it's
-# invoked from backend/, from rag/, or by main.py on server startup.
-# .../backend/src/rag/ingestion.py -> parents[3] is the project root
-# (the folder containing backend/, frontend/ and data/).
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 POLICIES_CSV = DATA_DIR / "policies.csv"
 
-# Exact section headings printed on every policy PDF -- text is split
-# wherever one of these lines appears.
 SECTION_HEADERS = [
     "Policy Information",
     "Motor Coverage Details",
@@ -30,8 +24,6 @@ SECTION_HEADERS = [
     "General Terms & Conditions",
 ]
 
-# Letterhead/footer/signature lines that repeat on every page and carry no
-# retrieval-useful information -- dropped before chunking.
 BOILERPLATE_PATTERNS = [
     r"^Meridian Shield Insurance Co\. Ltd\.$",
     r"^Protection You Can Trust$",
@@ -83,9 +75,6 @@ def _group_lines_into_items(lines):
             if current:
                 current.append(line)
             else:
-                # No bullet seen yet in this section -- not a bulleted
-                # section (e.g. Policy Information); keep accumulating
-                # into one running item.
                 current.append(line)
 
     if current:

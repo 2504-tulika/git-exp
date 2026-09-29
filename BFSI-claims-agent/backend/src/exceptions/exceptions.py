@@ -78,6 +78,13 @@ class ChatNotAvailableError(ClaimsAgentError):
     """
 
 
+class RateLimitExceededError(ClaimsAgentError):
+    """
+    Raised when a customer sends chat messages or submits claims faster
+    than the guardrail limits allow, or a chat thread has hit its message cap.
+    """
+
+
 _STATUS_CODES = {
     CustomerNotFoundError: 404,
     PolicyNotFoundError: 404,
@@ -91,6 +98,7 @@ _STATUS_CODES = {
     ClaimLimitExceededError: 422,
     ChatNotAvailableError: 409,
     AgentToolError: 502,
+    RateLimitExceededError: 429,
 }
 
 
