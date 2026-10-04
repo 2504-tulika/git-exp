@@ -166,8 +166,8 @@ def _render_claim_chat(claim):
 def _render_policies_chat():
     with st.container(border=True):
         st.markdown(accent_bar(INK_NAVY), unsafe_allow_html=True)
-        st.markdown("**💬 Ask about your policies**")
-        st.caption("Ask what's covered, exclusions, waiting periods, dates or premium -- for any of your policies.")
+        st.markdown("**💬 Ask about your policies and claims**")
+        st.caption("Ask what's covered, exclusions, waiting periods, dates or premium, or about your past claims.")
         _render_chat_box(
             key="policies",
             send_fn=send_policies_chat_message,
