@@ -101,7 +101,7 @@ def send_message(db, current_user, claim_id, user_message):
 
     reply = _guarded_chat(
         db, current_user.customer_id, thread_id, user_message,
-        lambda message: send_claim_chat_message(thread_id, claim_context, message),
+        lambda message: send_claim_chat_message(thread_id, claim_context, claim.policy_id, message),
     )
     logger.info(f"Chat message handled for claim {claim_id} (customer {current_user.customer_id})")
     return reply
@@ -110,8 +110,9 @@ def send_message(db, current_user, claim_id, user_message):
 def send_policies_message(db, current_user, user_message):
     """
     Handle one message in the customer's shared Policies-tab chat. The
-    policy list comes straight from the customer's own links, so the
-    agent's tool can only ever search policies they hold.
+    policy list comes straight from the customer's own links, and the
+    customer id from the login token, so the agent's tools can only ever
+    search policies they hold and read their own claims.
     """
     policies = CustomerRepository(db).get_policies_for_customer(current_user.customer_id)
     owned_ids = [p.policy_id for p in policies]
@@ -120,7 +121,9 @@ def send_policies_message(db, current_user, user_message):
 
     reply = _guarded_chat(
         db, current_user.customer_id, thread_id, user_message,
-        lambda message: send_policies_chat_message(thread_id, policy_summary, owned_ids, message),
+        lambda message: send_policies_chat_message(
+            thread_id, policy_summary, owned_ids, current_user.customer_id, message
+        ),
     )
     logger.info(f"Policies chat message handled (customer {current_user.customer_id})")
     return reply
