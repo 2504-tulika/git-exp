@@ -9,12 +9,8 @@ class CustomerNotFoundError(ClaimsAgentError):
     """Raised when a customer_id doesn't exist."""
 
 
-class UsernameTakenError(ClaimsAgentError):
-    """Raised on signup when the chosen username is already in use."""
-
-
 class InvalidCredentialsError(ClaimsAgentError):
-    """Raised on login when the username/password don't match."""
+    """Raised on login when the customer ID/password don't match."""
 
 
 class PolicyNotFoundError(ClaimsAgentError):
@@ -89,7 +85,6 @@ _STATUS_CODES = {
     CustomerNotFoundError: 404,
     PolicyNotFoundError: 404,
     ClaimNotFoundError: 404,
-    UsernameTakenError: 409,
     CustomerAlreadyRegisteredError: 409,
     InvalidCredentialsError: 401,
     TokenExpiredError: 401,

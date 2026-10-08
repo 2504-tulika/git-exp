@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -97,15 +98,15 @@ def _request(method, path, json_body=None, requires_auth=True):
     return result
 
 
-def signup(customer_id, username, password):
-    body = {"customer_id": customer_id, "username": username, "password": password}
+def signup(customer_id, password):
+    body = {"customer_id": customer_id, "password": password}
     user = _request("POST", "/auth/signup", json_body=body, requires_auth=False)
     return user
 
 
-def login(username, password):
+def login(customer_id, password):
     """Returns the raw token response dict ({"access_token": ..., "token_type": ...})."""
-    body = {"username": username, "password": password}
+    body = {"customer_id": customer_id, "password": password}
     token_response = _request("POST", "/auth/login", json_body=body, requires_auth=False)
     return token_response
 
@@ -126,6 +127,46 @@ def submit_claim(policy_id, claim_type, incident_description, incident_date, cla
     }
     claim = _request("POST", "/claims/submit", json_body=body)
     return claim
+
+
+def submit_claim_stream(policy_id, claim_type, incident_description, incident_date, claim_amount=None):
+    """
+    Like submit_claim, but yields progress events as the backend works:
+        {"type": "step", "step": "coverage", "status": "running" | "done"}  (several)
+        {"type": "final", "claim": {...}}                                   (last)
+    Raises ApiError for a rejected request (checked before the stream starts)
+    or if the backend reports a failure part-way through.
+    """
+    body = {
+        "policy_id": policy_id,
+        "claim_type": claim_type,
+        "incident_description": incident_description,
+        "incident_date": incident_date,
+        "claim_amount": claim_amount,
+    }
+    url = f"{API_BASE_URL}/claims/submit/stream"
+
+    try:
+        # (connect timeout, max wait between two events) -- not a limit on the whole review.
+        response = requests.post(url, json=body, headers=_auth_headers(), stream=True, timeout=(10, 180))
+    except requests.exceptions.RequestException as exc:
+        raise ApiError(0, f"Could not reach the backend at {API_BASE_URL}: {exc}")
+
+    try:
+        if response.status_code >= 400:
+            raise ApiError(response.status_code, _format_error_detail(_extract_error_detail(response)))
+
+        for raw_line in response.iter_lines(chunk_size=64):
+            if not raw_line:
+                continue
+            event = json.loads(raw_line.decode("utf-8"))
+            if event.get("type") == "error":
+                raise ApiError(500, event.get("detail", "Something went wrong while processing your claim."))
+            yield event
+    except requests.exceptions.RequestException as exc:
+        raise ApiError(0, f"The connection to the backend was interrupted: {exc}")
+    finally:
+        response.close()
 
 
 def list_my_claims():

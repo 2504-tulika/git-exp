@@ -86,7 +86,6 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     customer_id = Column(String(20), ForeignKey("customers.customer_id"), nullable=False, unique=True)
 

@@ -20,35 +20,34 @@ def _render_hero():
 
 def _login_form():
     with st.form("login_form"):
-        username = st.text_input("Username")
+        customer_id = st.text_input("Customer ID", help="e.g. CUST-005")
         password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Log in")
 
     if submitted:
-        if not username.strip() or not password:
-            st.error("Please enter your username and password.")
+        if not customer_id.strip() or not password:
+            st.error("Please enter your customer ID and password.")
             return
 
         try:
-            token_response = login(username, password)
+            token_response = login(customer_id.strip(), password)
         except ApiError as exc:
             st.error(exc.detail)
         else:
             st.session_state["access_token"] = token_response["access_token"]
-            st.session_state["username"] = username
+            st.session_state["customer_id"] = customer_id.strip()
             st.rerun()
 
 
 def _signup_form():
     with st.form("signup_form"):
         customer_id = st.text_input("Customer ID", help="The customer ID from your policy documents, e.g. CUST-005")
-        username = st.text_input("Choose a username")
         password = st.text_input("Choose a password", type="password", help="At least 8 characters, with a mix of letters and numbers")
         confirm_password = st.text_input("Confirm password", type="password")
         submitted = st.form_submit_button("Create account")
 
     if submitted:
-        if not customer_id.strip() or not username.strip() or not password:
+        if not customer_id.strip() or not password:
             st.error("Please fill in all fields.")
             return
 
@@ -57,7 +56,7 @@ def _signup_form():
             return
 
         try:
-            signup(customer_id, username, password)
+            signup(customer_id.strip(), password)
         except ApiError as exc:
             st.error(exc.detail)
         else:

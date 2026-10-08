@@ -42,6 +42,19 @@ def retrieve_policy_clauses(query, policy_id=None, top_k=DEFAULT_TOP_K):
     return clauses
 
 
+def warm_up():
+    """
+    Load the embedding model and open the policy index right now, with one
+    throwaway search. Without this, whichever process first searches pays
+    the one-time load (about half a minute) on its first real request.
+
+    The MCP server warms up its own copy (see mcp/server.py); this is for
+    the web app's process, where the chat assistants search policy clauses.
+    """
+    retrieve_policy_clauses("warm-up", top_k=1)
+    logger.info("Policy search warmed up (embedding model and index loaded)")
+
+
 def retrieve_for_claim(claim_type, incident_description, policy_id, top_k=DEFAULT_TOP_K):
     """
     Convenience wrapper for the coverage-check tool: builds the retrieval

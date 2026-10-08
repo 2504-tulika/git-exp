@@ -13,7 +13,6 @@ from src.exceptions.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
     TokenExpiredError,
-    UsernameTakenError,
 )
 from src.repositories.customer_repository import CustomerRepository
 from src.repositories.user_repository import UserRepository
@@ -39,9 +38,9 @@ def verify_password(plain_password, password_hash):
 
 
 def create_access_token(user):
-    """Issue a JWT for an authenticated user, carrying username and customer_id."""
+    """Issue a JWT for an authenticated user. The subject is the customer_id."""
     expire_at = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expiry_minutes)
-    payload = {"sub": user.username, "customer_id": user.customer_id, "exp": expire_at}
+    payload = {"sub": user.customer_id, "exp": expire_at}
     token = jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
     return token
 
@@ -75,34 +74,28 @@ def signup(db: Session, request):
         logger.warning(f"Signup failed: customer_id {request.customer_id} already has an account")
         raise CustomerAlreadyRegisteredError(constants.CUSTOMER_ALREADY_REGISTERED)
 
-    if user_repo.username_exists(request.username):
-        logger.warning(f"Signup failed: username '{request.username}' already taken")
-        raise UsernameTakenError(constants.USERNAME_TAKEN)
-
     password_hash = hash_password(request.password)
-    user = user_repo.create_user(
-        username=request.username, password_hash=password_hash, customer_id=request.customer_id
-    )
-    logger.info(f"New account created: username={user.username}, customer_id={user.customer_id}")
+    user = user_repo.create_user(customer_id=request.customer_id, password_hash=password_hash)
+    logger.info(f"New account created: customer_id={user.customer_id}")
     return user
 
 
 def login(db: Session, request):
     """
-    Verify username/password and issue a JWT. request is a
+    Verify customer_id/password and issue a JWT. request is a
     schemas.auth_schema.LoginRequest. Raises InvalidCredentialsError for
-    both an unknown username and a wrong password -- deliberately the
-    same exception for both, see module docstring.
+    both an unknown customer ID and a wrong password -- deliberately the
+    same exception for both, so a caller can't tell which IDs have accounts.
     """
     user_repo = UserRepository(db)
-    user = user_repo.get_by_username(request.username)
+    user = user_repo.get_by_customer_id(request.customer_id)
 
     if user is None or not verify_password(request.password, user.password_hash):
-        logger.warning(f"Login failed for username '{request.username}'")
+        logger.warning(f"Login failed for customer_id '{request.customer_id}'")
         raise InvalidCredentialsError(constants.INVALID_CREDENTIALS)
 
     access_token = create_access_token(user)
-    logger.info(f"Login succeeded: username={user.username}")
+    logger.info(f"Login succeeded: customer_id={user.customer_id}")
     return access_token
 
 
@@ -112,11 +105,11 @@ def get_current_user(db: Session, token: str):
     """
     payload = decode_access_token(token)
 
-    username = payload.get("sub")
-    if username is None:
+    customer_id = payload.get("sub")
+    if customer_id is None:
         raise InvalidTokenError(constants.INVALID_TOKEN)
 
-    user = UserRepository(db).get_by_username(username)
+    user = UserRepository(db).get_by_customer_id(customer_id)
     if user is None:
         raise InvalidTokenError(constants.INVALID_TOKEN)
 

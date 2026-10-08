@@ -1,8 +1,9 @@
 import uuid
 from datetime import date
 
-from src.agents.claims_agent import process_claim_async
+from src.agents.claims_agent import review_claim_events
 from src.config import constants
+from src.config.database import SessionLocal
 from src.exceptions.exceptions import (
     ClaimLimitExceededError,
     ClaimNotFoundError,
@@ -37,14 +38,20 @@ def _format_claim_amount(claim_amount):
     return formatted_amount
 
 
-async def submit_claim(db, current_user, request):
+def prepare_claim(db, current_user, request):
     """
-    Submit a new claim for the logged-in customer.
-
-    Order of checks (cheap and strict first, expensive last):
+    Everything that must happen BEFORE the AI review, in order (cheap and
+    strict first, expensive last):
       1. the customer must hold the policy
-      2. the yearly claim limit must not be reached
-      3. fraud-risk check, then the agent's recommendation
+      2. the per-customer rate limit must not be hit
+      3. injection scan, then PII masking, of the claim text
+      4. the yearly claim limit must not be reached
+      5. the deterministic fraud-risk check
+
+    Any problem is raised here as a normal exception, so a caller can turn
+    it into a proper HTTP error before a response (or a stream) has started.
+    Returns a plain dict ("ctx") for review_and_save_claim -- plain values
+    only, so it stays valid after this request's database session closes.
     """
     policy_repo = PolicyRepository(db)
     claims_repo = ClaimsRepository(db)
@@ -121,22 +128,68 @@ async def submit_claim(db, current_user, request):
         f"fraud_flag={fraud_flag}"
     )
 
+    return {
+        "customer_id": current_user.customer_id,
+        "policy_id": request.policy_id,
+        "claim_type": claim_type,
+        "incident_date": request.incident_date,
+        "incident_description": incident_description,
+        "intimation_date": intimation_date,
+        "claim_amount": formatted_amount,
+        "injection_flagged": injection_flagged,
+        "pii_found": pii_found,
+        "fraud_result": fraud_result,
+        "fraud_flag": fraud_flag,
+        "agent_claim": agent_claim,
+    }
+
+
+async def review_and_save_claim(db, ctx):
+    """
+    The AI review, the safety checks on its output, and saving the claim.
+    An async generator that yields progress events as it goes:
+
+        {"type": "step", "step": <name>, "status": "running" | "done"}   (several)
+        {"type": "final", "claim": <saved ClaimsHistory row>}            (last)
+
+    The model's own text is deliberately NOT streamed to the customer:
+    the decision rules and output scrubbing run after the model finishes
+    and can change the recommendation or the wording, so the customer only
+    ever sees the result that has been through them.
+
+    If the review fails for any reason, the claim is still saved as
+    needs_more_info for manual review -- a claim is never lost because the
+    AI was unavailable.
+    """
+    policy_repo = PolicyRepository(db)
+    claims_repo = ClaimsRepository(db)
+    customer_id = ctx["customer_id"]
+    policy_id = ctx["policy_id"]
+
     try:
-        agent_result = await process_claim_async(agent_claim)
+        result = None
+        async for event in review_claim_events(ctx["agent_claim"], ctx["fraud_result"]):
+            if event["type"] == "step":
+                yield event
+            else:
+                result = event["result"]
+
+        yield {"type": "step", "step": "safety", "status": "running"}
         ai_recommendation, ai_rationale = enforce_decision_rules(
-            recommendation=agent_result["recommendation"],
-            rationale=agent_result["rationale"],
-            policy=policy_repo.get_by_id(request.policy_id),
-            incident_date=request.incident_date,
-            claim_signals=fraud_result["claim_signals"],
-            tools_called={call["tool"] for call in agent_result.get("tool_calls", [])},
-            injection_flagged=injection_flagged,
+            recommendation=result["recommendation"],
+            rationale=result["rationale"],
+            policy=policy_repo.get_by_id(policy_id),
+            incident_date=ctx["incident_date"],
+            claim_signals=ctx["fraud_result"]["claim_signals"],
+            tools_called={call["tool"] for call in result.get("tool_calls", [])},
+            injection_flagged=ctx["injection_flagged"],
         )
-        ai_rationale = guard_text(ai_rationale, collect_allowed_ids(db, current_user.customer_id))
+        ai_rationale = guard_text(ai_rationale, collect_allowed_ids(db, customer_id))
+        yield {"type": "step", "step": "safety", "status": "done"}
     except Exception as exc:
         logger.error(
-            f"Agent processing failed for customer_id={current_user.customer_id}, "
-            f"policy_id={request.policy_id} -- recording claim anyway: {exc}"
+            f"Agent processing failed for customer_id={customer_id}, "
+            f"policy_id={policy_id} -- recording claim anyway: {exc}"
         )
         ai_recommendation = "needs_more_info"
         ai_rationale = (
@@ -146,22 +199,47 @@ async def submit_claim(db, current_user, request):
 
     claim = claims_repo.create_claim(
         claim_id=_generate_claim_id(),
-        policy_id=request.policy_id,
-        customer_id=current_user.customer_id,
-        claim_type=claim_type,
-        incident_date=request.incident_date,
-        incident_description=incident_description,
-        intimation_date=intimation_date,
-        claim_amount=formatted_amount,
+        policy_id=policy_id,
+        customer_id=customer_id,
+        claim_type=ctx["claim_type"],
+        incident_date=ctx["incident_date"],
+        incident_description=ctx["incident_description"],
+        intimation_date=ctx["intimation_date"],
+        claim_amount=ctx["claim_amount"],
         status="Under Review",
-        fraud_flag=fraud_flag,
+        fraud_flag=ctx["fraud_flag"],
         ai_recommendation=ai_recommendation,
         ai_rationale=ai_rationale,
     )
 
     logger.info(f"Claim {claim.claim_id} recorded: ai_recommendation={ai_recommendation}")
-    claim.privacy_notice = constants.PII_NOTICE if pii_found else None
+    claim.privacy_notice = constants.PII_NOTICE if ctx["pii_found"] else None
+    yield {"type": "final", "claim": claim}
+
+
+async def submit_claim(db, current_user, request):
+    """Submit a new claim for the logged-in customer and return the saved claim."""
+    ctx = prepare_claim(db, current_user, request)
+    claim = None
+    async for event in review_and_save_claim(db, ctx):
+        if event["type"] == "final":
+            claim = event["claim"]
     return claim
+
+
+async def stream_submit_claim(ctx):
+    """
+    Same review as submit_claim, as a stream of progress events ending in
+    the saved claim. Opens its OWN database session: the request's session
+    (from get_db) can already be closed by the time a streamed response
+    starts running.
+    """
+    db = SessionLocal()
+    try:
+        async for event in review_and_save_claim(db, ctx):
+            yield event
+    finally:
+        db.close()
 
 
 def get_my_claims(db, current_user):

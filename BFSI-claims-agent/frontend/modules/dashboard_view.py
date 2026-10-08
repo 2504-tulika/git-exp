@@ -10,9 +10,70 @@ from modules.api_client import (
     list_my_policies,
     send_chat_message,
     send_policies_chat_message,
-    submit_claim,
+    submit_claim_stream,
 )
 from modules.theme import INK_NAVY, SLATE, STATUS_COLORS, accent_bar, recommendation_block
+
+# The steps the backend reports while it reviews a claim, in the order shown.
+_REVIEW_STEPS = {
+    "coverage": "Checking your policy coverage",
+    "history": "Reviewing your claim history",
+    "fraud": "Running fraud-risk checks",
+    "recommendation": "Preparing the recommendation",
+    "safety": "Applying safety checks",
+}
+_STEP_ICONS = {"waiting": "○", "running": "⏳", "done": "✅", "failed": "⚠️"}
+
+
+def _progress_markdown(statuses):
+    lines = []
+    for step, label in _REVIEW_STEPS.items():
+        icon = _STEP_ICONS[statuses.get(step, "waiting")]
+        lines.append(f"{icon}&nbsp; {label}")
+    return "\n\n".join(lines)
+
+
+def _submit_claim_with_progress(**claim_fields):
+    """
+    Submit a claim and show each review step as it happens, instead of a
+    single spinner. Returns the saved claim, or None if it failed (the
+    error is shown on the page).
+    """
+    statuses = {}
+    claim = None
+    error_text = None
+
+    with st.status("Reviewing your claim...", expanded=True) as status:
+        board = st.empty()
+        board.markdown(_progress_markdown(statuses), unsafe_allow_html=True)
+        try:
+            for event in submit_claim_stream(**claim_fields):
+                if event["type"] == "step":
+                    statuses[event["step"]] = event["status"]
+                    board.markdown(_progress_markdown(statuses), unsafe_allow_html=True)
+                elif event["type"] == "final":
+                    claim = event["claim"]
+        except ApiError as exc:
+            error_text = exc.detail
+
+        if claim is not None:
+            # A step still "running" here means the review fell back to manual review.
+            for step, step_status in statuses.items():
+                if step_status == "running":
+                    statuses[step] = "failed"
+            board.markdown(_progress_markdown(statuses), unsafe_allow_html=True)
+            status.update(label="Review complete", state="complete", expanded=False)
+        else:
+            error_text = error_text or (
+                "The review ended unexpectedly. Check the Claim History tab -- your claim may "
+                "still have been recorded."
+            )
+            status.update(label="Your claim could not be processed", state="error", expanded=True)
+
+    if error_text:
+        st.error(error_text)
+    return claim
+
 
 def _render_policies_tab(policies):
     if not policies:
@@ -62,18 +123,15 @@ def _render_submit_claim_tab(policies):
         submitted = st.form_submit_button("Submit claim")
 
     if submitted:
-        with st.spinner("Processing your claim -- this runs the full coverage, history, and fraud checks, and can take up to a minute."):
-            try:
-                claim = submit_claim(
-                    policy_id=policy_options[policy_label],
-                    claim_type=claim_type,
-                    incident_description=incident_description,
-                    incident_date=incident_date.isoformat(),
-                    claim_amount=claim_amount if claim_amount > 0 else None,
-                )
-            except ApiError as exc:
-                st.error(exc.detail)
-                return
+        claim = _submit_claim_with_progress(
+            policy_id=policy_options[policy_label],
+            claim_type=claim_type,
+            incident_description=incident_description,
+            incident_date=incident_date.isoformat(),
+            claim_amount=claim_amount if claim_amount > 0 else None,
+        )
+        if claim is None:
+            return
 
         st.session_state["last_submitted_claim"] = claim
         st.rerun()
@@ -233,7 +291,7 @@ def _render_status_strip(policies, claims):
 
 def _render_account_bar():
     """
-    Top-right account row (username + log out), above the status strip
+    Top-right account row (customer ID + log out), above the status strip
     -- more conventional placement than burying it in the sidebar, and
     more robust in Streamlit than trying to CSS-pin something to the
     sidebar's bottom edge.
@@ -241,12 +299,12 @@ def _render_account_bar():
     spacer, account = st.columns([4, 1])
     with account:
         st.markdown(
-            f"<div style='text-align:right;color:{SLATE};font-size:0.9rem;'>Logged in as <strong>{st.session_state.get('username', '')}</strong></div>",
+            f"<div style='text-align:right;color:{SLATE};font-size:0.9rem;'>Logged in as <strong>{st.session_state.get('customer_id', '')}</strong></div>",
             unsafe_allow_html=True,
         )
         if st.button("Log out", use_container_width=True):
             st.session_state.pop("access_token", None)
-            st.session_state.pop("username", None)
+            st.session_state.pop("customer_id", None)
             st.session_state.pop("last_submitted_claim", None)
             for key in [k for k in st.session_state if k.startswith("chat_history_")]:
                 del st.session_state[key]

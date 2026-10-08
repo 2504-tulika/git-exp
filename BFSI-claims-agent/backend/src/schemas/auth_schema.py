@@ -6,7 +6,6 @@ class SignupRequest(BaseModel):
     customer_id must be an existing customer already on file.
     """
     customer_id: str = Field(..., min_length=1)
-    username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8)
 
     @field_validator("password")
@@ -18,7 +17,7 @@ class SignupRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str = Field(..., min_length=1)
+    customer_id: str = Field(..., min_length=1)
     password: str = Field(..., min_length=1)
 
 
@@ -34,7 +33,6 @@ class UserResponse(BaseModel):
     this directly in an API response.
     """
     id: int
-    username: str
     customer_id: str
 
     class Config:
